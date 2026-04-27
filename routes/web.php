@@ -1,0 +1,74 @@
+<?php
+
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Web\HomeController;
+use App\Http\Controllers\Web\TourController as WebTourController;
+use App\Http\Controllers\Web\ReservationController as WebReservationController;
+
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\TourController as AdminTourController;
+use App\Http\Controllers\Admin\ClientController as AdminClientController;
+use App\Http\Controllers\Admin\ReservationController as AdminReservationController;
+use App\Http\Controllers\Admin\SettingController as AdminSettingController;
+
+use App\Http\Controllers\Api\SeatController as ApiSeatController;
+use App\Http\Controllers\Api\NotificationController as ApiNotificationController;
+
+use Illuminate\Support\Facades\Route;
+
+// Rutas Públicas (Web)
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/about', [HomeController::class, 'about'])->name('about');
+
+Route::get('/tours', [WebTourController::class, 'index'])->name('tours.index');
+Route::get('/tours/{id}', [WebTourController::class, 'show'])->name('tours.show');
+
+// Rutas de Reservación (Web)
+Route::post('/reservations', [WebReservationController::class, 'store'])->name('reservations.store');
+Route::get('/reservations/{id}/success', [WebReservationController::class, 'success'])->name('reservations.success');
+Route::get('/reservations/{id}/ticket', [WebReservationController::class, 'downloadTicket'])->name('reservations.ticket');
+
+// API Pública
+Route::get('/api/seats/{id}', [ApiSeatController::class, 'getSeats']);
+
+// Panel de Admin
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Tours CRUD
+    Route::get('/admin/tours', [AdminTourController::class, 'index'])->name('admin.tours.index');
+    Route::get('/admin/tours/create', [AdminTourController::class, 'create'])->name('admin.tours.create');
+    Route::post('/admin/tours', [AdminTourController::class, 'store'])->name('admin.tours.store');
+    Route::get('/admin/tours/{id}', [AdminTourController::class, 'show'])->name('admin.tours.show');
+    Route::get('/admin/tours/{id}/edit', [AdminTourController::class, 'edit'])->name('admin.tours.edit');
+    Route::put('/admin/tours/{id}', [AdminTourController::class, 'update'])->name('admin.tours.update');
+    Route::delete('/admin/tours/{id}', [AdminTourController::class, 'destroy'])->name('admin.tours.destroy');
+    
+    Route::post('/admin/reservations/{id}/status', [AdminReservationController::class, 'updateStatus'])->name('admin.reservations.status');
+
+    // Clientes
+    Route::get('/admin/clients', [AdminClientController::class, 'index'])->name('admin.clients.index');
+
+    // Configuración
+    Route::get('/admin/settings', [AdminSettingController::class, 'index'])->name('admin.settings');
+
+    // Notification API
+    Route::get('/api/admin/notifications', [ApiNotificationController::class, 'index'])->name('admin.notifications.api');
+    Route::post('/api/admin/notifications/read', [ApiNotificationController::class, 'markRead'])->name('admin.notifications.read');
+});
+// Pagos con Stripe
+Route::get('/reservations/{id}/pay', [\App\Http\Controllers\Web\PaymentController::class, 'checkout'])->name('reservations.pay');
+
+// Stripe Webhook (excluido de CSRF)
+Route::post('/stripe/webhook', [\App\Http\Controllers\Api\StripeWebhookController::class, 'handle'])->name('stripe.webhook');
+
+// Mock de Pago (Fallback para pruebas sin Stripe)
+Route::post('/reservations/{id}/mock-pay', [WebReservationController::class, 'mockPay'])->name('reservations.mockPay');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__.'/auth.php';

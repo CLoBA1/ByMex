@@ -1,0 +1,105 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Tour;
+use App\Models\Client;
+use App\Models\Reservation;
+use App\Models\ReservationSeat;
+use App\Events\ReservationCreated;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Exception;
+
+class ReservationService
+{
+    /**
+     * Process a new reservation with DB Transactions.
+     * Throws Exception on failure.
+     */
+    public function processNewReservation(\App\DTOs\ReservationDTO $dto): Reservation
+    {
+        $tour = Tour::findOrFail($dto->tour_id);
+        $seatNumbers = explode(',', $dto->seats);
+        
+        if (empty($seatNumbers) || count($seatNumbers) === 0 || $seatNumbers[0] === "") {
+            throw new Exception("Debes seleccionar al menos un asiento.");
+        }
+
+        $totalAmount = count($seatNumbers) * $tour->price;
+
+        DB::beginTransaction();
+        try {
+            // 1. Create or Find Client
+            $client = Client::firstOrCreate(
+                ['email' => $dto->email],
+                [
+                    'name' => $dto->name,
+                    'phone' => $dto->phone,
+                    'whatsapp' => $dto->whatsapp ?? $dto->phone,
+                ]
+            );
+
+            // 2. Create Reservation
+            $reservation = Reservation::create([
+                'tour_id' => $tour->id,
+                'client_id' => $client->id,
+                'total_amount' => $totalAmount,
+                'balance_due' => $totalAmount,
+                'status' => \App\Enums\ReservationStatus::PENDING,
+                'expires_at' => Carbon::now()->addHours($tour->expiration_hours),
+            ]);
+
+            // 3. Create Seats
+            foreach ($seatNumbers as $seatNumber) {
+                ReservationSeat::create([
+                    'reservation_id' => $reservation->id,
+                    'tour_id' => $tour->id,
+                    'seat_number' => (int) $seatNumber,
+                    'status' => \App\Enums\SeatStatus::PENDING
+                ]);
+            }
+
+            DB::commit();
+            
+            // Dispatch domain event! The listener will handle Whatsapp Notification independently.
+            ReservationCreated::dispatch($reservation);
+
+            return $reservation;
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            if ($e->getCode() == 23000) {
+                throw new Exception('Lo sentimos, uno de los asientos seleccionados acaba de ser reservado por alguien más. Por favor, elige otros.');
+            }
+            throw new Exception('Ocurrió un error interno al procesar tu reserva. Inténtalo de nuevo.');
+        }
+    }
+    
+    /**
+     * Get real-time available/occupied seats logic
+     */
+    public function getSeatStatus(int $tourId): array
+    {
+        // Auto-expire pending reservations that have passed their expiration date
+        $expiredReservations = Reservation::where('tour_id', $tourId)
+            ->where('status', \App\Enums\ReservationStatus::PENDING)
+            ->where('expires_at', '<', Carbon::now())
+            ->get();
+
+        foreach ($expiredReservations as $res) {
+            $res->update(['status' => \App\Enums\ReservationStatus::CANCELLED]);
+            ReservationSeat::where('reservation_id', $res->id)->delete();
+        }
+
+        // Fetch current active seats
+        $seats = ReservationSeat::where('tour_id', $tourId)->get();
+        $response = [];
+        
+        foreach ($seats as $seat) {
+            $response[$seat->seat_number] = $seat->status->value;
+        }
+        
+        return $response;
+    }
+}
