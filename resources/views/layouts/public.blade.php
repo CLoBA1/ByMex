@@ -17,7 +17,7 @@
     <!-- Swiper Carousel -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
     
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}?v=1.1">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}?v=1.2">
     @yield('extra-css')
     
     <!-- Alpine.js -->
@@ -25,18 +25,18 @@
 </head>
 <body>
     
-    <!-- Navbar with Alpine.js -->
-    <nav class="navbar" id="navbar" x-data="{ mobileOpen: false }">
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
         <div class="nav-container">
             <a href="{{ url('/') }}" class="logo">
                 <img src="{{ asset('img/logobymex.jpeg') }}" alt="Viajes By Mex Logo">
             </a>
             
-            <div class="nav-links" :class="{ 'mobile-active': mobileOpen }" @click.outside="mobileOpen = false">
-                <a href="{{ route('home') }}" @click="mobileOpen = false">Inicio</a>
-                <a href="{{ route('about') }}" @click="mobileOpen = false">Nosotros</a>
-                <a href="{{ route('tours.index') }}" @click="mobileOpen = false">Destinos</a>
-                <a href="{{ route('home') }}#testimonials" @click="mobileOpen = false">Testimonios</a>
+            <div class="nav-links" id="mobile-nav-links">
+                <a href="{{ route('home') }}" onclick="document.getElementById('mobile-nav-links').classList.remove('mobile-active')">Inicio</a>
+                <a href="{{ route('about') }}" onclick="document.getElementById('mobile-nav-links').classList.remove('mobile-active')">Nosotros</a>
+                <a href="{{ route('tours.index') }}" onclick="document.getElementById('mobile-nav-links').classList.remove('mobile-active')">Destinos</a>
+                <a href="{{ route('home') }}#testimonials" onclick="document.getElementById('mobile-nav-links').classList.remove('mobile-active')">Testimonios</a>
             </div>
             
             <div class="nav-actions">
@@ -46,8 +46,8 @@
                     <a href="{{ route('login') }}" class="btn btn-outline" style="border:none;padding:.5rem;font-size:1rem"><i class="fa-solid fa-user"></i></a>
                 @endauth
                 <a href="{{ route('tours.index') }}" class="btn btn-primary btn-cta-nav">Explorar <i class="fa-solid fa-arrow-right"></i></a>
-                <button class="mobile-menu-btn" @click="mobileOpen = !mobileOpen">
-                    <i class="fa-solid" :class="mobileOpen ? 'fa-xmark' : 'fa-bars'"></i>
+                <button class="mobile-menu-btn" onclick="document.getElementById('mobile-nav-links').classList.toggle('mobile-active')">
+                    <i class="fa-solid fa-bars"></i>
                 </button>
             </div>
         </div>
