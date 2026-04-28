@@ -58,7 +58,7 @@
     @endphp
 
     <!-- KPI Cards -->
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 1.5rem;">
+    <div class="kpi-grid">
         
         <div class="card" style="margin-bottom: 0;">
             <div class="card-body" style="padding: 1.25rem;">
@@ -122,7 +122,7 @@
     </div>
 
     <!-- Map + Occupancy Chart Row -->
-    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+    <div class="map-chart-grid">
         <!-- Leaflet Map -->
         <div class="card" style="margin-bottom: 0; overflow: hidden;">
             <div class="card-header" style="padding: 1rem 1.5rem;">

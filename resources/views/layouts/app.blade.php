@@ -117,6 +117,45 @@
         /* Progress bar */
         .progress-bar { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; margin-top: 0.5rem; }
         .progress-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+
+        /* ================================================================
+           Responsive Admin Layout
+           ================================================================ */
+        /* Utility classes for grids */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem; }
+        .map-chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+
+        .mobile-toggle { display: none; background: none; border: none; color: var(--navy); font-size: 1.5rem; cursor: pointer; }
+
+        @media (max-width: 1024px) {
+            .map-chart-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            /* Sidebar becomes a drawer or hides behind a toggle */
+            .sidebar { 
+                position: fixed; 
+                left: -280px; 
+                top: 0; 
+                z-index: 1000; 
+                transition: left 0.3s ease; 
+                box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            }
+            .sidebar.active { left: 0; }
+            
+            .mobile-toggle { display: block; margin-right: 1rem; }
+            
+            .content-area { padding: 1rem; }
+            
+            .topbar { padding: 1rem; flex-wrap: wrap; gap: 1rem; }
+            .topbar h1 { font-size: 1.2rem; }
+            
+            .card-header { padding: 1rem; flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .btn-action { align-self: flex-start; }
+            
+            /* Make tables horizontally scrollable */
+            .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        }
     </style>
     @yield('extra-css')
 </head>
@@ -125,11 +164,16 @@
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="sidebar-header">
-            <img src="{{ asset('img/logobymex.jpeg') }}" alt="By Mex">
-            <div>
-                <h2>By Mex</h2>
-                <span>Admin Panel</span>
+            <div style="display: flex; align-items: center; gap: 1rem; flex: 1;">
+                <img src="{{ asset('img/logobymex.jpeg') }}" alt="By Mex">
+                <div>
+                    <h2>By Mex</h2>
+                    <span>Admin Panel</span>
+                </div>
             </div>
+            <button class="mobile-toggle" style="color: white; margin: 0;" onclick="document.querySelector('.sidebar').classList.remove('active')">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
         
         <nav class="sidebar-nav">
@@ -165,7 +209,12 @@
     <!-- Main Content -->
     <div class="main-content">
         <header class="topbar">
-            <h1>@yield('header-title', 'Dashboard')</h1>
+            <div style="display: flex; align-items: center;">
+                <button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('active')">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h1>@yield('header-title', 'Dashboard')</h1>
+            </div>
             <div class="topbar-actions">
                 <!-- Real Notifications from DB -->
                 @php $notifs = $notifications ?? []; @endphp
