@@ -10,7 +10,8 @@ class ReservationDTO
         public readonly string $name,
         public readonly string $phone,
         public readonly string $email,
-        public readonly ?string $whatsapp = null
+        public readonly ?string $whatsapp = null,
+        public readonly ?array $passengers = null
     ) {}
 
     public static function fromArray(array $data): self
@@ -21,7 +22,8 @@ class ReservationDTO
             name: $data['name'],
             phone: $data['phone'],
             email: $data['email'],
-            whatsapp: $data['whatsapp'] ?? null
+            whatsapp: $data['whatsapp'] ?? null,
+            passengers: $data['passengers'] ?? null
         );
     }
 }

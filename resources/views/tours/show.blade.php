@@ -197,6 +197,10 @@
                     <label>Correo Electrónico</label>
                     <input type="email" class="form-control" name="email" required placeholder="tu@correo.com">
                 </div>
+
+                <!-- Contenedor dinámico de pasajeros -->
+                <div id="passengersContainer" style="margin-top: 1.5rem;"></div>
+
                 <div class="form-group" style="margin-top:2rem;">
                     <button type="submit" class="bk-cta-btn"><i class="fa-solid fa-lock"></i> Confirmar Reserva</button>
                     <p style="text-align:center;font-size:.75rem;color:var(--slate-400);margin-top:1rem;">

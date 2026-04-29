@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 3. Actualizar el cuadro de resumen
+    // 3. Actualizar el cuadro de resumen y Pasajeros
     function updateSummary() {
         // Ordenar los asientos numéricamente
         selectedSeats.sort((a, b) => parseInt(a) - parseInt(b));
@@ -77,21 +77,98 @@ document.addEventListener('DOMContentLoaded', () => {
             btnContinuar.disabled = false;
         }
 
-        const total = selectedSeats.length * pricePerSeat;
-        const formattedTotal = `$${total.toLocaleString('es-MX')}`;
+        // Actualizar input oculto para el formulario
+        selectedSeatsInput.value = selectedSeats.join(',');
+
+        // Generar formulario dinámico de pasajeros
+        updatePassengersForm();
         
-        subtotalEl.innerText = selectedSeats.length > 0 
-            ? `${selectedSeats.length}x $${pricePerSeat.toLocaleString('es-MX')} = ${formattedTotal} MXN`
-            : '$0';
+        // Calcular totales
+        calculateTotalWithDiscounts();
+    }
+
+    function updatePassengersForm() {
+        const passengersContainer = document.getElementById('passengersContainer');
+        if (!passengersContainer) return;
+
+        // Guardar estado actual para no borrar lo que el usuario ya escribió si selecciona un asiento extra
+        const existingBlocks = {};
+        document.querySelectorAll('.passenger-block').forEach(block => {
+            const seat = block.dataset.seat;
+            const nameInput = block.querySelector('.p-name').value;
+            const typeSelect = block.querySelector('.p-type').value;
+            existingBlocks[seat] = { name: nameInput, type: typeSelect };
+        });
+
+        if (selectedSeats.length === 0) {
+            passengersContainer.innerHTML = '';
+            return;
+        }
+
+        passengersContainer.innerHTML = '<h3 style="margin-top: 1rem; margin-bottom: 0.5rem; font-size: 1.05rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--navy);"><i class="fa-solid fa-users"></i> Detalle de Pasajeros</h3>';
+
+        selectedSeats.forEach((seat, index) => {
+            const prevData = existingBlocks[seat] || { name: '', type: 'Adulto' };
+            const seatLabel = seat.toString().padStart(2, '0');
+            
+            const html = `
+                <div class="passenger-block" data-seat="${seat}" style="background: var(--bg-body); padding: 0.75rem; border-radius: 8px; margin-bottom: 0.75rem; border: 1px solid var(--border);">
+                    <p style="font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; color: var(--navy);">Pasajero del Asiento ${seatLabel}</p>
+                    <input type="hidden" name="passengers[${index}][seat_number]" value="${seat}">
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                        <div style="flex: 2; min-width: 150px;">
+                            <input type="text" class="form-control p-name" name="passengers[${index}][name]" value="${prevData.name}" required placeholder="Nombre completo" style="padding: 0.5rem; font-size: 0.85rem; height: auto;">
+                        </div>
+                        <div style="flex: 1; min-width: 100px;">
+                            <select class="form-control p-type" name="passengers[${index}][passenger_type]" style="padding: 0.5rem; font-size: 0.85rem; height: auto;">
+                                <option value="Adulto" ${prevData.type === 'Adulto' ? 'selected' : ''}>Adulto (100%)</option>
+                                <option value="Niño" ${prevData.type === 'Niño' ? 'selected' : ''}>Niño 3-10 (50%)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
+            passengersContainer.insertAdjacentHTML('beforeend', html);
+        });
+
+        // Re-atar eventos change a los selects para actualizar el precio en vivo
+        document.querySelectorAll('.p-type').forEach(select => {
+            select.addEventListener('change', calculateTotalWithDiscounts);
+        });
+    }
+
+    function calculateTotalWithDiscounts() {
+        let finalTotal = 0;
+        
+        if (selectedSeats.length === 0) {
+            subtotalEl.innerText = '$0';
+            totalEl.innerText = '$0 MXN';
+            if (totalModalEl) totalModalEl.innerText = '$0 MXN';
+            return;
+        }
+
+        const typeSelects = document.querySelectorAll('.p-type');
+        if (typeSelects.length > 0) {
+            typeSelects.forEach(select => {
+                let pPrice = pricePerSeat;
+                if (select.value === 'Niño') {
+                    pPrice = pricePerSeat * 0.5;
+                }
+                finalTotal += pPrice;
+            });
+        } else {
+            // Fallback
+            finalTotal = selectedSeats.length * pricePerSeat;
+        }
+
+        const formattedTotal = `$${finalTotal.toLocaleString('es-MX')}`;
+        
+        subtotalEl.innerText = `${selectedSeats.length} Asientos`;
         totalEl.innerText = `${formattedTotal} MXN`;
         
-        // Update modal total too
         if (totalModalEl) {
             totalModalEl.innerText = `${formattedTotal} MXN`;
         }
-        
-        // Actualizar input oculto para el formulario
-        selectedSeatsInput.value = selectedSeats.join(',');
     }
 
     // Inicializar estado del botón

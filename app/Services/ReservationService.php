@@ -26,7 +26,62 @@ class ReservationService
             throw new Exception("Debes seleccionar al menos un asiento.");
         }
 
-        $totalAmount = count($seatNumbers) * $tour->price;
+        // --- CÁLCULO DE IMPORTES Y PASAJEROS (MODO HÍBRIDO) ---
+        $subtotal = 0;
+        $discountTotal = 0;
+        $totalAmount = 0;
+        $passengersData = [];
+
+        if ($dto->passengers && count($dto->passengers) > 0) {
+            // MODO NUEVO: Se recibieron pasajeros detallados
+            foreach ($dto->passengers as $p) {
+                $basePrice = $tour->price;
+                $discount = 0;
+                
+                // Reglas de negocio iniciales
+                if ($p['passenger_type'] === 'Niño') {
+                    $discount = $basePrice * 0.5; // 50% descuento
+                }
+                
+                $finalPrice = $basePrice - $discount;
+
+                $subtotal += $basePrice;
+                $discountTotal += $discount;
+                $totalAmount += $finalPrice;
+
+                $passengersData[] = [
+                    'seat_number' => $p['seat_number'],
+                    'name' => $p['name'],
+                    'passenger_type' => $p['passenger_type'],
+                    'birthdate' => $p['birthdate'] ?? null,
+                    'benefit_label' => $p['benefit_label'] ?? null,
+                    'base_price' => $basePrice,
+                    'discount_amount' => $discount,
+                    'final_price' => $finalPrice,
+                    'validation_status' => 'pending',
+                ];
+            }
+        } else {
+            // MODO LEGACY: Generar pasajeros por defecto basados en los asientos
+            foreach ($seatNumbers as $seatNumber) {
+                $basePrice = $tour->price;
+                
+                $subtotal += $basePrice;
+                $totalAmount += $basePrice;
+
+                $passengersData[] = [
+                    'seat_number' => $seatNumber,
+                    'name' => $dto->name . ' (Pasajero)',
+                    'passenger_type' => 'Adulto',
+                    'birthdate' => null,
+                    'benefit_label' => null,
+                    'base_price' => $basePrice,
+                    'discount_amount' => 0,
+                    'final_price' => $basePrice,
+                    'validation_status' => 'pending',
+                ];
+            }
+        }
 
         DB::beginTransaction();
         try {
@@ -44,20 +99,28 @@ class ReservationService
             $reservation = Reservation::create([
                 'tour_id' => $tour->id,
                 'client_id' => $client->id,
+                'subtotal' => $subtotal,
+                'discount_total' => $discountTotal,
                 'total_amount' => $totalAmount,
                 'balance_due' => $totalAmount,
                 'status' => \App\Enums\ReservationStatus::PENDING,
                 'expires_at' => Carbon::now()->addHours($tour->expiration_hours),
             ]);
 
-            // 3. Create Seats
+            // 3. Create Seats and Passengers
             foreach ($seatNumbers as $seatNumber) {
+                // Mantenemos intacto el inventario de asientos
                 ReservationSeat::create([
                     'reservation_id' => $reservation->id,
                     'tour_id' => $tour->id,
                     'seat_number' => (int) $seatNumber,
                     'status' => \App\Enums\SeatStatus::PENDING
                 ]);
+            }
+
+            foreach ($passengersData as $passenger) {
+                $passenger['reservation_id'] = $reservation->id;
+                \App\Models\ReservationPassenger::create($passenger);
             }
 
             DB::commit();
