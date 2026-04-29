@@ -21,21 +21,26 @@ class ReservationController extends Controller
     {
         try {
             $reservation = $this->reservationService->processNewReservation($request->toDTO());
-            return redirect()->route('reservations.success', $reservation->id);
+            return redirect()->route('reservations.success', $reservation->public_token);
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
     }
 
-    public function success($id)
+    public function success($token)
     {
-        $reservation = Reservation::with(['tour', 'client', 'seats', 'passengers'])->findOrFail($id);
+        $reservation = Reservation::with(['tour', 'client', 'seats', 'passengers'])
+            ->where('public_token', $token)
+            ->firstOrFail();
+            
         return view('checkout.success', compact('reservation'));
     }
 
-    public function downloadTicket($id)
+    public function downloadTicket($token)
     {
-        $reservation = Reservation::with(['tour', 'client', 'seats', 'passengers'])->findOrFail($id);
+        $reservation = Reservation::with(['tour', 'client', 'seats', 'passengers'])
+            ->where('public_token', $token)
+            ->firstOrFail();
         
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.ticket', compact('reservation'));
         
@@ -44,9 +49,9 @@ class ReservationController extends Controller
         return $pdf->download($filename);
     }
 
-    public function mockPay($id)
+    public function mockPay($token)
     {
-        $reservation = Reservation::findOrFail($id);
+        $reservation = Reservation::where('public_token', $token)->firstOrFail();
         
         sleep(2);
         
@@ -57,7 +62,7 @@ class ReservationController extends Controller
         \App\Models\ReservationSeat::where('reservation_id', $reservation->id)
             ->update(['status' => 'paid']);
 
-        return redirect()->route('reservations.success', $reservation->id)
+        return redirect()->route('reservations.success', $reservation->public_token)
             ->with('success', '¡Pago procesado exitosamente vía Tarjeta de Crédito (Mock)!');
     }
 }

@@ -19,13 +19,13 @@ class PaymentController extends Controller
     /**
      * Create Stripe Checkout Session and redirect.
      */
-    public function checkout($id)
+    public function checkout($token)
     {
-        $reservation = Reservation::with(['tour', 'client', 'seats'])->findOrFail($id);
+        $reservation = Reservation::with(['tour', 'client', 'seats'])->where('public_token', $token)->firstOrFail();
 
         // Don't allow payment if already paid
         if ($reservation->status->value === 'paid') {
-            return redirect()->route('reservations.success', $reservation->id)
+            return redirect()->route('reservations.success', $reservation->public_token)
                 ->with('info', 'Esta reserva ya fue pagada.');
         }
 
@@ -33,7 +33,7 @@ class PaymentController extends Controller
             $session = $this->paymentService->createCheckoutSession($reservation);
             return redirect()->away($session->url);
         } catch (\Exception $e) {
-            return redirect()->route('reservations.success', $reservation->id)
+            return redirect()->route('reservations.success', $reservation->public_token)
                 ->with('error', 'Error al conectar con el procesador de pagos: ' . $e->getMessage());
         }
     }

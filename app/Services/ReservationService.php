@@ -97,6 +97,7 @@ class ReservationService
 
             // 2. Create Reservation
             $reservation = Reservation::create([
+                'public_token' => \Illuminate\Support\Str::random(32),
                 'tour_id' => $tour->id,
                 'client_id' => $client->id,
                 'subtotal' => $subtotal,

@@ -133,7 +133,7 @@
                 $whatsappMsg = urlencode("Hola, mi número de reserva es RES-" . str_pad($reservation->id, 4, '0', STR_PAD_LEFT) . " para el tour {$reservation->tour->title}. Aquí envío mi comprobante de pago.");
             @endphp
             <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                <a href="{{ route('reservations.ticket', $reservation->id) }}" class="btn btn-outline" style="border-width: 2px;">
+                <a href="{{ route('reservations.ticket', $reservation->public_token) }}" class="btn btn-outline" style="border-width: 2px;">
                     <i class="fa-solid fa-file-pdf"></i> Descargar Ticket PDF
                 </a>
                 @if($reservation->status->value === 'pending')
@@ -155,7 +155,7 @@
                     <h3 style="color: white; font-size: 1.3rem; margin-bottom: .5rem;">Paga en línea al instante</h3>
                     <p style="color: #94a3b8; font-size: .88rem; margin-bottom: 1.5rem;">Aceptamos Visa, Mastercard, American Express. Tu información está protegida con encriptación SSL.</p>
                     
-                    <a href="{{ route('reservations.pay', $reservation->id) }}" 
+                    <a href="{{ route('reservations.pay', $reservation->public_token) }}" 
                        class="btn" 
                        style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 1rem 3rem; font-size: 1.05rem; border-radius: var(--radius-lg); box-shadow: 0 8px 24px rgba(99,102,241,.35);"
                        onclick="this.innerHTML = '<i class=\'fa-solid fa-spinner fa-spin\'></i> Redirigiendo a Stripe...';">

@@ -25,8 +25,8 @@ Route::get('/tours/{id}', [WebTourController::class, 'show'])->name('tours.show'
 
 // Rutas de Reservación (Web)
 Route::post('/reservations', [WebReservationController::class, 'store'])->name('reservations.store');
-Route::get('/reservations/{id}/success', [WebReservationController::class, 'success'])->name('reservations.success');
-Route::get('/reservations/{id}/ticket', [WebReservationController::class, 'downloadTicket'])->name('reservations.ticket');
+Route::get('/reservations/{token}/success', [WebReservationController::class, 'success'])->name('reservations.success');
+Route::get('/reservations/{token}/ticket', [WebReservationController::class, 'downloadTicket'])->name('reservations.ticket');
 
 // API Pública
 Route::get('/api/seats/{id}', [ApiSeatController::class, 'getSeats']);
@@ -57,13 +57,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/api/admin/notifications/read', [ApiNotificationController::class, 'markRead'])->name('admin.notifications.read');
 });
 // Pagos con Stripe
-Route::get('/reservations/{id}/pay', [\App\Http\Controllers\Web\PaymentController::class, 'checkout'])->name('reservations.pay');
+Route::get('/reservations/{token}/pay', [\App\Http\Controllers\Web\PaymentController::class, 'checkout'])->name('reservations.pay');
 
 // Stripe Webhook (excluido de CSRF)
 Route::post('/stripe/webhook', [\App\Http\Controllers\Api\StripeWebhookController::class, 'handle'])->name('stripe.webhook');
 
 // Mock de Pago (Fallback para pruebas sin Stripe)
-Route::post('/reservations/{id}/mock-pay', [WebReservationController::class, 'mockPay'])->name('reservations.mockPay');
+Route::post('/reservations/{token}/mock-pay', [WebReservationController::class, 'mockPay'])->name('reservations.mockPay');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

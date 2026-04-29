@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Reservation extends Model
 {
-    protected $fillable = ['tour_id', 'client_id', 'subtotal', 'discount_total', 'total_amount', 'balance_due', 'status', 'expires_at'];
+    protected $fillable = ['public_token', 'tour_id', 'client_id', 'subtotal', 'discount_total', 'total_amount', 'balance_due', 'status', 'expires_at'];
 
     protected function casts(): array
     {
