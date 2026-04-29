@@ -166,9 +166,6 @@ class ReservationService
      */
     public function getSeatStatus(int $tourId): array
     {
-        // Llamada ligera temporal (se removerá en el futuro cuando el Cron esté bien establecido)
-        $this->cancelExpiredReservations($tourId);
-
         // Fetch current active seats
         $seats = ReservationSeat::where('tour_id', $tourId)->get();
         $response = [];
