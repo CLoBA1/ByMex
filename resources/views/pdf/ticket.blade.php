@@ -113,6 +113,31 @@
             text-transform: uppercase;
             font-size: 12px;
         }
+        table.passengers-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table.passengers-table th, table.passengers-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-size: 13px;
+        }
+        table.passengers-table th {
+            background-color: #f8f9fa;
+            color: #555;
+            text-transform: uppercase;
+        }
+        .note-alert {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -166,18 +191,81 @@
             <div class="clear"></div>
         </div>
 
-        <div class="seats-container">
-            <div style="font-size: 14px; color: #666; margin-bottom: 5px; text-transform: uppercase;">Asientos Reservados</div>
-            <div class="seats-list">
-                @foreach($reservation->seats as $seat)
-                    {{ str_pad($seat->seat_number, 2, '0', STR_PAD_LEFT) }}{{ !$loop->last ? ' - ' : '' }}
-                @endforeach
-            </div>
-            <div style="font-size: 12px; color: #888; margin-top: 5px;">Total: {{ $reservation->seats->count() }} asiento(s)</div>
-        </div>
+        <div class="section-title">Lista de Pasajeros</div>
+        <table class="passengers-table">
+            <thead>
+                <tr>
+                    <th>Asiento</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th style="text-align: right;">Tarifa Final</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($reservation->passengers as $p)
+                <tr>
+                    <td style="text-align: center; font-weight: bold;">{{ str_pad($p->seat_number, 2, '0', STR_PAD_LEFT) }}</td>
+                    <td>{{ $p->name }}</td>
+                    <td>
+                        {{ $p->passenger_type }}
+                        @if($p->benefit_label)
+                            <br><small style="color: #666;">({{ $p->benefit_label }})</small>
+                        @endif
+                    </td>
+                    <td style="text-align: right;">
+                        @if($p->discount_amount > 0)
+                            <del style="color: #999; font-size: 11px;">${{ number_format($p->base_price, 2) }}</del><br>
+                        @endif
+                        ${{ number_format($p->final_price, 2) }}
+                    </td>
+                </tr>
+                @empty
+                <!-- Fallback para reservaciones muy antiguas sin pasajeros en BD -->
+                <tr>
+                    <td colspan="4" style="text-align: center; font-style: italic; color: #888;">
+                        Asientos: 
+                        @foreach($reservation->seats as $seat)
+                            {{ str_pad($seat->seat_number, 2, '0', STR_PAD_LEFT) }}{{ !$loop->last ? ' - ' : '' }}
+                        @endforeach
+                        (Pasajeros no detallados)
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
 
-        <div class="total-box">
-            Total a Pagar: ${{ number_format($reservation->total_amount, 2) }} MXN
+        @if($reservation->passengers && $reservation->passengers->where('discount_amount', '>', 0)->count() > 0)
+        <div class="note-alert">
+            <strong>AVISO IMPORTANTE:</strong> Las tarifas con descuento o beneficios especiales (Niños, INAPAM, Estudiantes, etc.) quedan estrictamente sujetas a validación documental antes del inicio del tour. Por favor, presente su identificación oficial al momento de abordar.
+        </div>
+        @endif
+
+        <div style="width: 100%; text-align: right; margin-bottom: 20px;">
+            <table style="width: 300px; float: right; font-size: 14px; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 5px; color: #555;">Subtotal:</td>
+                    <td style="padding: 5px; text-align: right;">${{ number_format($reservation->subtotal ?? $reservation->total_amount, 2) }}</td>
+                </tr>
+                @if($reservation->discount_total > 0)
+                <tr>
+                    <td style="padding: 5px; color: #d62828;">Descuentos Aplicados:</td>
+                    <td style="padding: 5px; text-align: right; color: #d62828;">-${{ number_format($reservation->discount_total, 2) }}</td>
+                </tr>
+                @endif
+                <tr style="font-weight: bold; font-size: 18px; background: #d62828; color: #fff;">
+                    <td style="padding: 10px; border-radius: 5px 0 0 5px;">TOTAL FINAL:</td>
+                    <td style="padding: 10px; text-align: right; border-radius: 0 5px 5px 0;">${{ number_format($reservation->total_amount, 2) }} MXN</td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px; color: #555; font-size: 13px;">Anticipo / Pagado:</td>
+                    <td style="padding: 5px; text-align: right; font-size: 13px;">${{ number_format($reservation->total_amount - $reservation->balance_due, 2) }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px; color: #555; font-size: 13px; font-weight: bold;">Saldo Pendiente:</td>
+                    <td style="padding: 5px; text-align: right; font-size: 13px; font-weight: bold;">${{ number_format($reservation->balance_due, 2) }}</td>
+                </tr>
+            </table>
+            <div class="clear"></div>
         </div>
 
         <div class="footer">

@@ -29,13 +29,13 @@ class ReservationController extends Controller
 
     public function success($id)
     {
-        $reservation = Reservation::with(['tour', 'client', 'seats'])->findOrFail($id);
+        $reservation = Reservation::with(['tour', 'client', 'seats', 'passengers'])->findOrFail($id);
         return view('checkout.success', compact('reservation'));
     }
 
     public function downloadTicket($id)
     {
-        $reservation = Reservation::with(['tour', 'client', 'seats'])->findOrFail($id);
+        $reservation = Reservation::with(['tour', 'client', 'seats', 'passengers'])->findOrFail($id);
         
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.ticket', compact('reservation'));
         
