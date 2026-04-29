@@ -216,5 +216,5 @@
     <script>
         window.API_URL_SEATS = "{{ url('api/seats') }}/{{ $tour->id }}";
     </script>
-    <script src="{{ asset('js/tour.js') }}"></script>
+    <script src="{{ asset('js/tour.js') }}?v={{ filemtime(public_path('js/tour.js')) }}"></script>
 @endsection
