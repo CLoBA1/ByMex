@@ -140,21 +140,34 @@ class ReservationService
         }
     }
     
+    public function cancelExpiredReservations(?int $tourId = null): int
+    {
+        $query = Reservation::where('status', \App\Enums\ReservationStatus::PENDING)
+            ->where('expires_at', '<', Carbon::now());
+
+        if ($tourId) {
+            $query->where('tour_id', $tourId);
+        }
+
+        $expiredReservations = $query->get();
+        $count = 0;
+
+        foreach ($expiredReservations as $res) {
+            $res->update(['status' => \App\Enums\ReservationStatus::CANCELLED]);
+            ReservationSeat::where('reservation_id', $res->id)->delete();
+            $count++;
+        }
+
+        return $count;
+    }
+
     /**
      * Get real-time available/occupied seats logic
      */
     public function getSeatStatus(int $tourId): array
     {
-        // Auto-expire pending reservations that have passed their expiration date
-        $expiredReservations = Reservation::where('tour_id', $tourId)
-            ->where('status', \App\Enums\ReservationStatus::PENDING)
-            ->where('expires_at', '<', Carbon::now())
-            ->get();
-
-        foreach ($expiredReservations as $res) {
-            $res->update(['status' => \App\Enums\ReservationStatus::CANCELLED]);
-            ReservationSeat::where('reservation_id', $res->id)->delete();
-        }
+        // Llamada ligera temporal (se removerá en el futuro cuando el Cron esté bien establecido)
+        $this->cancelExpiredReservations($tourId);
 
         // Fetch current active seats
         $seats = ReservationSeat::where('tour_id', $tourId)->get();
