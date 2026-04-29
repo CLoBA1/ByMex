@@ -63,7 +63,9 @@ Route::get('/reservations/{token}/pay', [\App\Http\Controllers\Web\PaymentContro
 Route::post('/stripe/webhook', [\App\Http\Controllers\Api\StripeWebhookController::class, 'handle'])->name('stripe.webhook');
 
 // Mock de Pago (Fallback para pruebas sin Stripe)
-Route::post('/reservations/{token}/mock-pay', [WebReservationController::class, 'mockPay'])->name('reservations.mockPay');
+if (app()->environment('local', 'testing')) {
+    Route::post('/reservations/{token}/mock-pay', [WebReservationController::class, 'mockPay'])->name('reservations.mockPay');
+}
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

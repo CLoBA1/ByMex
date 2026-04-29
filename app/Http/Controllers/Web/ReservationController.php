@@ -51,6 +51,8 @@ class ReservationController extends Controller
 
     public function mockPay($token)
     {
+        abort_unless(app()->environment('local', 'testing'), 404);
+
         $reservation = Reservation::where('public_token', $token)->firstOrFail();
         
         sleep(2);
