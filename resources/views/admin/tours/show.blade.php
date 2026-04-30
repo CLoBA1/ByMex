@@ -259,10 +259,11 @@
                                     @php 
                                         $sn = str_pad($seatNum, 2, "0", STR_PAD_LEFT); 
                                         $data = $seatData[$seatNum] ?? null;
+                                        $isLastOdd = ($seatNum == $totalSeats && $totalSeats % 2 != 0 && $c == 0);
                                     @endphp
                                     
                                     @if($data)
-                                        <div class="admin-seat admin-seat-occupied" style="background: {{ $data['bg'] }}; border: {{ $data['borderWidth'] }} solid {{ $data['border'] }};">
+                                        <div class="admin-seat admin-seat-occupied" {!! $isLastOdd ? 'style="grid-column: 1 / -1; background: '.$data['bg'].'; border: '.$data['borderWidth'].' solid '.$data['border'].';"' : 'style="background: '.$data['bg'].'; border: '.$data['borderWidth'].' solid '.$data['border'].';"' !!}>
                                             {{ $sn }}
                                             <div class="tooltip-content">
                                                 <div class="tooltip-row"><strong>Asiento:</strong> {{ $sn }}</div>
@@ -277,13 +278,14 @@
                                             </div>
                                         </div>
                                     @else
-                                        <div class="admin-seat admin-seat-free">
+                                        <div class="admin-seat admin-seat-free" {!! $isLastOdd ? 'style="grid-column: 1 / -1;"' : '' !!}>
                                             {{ $sn }}
                                         </div>
                                     @endif
                                     
                                     @php $seatNum++; @endphp
                                 @else
+                                @elseif($seatNum > $totalSeats && !($totalSeats % 2 != 0))
                                     <div></div>
                                 @endif
                             @endfor

@@ -96,10 +96,13 @@
                                     {{-- Left pair (seats in columns 1-2) --}}
                                     @for ($c = 0; $c < 2; $c++)
                                         @if ($seatNum <= $totalSeats)
-                                            @php $sn = str_pad($seatNum, 2, "0", STR_PAD_LEFT); @endphp
-                                            <div class="seat" data-seat="{{ $seatNum }}">{{ $sn }}</div>
+                                            @php 
+                                                $sn = str_pad($seatNum, 2, "0", STR_PAD_LEFT); 
+                                                $isLastOdd = ($seatNum == $totalSeats && $totalSeats % 2 != 0 && $c == 0);
+                                            @endphp
+                                            <div class="seat" data-seat="{{ $seatNum }}" {!! $isLastOdd ? 'style="grid-column: 1 / -1;"' : '' !!}>{{ $sn }}</div>
                                             @php $seatNum++; @endphp
-                                        @else
+                                        @elseif($seatNum > $totalSeats && !($totalSeats % 2 != 0))
                                             <div></div>
                                         @endif
                                     @endfor
@@ -110,7 +113,7 @@
                                             @php $sn = str_pad($seatNum, 2, "0", STR_PAD_LEFT); @endphp
                                             <div class="seat" data-seat="{{ $seatNum }}">{{ $sn }}</div>
                                             @php $seatNum++; @endphp
-                                        @else
+                                        @elseif($seatNum > $totalSeats && !($totalSeats % 2 != 0))
                                             <div></div>
                                         @endif
                                     @endfor
