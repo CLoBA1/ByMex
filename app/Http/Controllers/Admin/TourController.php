@@ -24,7 +24,7 @@ class TourController extends Controller
 
     public function create()
     {
-        return view('admin.tours.create');
+        return view('admin.tours.form');
     }
 
     public function store(Request $request)
@@ -55,7 +55,7 @@ class TourController extends Controller
     public function edit($id)
     {
         $tour = $this->repository->findTourWithReservations($id);
-        return view('admin.tours.edit', compact('tour'));
+        return view('admin.tours.form', compact('tour'));
     }
 
     public function update(Request $request, $id)

@@ -73,6 +73,9 @@
                                 <td style="text-align: right;">
                                     @if($reservation->status == 'pending')
                                         <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                            <a href="{{ route('admin.reservations.show', $reservation->id) }}" class="btn-action" style="background: var(--slate-100); color: var(--navy); border: 1px solid var(--border);" title="Ver Detalle">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </a>
                                             <form action="{{ route('admin.reservations.status', $reservation->id) }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" name="status" value="paid">
@@ -89,7 +92,12 @@
                                             </form>
                                         </div>
                                     @else
-                                        <span style="font-size: 0.8rem; color: var(--text-muted);"><i class="fa-solid fa-lock"></i> Sin acciones</span>
+                                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center;">
+                                            <span style="font-size: 0.8rem; color: var(--text-muted);"><i class="fa-solid fa-lock"></i> Sin acciones</span>
+                                            <a href="{{ route('admin.reservations.show', $reservation->id) }}" class="btn-action" style="background: var(--slate-100); color: var(--navy); border: 1px solid var(--border);" title="Ver Detalle">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </a>
+                                        </div>
                                     @endif
                                 </td>
                             </tr>

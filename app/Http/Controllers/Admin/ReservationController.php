@@ -8,6 +8,12 @@ use Illuminate\Http\Request;
 
 class ReservationController extends Controller
 {
+    public function show($id)
+    {
+        $reservation = Reservation::with(['client', 'tour', 'passengers', 'seats'])->findOrFail($id);
+        return view('admin.reservations.show', compact('reservation'));
+    }
+
     public function updateStatus(Request $request, $id)
     {
         $reservation = Reservation::findOrFail($id);
