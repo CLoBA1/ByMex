@@ -57,6 +57,7 @@ class ReservationService
                     'benefit_label' => $p['benefit_label'] ?? null,
                     'base_price' => $basePrice,
                     'discount_amount' => $discount,
+                    'original_discount_amount' => $discount,
                     'final_price' => $finalPrice,
                     'validation_status' => 'pending',
                 ];

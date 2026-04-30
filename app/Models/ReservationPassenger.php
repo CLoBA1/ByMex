@@ -15,6 +15,7 @@ class ReservationPassenger extends Model
         'benefit_label',
         'base_price',
         'discount_amount',
+        'original_discount_amount',
         'final_price',
         'validation_status',
         'validation_notes',
@@ -26,6 +27,7 @@ class ReservationPassenger extends Model
             'birthdate' => 'date',
             'base_price' => 'decimal:2',
             'discount_amount' => 'decimal:2',
+            'original_discount_amount' => 'decimal:2',
             'final_price' => 'decimal:2',
         ];
     }

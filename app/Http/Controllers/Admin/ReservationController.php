@@ -24,11 +24,40 @@ class ReservationController extends Controller
             'validation_notes' => 'nullable|string|max:255',
         ]);
 
-        $passenger->validation_status = $request->validation_status;
+        $newStatus = $request->validation_status;
+        $passenger->validation_status = $newStatus;
         $passenger->validation_notes = $request->validation_notes;
+
+        // --- AJUSTE FINANCIERO DEL PASAJERO ---
+        if ($newStatus === 'rejected') {
+            // Pierde el descuento: paga tarifa completa
+            $passenger->discount_amount = 0;
+            $passenger->final_price = $passenger->base_price;
+        } elseif ($newStatus === 'validated') {
+            // Restaura el descuento original
+            $passenger->discount_amount = $passenger->original_discount_amount;
+            $passenger->final_price = $passenger->base_price - $passenger->original_discount_amount;
+        }
+
         $passenger->save();
 
-        return back()->with('success', 'Pasajero ' . $passenger->name . ' marcado como ' . ($request->validation_status == 'validated' ? 'Validado' : 'Rechazado') . '.');
+        // --- RECÁLCULO DE TOTALES DE LA RESERVA PADRE ---
+        $reservation = $passenger->reservation;
+        $allPassengers = $reservation->passengers()->get();
+
+        $newDiscountTotal = $allPassengers->sum('discount_amount');
+        $newTotalAmount = $allPassengers->sum('final_price');
+
+        $amountAlreadyPaid = $reservation->total_amount - $reservation->balance_due;
+        $newBalanceDue = max(0, $newTotalAmount - $amountAlreadyPaid);
+
+        $reservation->discount_total = $newDiscountTotal;
+        $reservation->total_amount = $newTotalAmount;
+        $reservation->balance_due = $newBalanceDue;
+        $reservation->save();
+
+        $label = $newStatus === 'validated' ? 'Validado' : 'Rechazado';
+        return back()->with('success', "Pasajero {$passenger->name} marcado como {$label}. Totales de la reserva actualizados.");
     }
 
     public function updateStatus(Request $request, $id)
