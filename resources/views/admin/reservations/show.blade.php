@@ -1,6 +1,12 @@
 <x-app-layout>
     @section('header-title', 'Detalle de Reservación')
 
+    @if (session('success'))
+        <div style="background: #dcfce7; border: 1px solid #22c55e; color: #166534; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem;">
+            <i class="fa-solid fa-check-circle"></i> {{ session('success') }}
+        </div>
+    @endif
+
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <div>
             <h2 style="font-family: 'Montserrat', sans-serif; font-size: 1.5rem; color: var(--navy); font-weight: 800; margin-bottom: 0.25rem;">
@@ -64,12 +70,18 @@
                                     <td>
                                         @if($passenger->validation_status == 'pending')
                                             <span class="badge badge-orange">Pendiente</span>
-                                        @elseif($passenger->validation_status == 'approved')
-                                            <span class="badge badge-green">Aprobado</span>
+                                        @elseif($passenger->validation_status == 'validated')
+                                            <span class="badge badge-green">Validado</span>
                                         @elseif($passenger->validation_status == 'rejected')
                                             <span class="badge" style="background: var(--primary); color: white;">Rechazado</span>
                                         @else
                                             <span style="color: var(--text-muted); font-size: 0.9rem;">N/A</span>
+                                        @endif
+                                        
+                                        @if($passenger->validation_notes)
+                                            <div style="font-size: 0.75rem; color: var(--slate-500); margin-top: 0.35rem; font-style: italic;">
+                                                <i class="fa-regular fa-comment"></i> {{ $passenger->validation_notes }}
+                                            </div>
                                         @endif
                                     </td>
                                 </tr>
@@ -153,15 +165,45 @@
                 </div>
             </div>
 
-            <!-- Acciones Rápidas (Reservadas para después) -->
+            <!-- Validación de Pasajeros -->
             <div class="card" style="margin-top: 2rem;">
                 <div class="card-header">
-                    <h3 class="card-title"><i class="fa-solid fa-bolt"></i> Acciones Administrativas</h3>
+                    <h3 class="card-title"><i class="fa-solid fa-id-card"></i> Validación Pendiente</h3>
                 </div>
                 <div class="card-body">
-                    <p style="font-size: 0.9rem; color: var(--text-muted);">
-                        <em>Las acciones de validación de pasajeros y pagos se implementarán en la siguiente etapa.</em>
-                    </p>
+                    @php
+                        $pendingPassengers = $reservation->passengers->where('validation_status', 'pending');
+                    @endphp
+                    @if($pendingPassengers->isEmpty())
+                        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">
+                            <i class="fa-solid fa-check-circle" style="color: #166534;"></i> No hay pasajeros pendientes de validación en esta reserva.
+                        </p>
+                    @else
+                        @foreach($pendingPassengers as $passenger)
+                            <div style="border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 1rem;">
+                                <div style="font-weight: 700; color: var(--navy); margin-bottom: 0.25rem;">
+                                    Asiento {{ $passenger->seat_number }} - {{ $passenger->name }}
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+                                    Solicita: <strong style="color: var(--navy);">{{ ucfirst($passenger->passenger_type) }} ({{ $passenger->benefit_label }})</strong>
+                                </div>
+                                <form action="{{ route('admin.passengers.validate', $passenger->id) }}" method="POST">
+                                    @csrf
+                                    <div style="margin-bottom: 0.75rem;">
+                                        <input type="text" name="validation_notes" placeholder="Añadir nota opcional (ej. credencial borrosa)..." style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem;">
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <button type="submit" name="validation_status" value="validated" class="btn-action" style="background: #166534; padding: 0.5rem; font-size: 0.85rem; flex: 1; justify-content: center;" onclick="return confirm('¿Aprobar el descuento para este pasajero?');">
+                                            <i class="fa-solid fa-check"></i> Validar
+                                        </button>
+                                        <button type="submit" name="validation_status" value="rejected" class="btn-action" style="background: var(--primary); padding: 0.5rem; font-size: 0.85rem; flex: 1; justify-content: center;" onclick="return confirm('¿Rechazar el descuento? El pago seguirá igual por ahora.');">
+                                            <i class="fa-solid fa-xmark"></i> Rechazar
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        @endforeach
+                    @endif
                 </div>
             </div>
         </div>

@@ -46,6 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::post('/admin/reservations/{id}/status', [AdminReservationController::class, 'updateStatus'])->name('admin.reservations.status');
     Route::get('/admin/reservations/{id}', [AdminReservationController::class, 'show'])->name('admin.reservations.show');
+    Route::post('/admin/passengers/{id}/validate', [AdminReservationController::class, 'validatePassenger'])->name('admin.passengers.validate');
 
     // Clientes
     Route::get('/admin/clients', [AdminClientController::class, 'index'])->name('admin.clients.index');
