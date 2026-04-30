@@ -186,6 +186,9 @@
             <a href="{{ route('admin.clients.index') }}" class="nav-item {{ request()->routeIs('admin.clients.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-users"></i> Clientes
             </a>
+            <a href="{{ route('admin.boarding-points.index') }}" class="nav-item {{ request()->routeIs('admin.boarding-points.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-map-marker-alt"></i> Puntos de Abordaje
+            </a>
             <a href="{{ route('admin.settings') }}" class="nav-item {{ request()->routeIs('admin.settings') ? 'active' : '' }}">
                 <i class="fa-solid fa-gear"></i> Configuración
             </a>

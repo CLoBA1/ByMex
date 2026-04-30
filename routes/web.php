@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\TourController as AdminTourController;
 use App\Http\Controllers\Admin\ClientController as AdminClientController;
 use App\Http\Controllers\Admin\ReservationController as AdminReservationController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
+use App\Http\Controllers\Admin\BoardingPointController as AdminBoardingPointController;
 
 use App\Http\Controllers\Api\SeatController as ApiSeatController;
 use App\Http\Controllers\Api\NotificationController as ApiNotificationController;
@@ -53,6 +54,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Configuración
     Route::get('/admin/settings', [AdminSettingController::class, 'index'])->name('admin.settings');
+
+    // Puntos de Abordaje
+    Route::get('/admin/boarding-points', [AdminBoardingPointController::class, 'index'])->name('admin.boarding-points.index');
+    Route::post('/admin/boarding-points', [AdminBoardingPointController::class, 'store'])->name('admin.boarding-points.store');
+    Route::put('/admin/boarding-points/{id}', [AdminBoardingPointController::class, 'update'])->name('admin.boarding-points.update');
+    Route::delete('/admin/boarding-points/{id}', [AdminBoardingPointController::class, 'destroy'])->name('admin.boarding-points.destroy');
 
     // Notification API
     Route::get('/api/admin/notifications', [ApiNotificationController::class, 'index'])->name('admin.notifications.api');

@@ -215,6 +215,7 @@
 @section('extra-js')
     <script>
         window.API_URL_SEATS = "{{ url('api/seats') }}/{{ $tour->id }}";
+        window.BOARDING_POINTS = @json($boardingPoints);
     </script>
     <script src="{{ asset('js/tour.js') }}?v={{ filemtime(public_path('js/tour.js')) }}"></script>
 @endsection

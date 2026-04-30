@@ -97,7 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const seat = block.dataset.seat;
             const nameInput = block.querySelector('.p-name').value;
             const typeSelect = block.querySelector('.p-type').value;
-            existingBlocks[seat] = { name: nameInput, type: typeSelect };
+            const bpSelect = block.querySelector('.p-bp');
+            existingBlocks[seat] = { name: nameInput, type: typeSelect, bp: bpSelect ? bpSelect.value : '' };
         });
 
         if (selectedSeats.length === 0) {
@@ -105,11 +106,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Construir opciones de puntos de abordaje desde el catálogo del servidor
+        const bpList = window.BOARDING_POINTS || [];
+        let bpOptions = '<option value="">-- Selecciona --</option>';
+        bpList.forEach(bp => {
+            bpOptions += `<option value="${bp.id}">${bp.name}</option>`;
+        });
+
         passengersContainer.innerHTML = '<h3 style="margin-top: 1rem; margin-bottom: 0.5rem; font-size: 1.05rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--navy);"><i class="fa-solid fa-users"></i> Detalle de Pasajeros</h3>';
 
         selectedSeats.forEach((seat, index) => {
-            const prevData = existingBlocks[seat] || { name: '', type: 'Adulto' };
+            const prevData = existingBlocks[seat] || { name: '', type: 'Adulto', bp: '' };
             const seatLabel = seat.toString().padStart(2, '0');
+
+            // Re-seleccionar la opción de boarding point guardada
+            let bpOptionsWithSel = bpOptions.replace(`value="${prevData.bp}"`, `value="${prevData.bp}" selected`);
             
             const html = `
                 <div class="passenger-block" data-seat="${seat}" style="background: var(--bg-body); padding: 0.75rem; border-radius: 8px; margin-bottom: 0.75rem; border: 1px solid var(--border);">
@@ -123,6 +134,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             <select class="form-control p-type" name="passengers[${index}][passenger_type]" style="padding: 0.5rem; font-size: 0.85rem; height: auto;">
                                 <option value="Adulto" ${prevData.type === 'Adulto' ? 'selected' : ''}>Adulto (100%)</option>
                                 <option value="Niño" ${prevData.type === 'Niño' ? 'selected' : ''}>Niño 3-10 (50%)</option>
+                                <option value="Adulto Mayor" ${prevData.type === 'Adulto Mayor' ? 'selected' : ''}>Adulto Mayor (70%)</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 120px;">
+                            <select class="form-control p-bp" name="passengers[${index}][boarding_point_id]" style="padding: 0.5rem; font-size: 0.85rem; height: auto;">
+                                ${bpOptionsWithSel}
                             </select>
                         </div>
                     </div>
@@ -153,6 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 let pPrice = pricePerSeat;
                 if (select.value === 'Niño') {
                     pPrice = pricePerSeat * 0.5;
+                } else if (select.value === 'Adulto Mayor') {
+                    pPrice = pricePerSeat * 0.7;
                 }
                 finalTotal += pPrice;
             });

@@ -46,6 +46,7 @@
                                 <th>Asiento</th>
                                 <th>Nombre</th>
                                 <th>Categoría</th>
+                                <th>Abordaje</th>
                                 <th>Estatus Validación</th>
                             </tr>
                         </thead>
@@ -68,6 +69,16 @@
                                         @endif
                                     </td>
                                     <td>
+                                        @if($passenger->boardingPoint)
+                                            <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.85rem;">
+                                                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: {{ $passenger->boardingPoint->color_hex }};"></span>
+                                                {{ $passenger->boardingPoint->name }}
+                                            </span>
+                                        @else
+                                            <span style="color: var(--text-muted); font-size: 0.85rem;">—</span>
+                                        @endif
+                                    </td>
+                                    <td>
                                         @if($passenger->validation_status == 'pending')
                                             <span class="badge badge-orange">Pendiente</span>
                                         @elseif($passenger->validation_status == 'validated')
@@ -87,7 +98,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">Esta reservación legacy no tiene pasajeros desglosados.</td>
+                                    <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">Esta reservación legacy no tiene pasajeros desglosados.</td>
                                 </tr>
                             @endforelse
                         </tbody>

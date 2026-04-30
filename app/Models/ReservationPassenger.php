@@ -13,6 +13,7 @@ class ReservationPassenger extends Model
         'birthdate',
         'passenger_type',
         'benefit_label',
+        'boarding_point_id',
         'base_price',
         'discount_amount',
         'original_discount_amount',
@@ -35,5 +36,10 @@ class ReservationPassenger extends Model
     public function reservation()
     {
         return $this->belongsTo(Reservation::class);
+    }
+
+    public function boardingPoint()
+    {
+        return $this->belongsTo(BoardingPoint::class);
     }
 }

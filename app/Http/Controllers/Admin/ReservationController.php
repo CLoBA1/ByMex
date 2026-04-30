@@ -11,7 +11,7 @@ class ReservationController extends Controller
 {
     public function show($id)
     {
-        $reservation = Reservation::with(['client', 'tour', 'passengers', 'seats'])->findOrFail($id);
+        $reservation = Reservation::with(['client', 'tour', 'passengers.boardingPoint', 'seats'])->findOrFail($id);
         return view('admin.reservations.show', compact('reservation'));
     }
 

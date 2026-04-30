@@ -24,6 +24,7 @@ class TourController extends Controller
     public function show($id)
     {
         $tour = Tour::with(['seats'])->findOrFail($id);
-        return view('tours.show', compact('tour'));
+        $boardingPoints = \App\Models\BoardingPoint::where('is_active', true)->orderBy('name')->get();
+        return view('tours.show', compact('tour', 'boardingPoints'));
     }
 }

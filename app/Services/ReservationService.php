@@ -38,9 +38,11 @@ class ReservationService
                 $basePrice = $tour->price;
                 $discount = 0;
                 
-                // Reglas de negocio iniciales
+                // Reglas de negocio de descuentos por categoría
                 if ($p['passenger_type'] === 'Niño') {
                     $discount = $basePrice * 0.5; // 50% descuento
+                } elseif ($p['passenger_type'] === 'Adulto Mayor') {
+                    $discount = $basePrice * 0.3; // 30% descuento
                 }
                 
                 $finalPrice = $basePrice - $discount;
@@ -55,6 +57,7 @@ class ReservationService
                     'passenger_type' => $p['passenger_type'],
                     'birthdate' => $p['birthdate'] ?? null,
                     'benefit_label' => $p['benefit_label'] ?? null,
+                    'boarding_point_id' => $p['boarding_point_id'] ?? null,
                     'base_price' => $basePrice,
                     'discount_amount' => $discount,
                     'original_discount_amount' => $discount,
