@@ -284,7 +284,6 @@
                                     @endif
                                     
                                     @php $seatNum++; @endphp
-                                @else
                                 @elseif($seatNum > $totalSeats && !($totalSeats % 2 != 0))
                                     <div></div>
                                 @endif
