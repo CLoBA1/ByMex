@@ -34,6 +34,7 @@ class StoreReservationRequest extends FormRequest
             'passengers.*.passenger_type' => 'required_with:passengers|string',
             'passengers.*.birthdate' => 'nullable|date',
             'passengers.*.benefit_label' => 'nullable|string',
+            'passengers.*.boarding_point_id' => 'nullable|exists:boarding_points,id',
         ];
     }
     

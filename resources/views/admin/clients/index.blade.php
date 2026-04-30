@@ -25,7 +25,7 @@
                             @php
                                 $totalGasto = 0;
                                 foreach($client->reservations as $res) {
-                                    if($res->status == 'paid') {
+                                    if($res->status->value == 'paid') {
                                         $totalGasto += $res->total_amount;
                                     }
                                 }

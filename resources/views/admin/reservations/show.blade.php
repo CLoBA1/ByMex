@@ -20,12 +20,33 @@
             <a href="{{ route('admin.tours.show', $reservation->tour_id) }}" class="btn-action" style="background: var(--slate-100); color: var(--navy); border: 1px solid var(--border);">
                 <i class="fa-solid fa-arrow-left"></i> Volver al Tour
             </a>
+            @php
+                $amountPaid = $reservation->payments->where('status', 'approved')->sum('amount');
+                $surplus = $amountPaid > $reservation->total_amount ? $amountPaid - $reservation->total_amount : 0;
+            @endphp
+            
             @if($reservation->status->value == 'pending')
                 <span class="badge badge-orange" style="font-size: 1rem;"><i class="fa-regular fa-clock"></i> Pendiente</span>
+            @elseif($reservation->status->value == 'partial')
+                @if($surplus > 0)
+                    <span class="badge" style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; font-size: 1rem;"><i class="fa-solid fa-hand-holding-dollar"></i> Pagada con Excedente</span>
+                @else
+                    <span class="badge" style="background: #fef08a; color: #854d0e; border: 1px solid #fde047; font-size: 1rem;"><i class="fa-solid fa-star-half-stroke"></i> Anticipo</span>
+                @endif
             @elseif($reservation->status->value == 'paid')
-                <span class="badge badge-green" style="font-size: 1rem;"><i class="fa-solid fa-check"></i> Pagada</span>
+                @if($surplus > 0)
+                    <span class="badge" style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; font-size: 1rem;"><i class="fa-solid fa-hand-holding-dollar"></i> Pagada con Excedente</span>
+                @else
+                    <span class="badge badge-green" style="font-size: 1rem;"><i class="fa-solid fa-check"></i> Pagada</span>
+                @endif
+            @elseif($reservation->status->value == 'expired')
+                <span class="badge" style="background: #e2e8f0; color: #475569; font-size: 1rem;"><i class="fa-solid fa-hourglass-end"></i> Expirada</span>
             @else
-                <span class="badge" style="background: var(--slate-100); color: var(--text-muted); font-size: 1rem;"><i class="fa-solid fa-xmark"></i> Cancelada</span>
+                @if($surplus > 0)
+                    <span class="badge" style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; font-size: 1rem;"><i class="fa-solid fa-hand-holding-dollar"></i> Saldo a Favor</span>
+                @else
+                    <span class="badge" style="background: var(--slate-100); color: var(--text-muted); font-size: 1rem;"><i class="fa-solid fa-xmark"></i> Cancelada</span>
+                @endif
             @endif
         </div>
     </div>
@@ -48,12 +69,14 @@
                                 <th>Categoría</th>
                                 <th>Abordaje</th>
                                 <th>Estatus Validación</th>
+                                <th>Estado Operativo</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($reservation->passengers as $passenger)
-                                <tr>
-                                    <td style="font-weight: 700; color: var(--navy);">{{ $passenger->seat_number }}</td>
+                                <tr style="{{ $passenger->status->value == 'cancelled' ? 'opacity: 0.6; background-color: #f8fafc;' : '' }}">
+                                    <td style="font-weight: 700; color: var(--navy); {{ $passenger->status->value == 'cancelled' ? 'text-decoration: line-through;' : '' }}">{{ $passenger->seat_number }}</td>
                                     <td>{{ $passenger->name }}</td>
                                     <td>
                                         <div>{{ ucfirst($passenger->passenger_type) }}</div>
@@ -93,6 +116,67 @@
                                             <div style="font-size: 0.75rem; color: var(--slate-500); margin-top: 0.35rem; font-style: italic;">
                                                 <i class="fa-regular fa-comment"></i> {{ $passenger->validation_notes }}
                                             </div>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($passenger->status->value == 'active')
+                                            <span class="badge badge-green">Activo</span>
+                                        @elseif($passenger->status->value == 'cancelled')
+                                            <span class="badge" style="background: var(--slate-100); color: var(--text-muted);">Cancelado</span>
+                                        @elseif($passenger->status->value == 'no_show')
+                                            <span class="badge" style="background: #fef08a; color: #854d0e;">No Show</span>
+                                        @elseif($passenger->status->value == 'boarded')
+                                            <span class="badge" style="background: #e0e7ff; color: #3730a3;">Abordó</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($passenger->status->value != 'cancelled')
+                                            <div style="display: flex; gap: 0.25rem; flex-wrap: wrap;">
+                                                <form action="{{ route('admin.passengers.status', $passenger->id) }}" method="POST" style="display: inline;">
+                                                    @csrf
+                                                    <input type="hidden" name="status" value="boarded">
+                                                    <button type="submit" class="btn-action" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: #e0e7ff; color: #3730a3;" title="Marcar como Abordó">
+                                                        <i class="fa-solid fa-person-walking-luggage"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('admin.passengers.status', $passenger->id) }}" method="POST" style="display: inline;">
+                                                    @csrf
+                                                    <input type="hidden" name="status" value="no_show">
+                                                    <button type="submit" class="btn-action" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: #fef08a; color: #854d0e;" title="Marcar No Show">
+                                                        <i class="fa-solid fa-user-slash"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('admin.passengers.status', $passenger->id) }}" method="POST" style="display: inline;" onsubmit="
+                                                    let reason = prompt('Motivo de cancelación para {{ $passenger->name }}:');
+                                                    if(reason === null) return false;
+                                                    this.action_notes.value = reason;
+                                                    return true;
+                                                ">
+                                                    @csrf
+                                                    <input type="hidden" name="status" value="cancelled">
+                                                    <input type="hidden" name="action_notes" value="">
+                                                    <button type="submit" class="btn-action" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: var(--primary);" title="Cancelar Pasajero">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('admin.passengers.type', $passenger->id) }}" method="POST" style="display: flex; gap: 0.25rem;" onsubmit="return confirm('¿Cambiar tipo de pasajero? Esto recalculará la reserva.');">
+                                                    @csrf
+                                                    <select name="passenger_type" style="padding: 0.25rem; font-size: 0.75rem; border: 1px solid var(--border); border-radius: 4px;" required>
+                                                        <option value="Adulto" {{ $passenger->passenger_type == 'Adulto' ? 'selected' : '' }}>Adulto</option>
+                                                        <option value="Niño" {{ $passenger->passenger_type == 'Niño' ? 'selected' : '' }}>Niño</option>
+                                                        <option value="Adulto Mayor" {{ $passenger->passenger_type == 'Adulto Mayor' ? 'selected' : '' }}>Adulto Mayor</option>
+                                                    </select>
+                                                    <button type="submit" class="btn-action" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: var(--slate-600);">
+                                                        <i class="fa-solid fa-save"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        @else
+                                            @if($passenger->action_notes)
+                                                <div style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">
+                                                    Motivo: {{ $passenger->action_notes }}
+                                                </div>
+                                            @endif
                                         @endif
                                     </td>
                                 </tr>
@@ -168,11 +252,122 @@
                     </div>
                     
                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: var(--slate-600);">Pagado Acumulado:</span>
+                        <span style="font-weight: 600;">${{ number_format($amountPaid, 2) }}</span>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                         <span style="color: var(--slate-600);">Balance Pendiente:</span>
                         <span style="font-weight: 600; color: {{ $reservation->balance_due > 0 ? 'var(--primary)' : 'var(--text-muted)' }};">
                             ${{ number_format($reservation->balance_due, 2) }}
                         </span>
                     </div>
+
+                    @if($surplus > 0)
+                    @php
+                        $adjustmentsTotal = $reservation->adjustments->sum('amount');
+                        $availableSurplus = max(0, $surplus - $adjustmentsTotal);
+                    @endphp
+                    <div style="padding-top: 0.5rem; margin-top: 0.5rem; border-top: 1px dashed var(--border);">
+                        <div style="display: flex; justify-content: space-between; color: #059669; margin-bottom: 0.25rem;">
+                            <span style="font-weight: 600;">Excedente Bruto:</span>
+                            <span style="font-weight: 700;">${{ number_format($surplus, 2) }}</span>
+                        </div>
+                        @if($adjustmentsTotal > 0)
+                        <div style="display: flex; justify-content: space-between; color: var(--slate-500); margin-bottom: 0.25rem; font-size: 0.85rem;">
+                            <span>Ajustes Registrados:</span>
+                            <span>-${{ number_format($adjustmentsTotal, 2) }}</span>
+                        </div>
+                        @endif
+                        <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.05rem; color: {{ $availableSurplus > 0 ? '#059669' : 'var(--text-muted)' }};">
+                            <span>Saldo a Favor Disponible:</span>
+                            <span>${{ number_format($availableSurplus, 2) }}</span>
+                        </div>
+                    </div>
+
+                    {{-- Formulario de Resolución --}}
+                    @if($availableSurplus > 0)
+                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px dashed var(--border);">
+                        <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem;">Resolución de Saldo a Favor</h4>
+                        <form action="{{ route('admin.reservations.adjustment', $reservation->id) }}" method="POST" onsubmit="return confirm('¿Registrar este movimiento?');">
+                            @csrf
+                            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <select name="type" id="adj_type" required style="padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem;" onchange="document.getElementById('adj_amount_wrap').style.display = this.value === 'note' ? 'none' : 'block';">
+                                    <option value="refund">Devolución Manual</option>
+                                    <option value="penalty">Penalización</option>
+                                    <option value="note">Solo Nota / Observación</option>
+                                </select>
+                                <div id="adj_amount_wrap" style="position: relative; flex: 1;">
+                                    <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted);">$</span>
+                                    <input type="number" name="amount" step="0.01" min="0.01" max="{{ $availableSurplus }}" placeholder="Monto" style="width: 100%; padding: 0.5rem 0.5rem 0.5rem 1.5rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem;">
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 0.75rem;">
+                                <input type="text" name="notes" placeholder="Motivo o nota (ej. Devuelto en efectivo, Penalización por no show...)" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem;">
+                            </div>
+                            <button type="submit" class="btn-action" style="background: var(--navy); border: none; width: 100%; justify-content: center;">
+                                <i class="fa-solid fa-receipt"></i> Registrar Movimiento
+                            </button>
+                        </form>
+                    </div>
+                    @endif
+
+                    {{-- Historial de Ajustes --}}
+                    @if($reservation->adjustments->count() > 0)
+                    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                        <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--slate-500); margin-bottom: 0.75rem;">Historial de Ajustes</h4>
+                        @foreach($reservation->adjustments->sortByDesc('created_at') as $adj)
+                        <div style="padding: 0.5rem 0.75rem; margin-bottom: 0.5rem; border-radius: 4px; font-size: 0.8rem; background: {{ $adj->type === 'refund' ? '#f0fdf4' : ($adj->type === 'penalty' ? '#fff7ed' : '#f8fafc') }}; border-left: 3px solid {{ $adj->type === 'refund' ? '#059669' : ($adj->type === 'penalty' ? '#ea580c' : '#94a3b8') }};">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-weight: 600; color: {{ $adj->type === 'refund' ? '#059669' : ($adj->type === 'penalty' ? '#ea580c' : '#475569') }};">
+                                    @if($adj->type === 'refund') <i class="fa-solid fa-arrow-rotate-left"></i> Devolución
+                                    @elseif($adj->type === 'penalty') <i class="fa-solid fa-gavel"></i> Penalización
+                                    @else <i class="fa-regular fa-note-sticky"></i> Nota
+                                    @endif
+                                </span>
+                                @if($adj->amount > 0)
+                                <span style="font-weight: 700;">${{ number_format($adj->amount, 2) }}</span>
+                                @endif
+                            </div>
+                            @if($adj->notes)
+                            <div style="color: var(--slate-500); margin-top: 0.2rem;">{{ $adj->notes }}</div>
+                            @endif
+                            <div style="color: var(--slate-400); margin-top: 0.2rem; font-size: 0.75rem;">
+                                {{ $adj->created_at->format('d/m/Y H:i') }} — {{ $adj->user ? $adj->user->name : 'Sistema' }}
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    @endif
+
+                    @endif
+
+                    @if(in_array($reservation->status->value, ['pending', 'partial']) && $reservation->balance_due > 0)
+                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px dashed var(--border);">
+                            <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem;">Registrar Abono Manual</h4>
+                            
+                            <!-- Formulario de Abono Parcial/Total -->
+                            <form action="{{ route('admin.reservations.payment', $reservation->id) }}" method="POST" style="display: flex; gap: 0.5rem; align-items: stretch; margin-bottom: 1rem;">
+                                @csrf
+                                <div style="position: relative; flex: 1;">
+                                    <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted);">$</span>
+                                    <input type="number" name="amount" step="0.01" min="1" max="{{ $reservation->balance_due }}" required placeholder="Monto a abonar" style="width: 100%; padding: 0.5rem 0.5rem 0.5rem 1.5rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem;">
+                                </div>
+                                <button type="submit" class="btn-action" style="background: var(--navy); border: none;" onclick="return confirm('¿Registrar este abono manual?')">
+                                    <i class="fa-solid fa-plus"></i> Abonar
+                                </button>
+                            </form>
+
+                            <!-- Botón Liquidar Rápido -->
+                            <form action="{{ route('admin.reservations.payment', $reservation->id) }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="amount" value="{{ $reservation->balance_due }}">
+                                <button type="submit" class="btn-action" style="background: #166534; width: 100%; justify-content: center; border: none;" onclick="return confirm('¿Confirmar liquidación completa del saldo por ${{ number_format($reservation->balance_due, 2) }}?')">
+                                    <i class="fa-solid fa-money-bill-wave"></i> Liquidar Saldo Completo
+                                </button>
+                            </form>
+                        </div>
+                    @endif
                 </div>
             </div>
 

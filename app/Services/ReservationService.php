@@ -36,16 +36,9 @@ class ReservationService
             // MODO NUEVO: Se recibieron pasajeros detallados
             foreach ($dto->passengers as $p) {
                 $basePrice = $tour->price;
-                $discount = 0;
-                
-                // Reglas de negocio de descuentos por categoría
-                if ($p['passenger_type'] === 'Niño') {
-                    $discount = $basePrice * 0.5; // 50% descuento
-                } elseif ($p['passenger_type'] === 'Adulto Mayor') {
-                    $discount = $basePrice * 0.3; // 30% descuento
-                }
-                
-                $finalPrice = $basePrice - $discount;
+                $pricing = $this->calculatePassengerPricing($basePrice, $p['passenger_type']);
+                $discount = $pricing['discount_amount'];
+                $finalPrice = $pricing['final_price'];
 
                 $subtotal += $basePrice;
                 $discountTotal += $discount;
@@ -157,7 +150,7 @@ class ReservationService
         $count = 0;
 
         foreach ($expiredReservations as $res) {
-            $res->update(['status' => \App\Enums\ReservationStatus::CANCELLED]);
+            $res->update(['status' => \App\Enums\ReservationStatus::EXPIRED]);
             ReservationSeat::where('reservation_id', $res->id)->delete();
             $count++;
         }
@@ -179,5 +172,25 @@ class ReservationService
         }
         
         return $response;
+    }
+
+    /**
+     * Calcula los precios y descuentos base para un tipo de pasajero
+     */
+    public function calculatePassengerPricing(float $basePrice, string $passengerType): array
+    {
+        $discount = 0;
+        
+        if ($passengerType === 'Niño') {
+            $discount = $basePrice * 0.5; // 50% descuento
+        } elseif ($passengerType === 'Adulto Mayor') {
+            $discount = $basePrice * 0.3; // 30% descuento
+        }
+        
+        return [
+            'base_price' => $basePrice,
+            'discount_amount' => $discount,
+            'final_price' => $basePrice - $discount
+        ];
     }
 }

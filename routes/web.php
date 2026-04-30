@@ -46,8 +46,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/admin/tours/{id}', [AdminTourController::class, 'destroy'])->name('admin.tours.destroy');
     
     Route::post('/admin/reservations/{id}/status', [AdminReservationController::class, 'updateStatus'])->name('admin.reservations.status');
+    Route::post('/admin/reservations/{id}/payment', [AdminReservationController::class, 'storePayment'])->name('admin.reservations.payment');
     Route::get('/admin/reservations/{id}', [AdminReservationController::class, 'show'])->name('admin.reservations.show');
     Route::post('/admin/passengers/{id}/validate', [AdminReservationController::class, 'validatePassenger'])->name('admin.passengers.validate');
+    Route::post('/admin/passengers/{id}/status', [AdminReservationController::class, 'updatePassengerStatus'])->name('admin.passengers.status');
+    Route::post('/admin/passengers/{id}/type', [AdminReservationController::class, 'updatePassengerType'])->name('admin.passengers.type');
+    Route::post('/admin/reservations/{id}/adjustment', [AdminReservationController::class, 'storeAdjustment'])->name('admin.reservations.adjustment');
 
     // Clientes
     Route::get('/admin/clients', [AdminClientController::class, 'index'])->name('admin.clients.index');

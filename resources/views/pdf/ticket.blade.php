@@ -160,15 +160,19 @@
             <div class="col-right">
                 <div class="section-title">Estado de la Reserva</div>
                 <div class="info-block">
-                    <span class="badge">
-                        @if($reservation->status == 'pending')
-                            PENDIENTE DE PAGO
-                        @elseif($reservation->status == 'paid')
-                            PAGADO
+                    <div class="financial-status">
+                        @if($reservation->status->value == 'pending')
+                            <span class="status-badge status-pending">PENDIENTE DE PAGO</span>
+                        @elseif($reservation->status->value == 'partial')
+                            <span class="badge" style="background: #fef08a; color: #854d0e; border: 1px solid #fde047;">ANTICIPO PAGADO</span>
+                        @elseif($reservation->status->value == 'paid')
+                            <span class="status-badge status-paid">PAGADO</span>
+                        @elseif($reservation->status->value == 'expired')
+                            <span class="badge" style="background: #e2e8f0; color: #475569;">EXPIRADO</span>
                         @else
-                            CANCELADO
+                            <span class="badge" style="background: #f1f5f9; color: #64748b;">CANCELADO</span>
                         @endif
-                    </span>
+                    </div>
                     <br><br>
                     <small style="color:#666;">
                         <strong>Fecha de solicitud:</strong><br>

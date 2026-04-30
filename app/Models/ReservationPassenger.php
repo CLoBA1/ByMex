@@ -20,6 +20,8 @@ class ReservationPassenger extends Model
         'final_price',
         'validation_status',
         'validation_notes',
+        'status',
+        'action_notes',
     ];
 
     protected function casts(): array
@@ -30,6 +32,7 @@ class ReservationPassenger extends Model
             'discount_amount' => 'decimal:2',
             'original_discount_amount' => 'decimal:2',
             'final_price' => 'decimal:2',
+            'status' => \App\Enums\PassengerStatus::class,
         ];
     }
 
