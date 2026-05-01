@@ -10,7 +10,7 @@
     {{-- ============================================================
          HERO BANNER (Full-width image)
          ============================================================ --}}
-    <header class="tour-hero" style="background-image: url('{{ $tour->image ? asset($tour->image) : 'https://images.unsplash.com/photo-1582650517303-b42616d56fba?auto=format&fit=crop&q=80&w=1920' }}');">
+    <header class="tour-hero" style="background-image: url('{{ $tour->image ? Storage::url($tour->image) : 'https://images.unsplash.com/photo-1582650517303-b42616d56fba?auto=format&fit=crop&q=80&w=1920' }}');">
         <div class="tour-hero-content">
             <h1>{{ $tour->title }}</h1>
         </div>

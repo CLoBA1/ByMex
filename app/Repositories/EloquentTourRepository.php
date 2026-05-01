@@ -30,8 +30,8 @@ class EloquentTourRepository implements TourRepositoryInterface
     public function createTour(array $data)
     {
         if (isset($data['image']) && $data['image'] instanceof \Illuminate\Http\UploadedFile) {
-            $path = tap($data['image'])->store('tours', 'public');
-            $data['image'] = 'storage/' . $path->hashName();
+            $path = $data['image']->store('tours', 'public');
+            $data['image'] = $path;
         }
 
         return Tour::create($data);
@@ -43,10 +43,10 @@ class EloquentTourRepository implements TourRepositoryInterface
 
         if (isset($data['image']) && $data['image'] instanceof \Illuminate\Http\UploadedFile) {
             if ($tour->image) {
-                Storage::disk('public')->delete(str_replace('storage/', '', $tour->image));
+                Storage::disk('public')->delete($tour->image);
             }
-            $path = tap($data['image'])->store('tours', 'public');
-            $data['image'] = 'storage/' . $path->hashName();
+            $path = $data['image']->store('tours', 'public');
+            $data['image'] = $path;
         } else {
             unset($data['image']);
         }
@@ -59,7 +59,7 @@ class EloquentTourRepository implements TourRepositoryInterface
     {
         $tour = Tour::findOrFail($id);
         if ($tour->image) {
-            Storage::disk('public')->delete(str_replace('storage/', '', $tour->image));
+            Storage::disk('public')->delete($tour->image);
         }
         return $tour->delete();
     }

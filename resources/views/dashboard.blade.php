@@ -49,7 +49,7 @@
                 'lng' => $lng,
                 'price' => $tour->price,
                 'date' => \Carbon\Carbon::parse($tour->departure_date)->translatedFormat('d M Y'),
-                'image' => $tour->image ? asset($tour->image) : null,
+                'image' => $tour->image ? Storage::url($tour->image) : null,
                 'occupied' => $tour->seats_count,
                 'total' => $tour->total_seats,
                 'url' => route('admin.tours.show', $tour->id),
@@ -175,7 +175,7 @@
                             <td>
                                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                                     @if($tour->image)
-                                        <img src="{{ asset($tour->image) }}" alt="{{ $tour->title }}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); flex-shrink: 0;">
+                                        <img src="{{ Storage::url($tour->image) }}" alt="{{ $tour->title }}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); flex-shrink: 0;">
                                     @else
                                         <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--bg-body); display: flex; align-items: center; justify-content: center; color: var(--text-muted); border: 2px solid var(--border); flex-shrink: 0;"><i class="fa-solid fa-bus"></i></div>
                                     @endif

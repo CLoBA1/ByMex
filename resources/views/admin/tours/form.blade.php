@@ -66,7 +66,7 @@
                     <label style="display: block; margin-bottom: .5rem; font-weight: 600; font-size: .85rem;">Imagen del Tour</label>
                     @if(isset($tour) && $tour->image)
                         <div style="margin-bottom: 1rem;">
-                            <img src="{{ asset($tour->image) }}" alt="Preview" style="max-height: 150px; border-radius: 6px; border: 1px solid var(--border);">
+                            <img src="{{ Storage::url($tour->image) }}" alt="Preview" style="max-height: 150px; border-radius: 6px; border: 1px solid var(--border);">
                         </div>
                     @endif
                     <input type="file" name="image" accept="image/*" style="width: 100%; padding: .75rem; border: 1px solid var(--border); border-radius: 6px; background: white;">

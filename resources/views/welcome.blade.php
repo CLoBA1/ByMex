@@ -111,7 +111,7 @@
                         @endphp
                         <div class="horizontal-scroll-item">
                             <a href="{{ route('tours.show', $tour->id) }}" class="tour-card-immersive">
-                                <img src="{{ $tour->image ? asset($tour->image) : $imgs[$i % 3] }}" alt="{{ $tour->destination }}" class="card-bg">
+                                <img src="{{ $tour->image ? Storage::url($tour->image) : $imgs[$i % 3] }}" alt="{{ $tour->destination }}" class="card-bg">
                                 <div class="card-gradient"></div>
                                 <div class="card-content">
                                     <div class="card-tags">

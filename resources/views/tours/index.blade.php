@@ -59,7 +59,7 @@
                             $avail = $tour->total_seats - $taken;
                         @endphp
                         <a href="{{ route('tours.show', $tour->id) }}" class="tour-card-immersive" data-aos="fade-up" data-aos-delay="{{ ($i % 3) * 100 }}">
-                            <img src="{{ $tour->image ? asset($tour->image) : $imgs[$i % 3] }}" alt="{{ $tour->destination }}" class="card-bg">
+                            <img src="{{ $tour->image ? Storage::url($tour->image) : $imgs[$i % 3] }}" alt="{{ $tour->destination }}" class="card-bg">
                             <div class="card-gradient"></div>
                             <div class="card-content">
                                 <div class="card-tags">
