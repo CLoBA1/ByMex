@@ -23,6 +23,7 @@ $busMap = [
 $isAdmin = ($mode ?? 'public') === 'admin';
 @endphp
 
+<div class="rbus-container">
 <div class="rbus-grid">
 @foreach($busMap as $row)
     @foreach($row as $cell)
@@ -70,4 +71,5 @@ $isAdmin = ($mode ?? 'public') === 'admin';
         @endif
     @endforeach
 @endforeach
+</div>
 </div>

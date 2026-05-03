@@ -703,11 +703,28 @@
 /* ==========================================================================
    Real Bus Layout (rbus-) — Croquis fiel al autobús real
    ========================================================================== */
+.rbus-container {
+    width: fit-content;
+    margin: 0 auto;
+    padding: 30px 20px;
+    border-radius: 40px 40px 10px 10px;
+    border: 3px solid rgba(148,163,184,0.3);
+    background: rgba(255,255,255,0.02);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.1), 0 10px 30px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+.admin-bus-map .rbus-container {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
+}
+
 .rbus-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 18px 1fr 1fr;
-    gap: 8px;
-    padding: 0 .5rem;
+    grid-template-columns: repeat(5, 42px);
+    gap: 12px 10px;
+    justify-content: center;
 }
 .rbus-aisle { min-height: 1px; }
 .rbus-empty { min-height: 0; }
@@ -718,14 +735,15 @@
     align-items: center;
     justify-content: center;
     grid-column: span 2;
-    padding: 0.35rem 0.2rem;
+    padding: 0;
     border-radius: 8px;
     font-size: 0.55rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     gap: 2px;
-    min-height: 36px;
+    height: 100%;
+    min-height: 42px;
 }
 .rbus-special i { font-size: 0.8rem; }
 
@@ -759,19 +777,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.5rem;
+    font-size: 0.55rem;
     font-weight: 800;
     color: var(--primary, #d62828);
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
-/* Admin overrides for light background */
-.admin-bus-map .rbus-grid {
-    grid-template-columns: 40px 40px 18px 40px 40px;
-    gap: 10px;
-    justify-content: center;
-}
+/* Admin overrides */
 .admin-bus-map .rbus-operator {
     background: #fef3c7; border-color: #f59e0b; color: #92400e;
 }
