@@ -85,45 +85,7 @@
                                 <i class="fa-solid fa-tv"></i> Frente del Autobús — Elige tus asientos
                             </div>
 
-                            <div class="bus-seat-grid">
-                                @php
-                                    $totalSeats = $tour->total_seats ?? 36;
-                                    $rows = ceil($totalSeats / 4);
-                                    $seatNum = 1;
-                                @endphp
-
-                                @for ($r = 0; $r < $rows; $r++)
-                                    {{-- Left pair (seats in columns 1-2) --}}
-                                    @for ($c = 0; $c < 2; $c++)
-                                        @if ($seatNum <= $totalSeats)
-                                            @php 
-                                                $sn = str_pad($seatNum, 2, "0", STR_PAD_LEFT); 
-                                                $isLastOdd = ($seatNum == $totalSeats && $totalSeats % 2 != 0 && $c == 0);
-                                            @endphp
-                                            <div class="seat" data-seat="{{ $seatNum }}" {!! $isLastOdd ? 'style="grid-column: 1 / -1;"' : '' !!}>{{ $sn }}</div>
-                                            @php $seatNum++; @endphp
-                                        @elseif($seatNum > $totalSeats && !($totalSeats % 2 != 0))
-                                            <div></div>
-                                        @endif
-                                    @endfor
-
-                                    {{-- Right pair (seats in columns 3-4) --}}
-                                    @for ($c = 0; $c < 2; $c++)
-                                        @if ($seatNum <= $totalSeats)
-                                            @php $sn = str_pad($seatNum, 2, "0", STR_PAD_LEFT); @endphp
-                                            <div class="seat" data-seat="{{ $seatNum }}">{{ $sn }}</div>
-                                            @php $seatNum++; @endphp
-                                        @elseif($seatNum > $totalSeats && !($totalSeats % 2 != 0))
-                                            <div></div>
-                                        @endif
-                                    @endfor
-
-                                    {{-- Aisle spacer after every 2 rows --}}
-                                    @if ($r == floor($rows / 3) - 1 || $r == floor(2 * $rows / 3) - 1)
-                                        <div class="seat-row-spacer"></div>
-                                    @endif
-                                @endfor
-                            </div>
+                            @include('partials._bus_map', ['mode' => 'public', 'tour' => $tour])
 
                             <div class="bus-legend">
                                 <div class="legend-item"><div class="legend-box available"></div> Libre</div>

@@ -252,48 +252,7 @@
                         <i class="fa-solid fa-steering-wheel"></i> Frente
                     </div>
                     
-                    <div class="admin-seat-grid">
-                        @for ($r = 0; $r < $rows; $r++)
-                            @for ($c = 0; $c < 4; $c++)
-                                @if ($seatNum <= $totalSeats)
-                                    @php 
-                                        $sn = str_pad($seatNum, 2, "0", STR_PAD_LEFT); 
-                                        $data = $seatData[$seatNum] ?? null;
-                                        $isLastOdd = ($seatNum == $totalSeats && $totalSeats % 2 != 0 && $c == 0);
-                                    @endphp
-                                    
-                                    @if($data)
-                                        <div class="admin-seat admin-seat-occupied" {!! $isLastOdd ? 'style="grid-column: 1 / -1; background: '.$data['bg'].'; border: '.$data['borderWidth'].' solid '.$data['border'].';"' : 'style="background: '.$data['bg'].'; border: '.$data['borderWidth'].' solid '.$data['border'].';"' !!}>
-                                            {{ $sn }}
-                                            <div class="tooltip-content">
-                                                <div class="tooltip-row"><strong>Asiento:</strong> {{ $sn }}</div>
-                                                <div class="tooltip-row"><strong>Pasajero:</strong> {{ $data['name'] }}</div>
-                                                @if($data['type'])
-                                                    <div class="tooltip-row"><strong>Categoría:</strong> {{ $data['type'] }}</div>
-                                                @endif
-                                                <div class="tooltip-row"><strong>Abordaje:</strong> {{ $data['bp'] }}</div>
-                                                <div class="tooltip-row"><strong>Estado:</strong> 
-                                                    <span style="color: {{ $data['status'] == 'Pagada' ? '#4ade80' : '#fbbf24' }};">{{ mb_strtoupper($data['status']) }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @else
-                                        <div class="admin-seat admin-seat-free" {!! $isLastOdd ? 'style="grid-column: 1 / -1;"' : '' !!}>
-                                            {{ $sn }}
-                                        </div>
-                                    @endif
-                                    
-                                    @php $seatNum++; @endphp
-                                @elseif($seatNum > $totalSeats && !($totalSeats % 2 != 0))
-                                    <div></div>
-                                @endif
-                            @endfor
-                            
-                            @if ($r == floor($rows / 3) - 1 || $r == floor(2 * $rows / 3) - 1)
-                                <div style="grid-column: span 4; height: 1rem;"></div>
-                            @endif
-                        @endfor
-                    </div>
+                    @include('partials._bus_map', ['mode' => 'admin', 'seatData' => $seatData, 'tour' => $tour])
                 </div>
 
                 <!-- COLUMNA DERECHA: LEYENDAS Y RESUMEN -->
