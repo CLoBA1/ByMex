@@ -21,6 +21,17 @@ class ReservationController extends Controller
     {
         try {
             $reservation = $this->reservationService->processNewReservation($request->toDTO());
+            
+            $admin = \App\Models\AdminOwner::first();
+            if ($admin) {
+                $admin->notify(new \App\Notifications\SystemAlert(
+                    'Nueva Reservación',
+                    "El cliente {$reservation->client->name} ha creado la reserva #{$reservation->id} para el tour {$reservation->tour->title}.",
+                    route('admin.reservations.show', $reservation->id),
+                    'fa-solid fa-ticket'
+                ));
+            }
+
             return redirect()->route('reservations.success', $reservation->public_token);
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());

@@ -153,6 +153,16 @@ class ReservationService
             $res->update(['status' => \App\Enums\ReservationStatus::EXPIRED]);
             ReservationSeat::where('reservation_id', $res->id)->delete();
             $count++;
+
+            $admin = \App\Models\AdminOwner::first();
+            if ($admin) {
+                $admin->notify(new \App\Notifications\SystemAlert(
+                    'Reservación Expirada',
+                    "La reserva #{$res->id} expiró automáticamente por falta de pago.",
+                    route('admin.reservations.show', $res->id),
+                    'fa-solid fa-clock'
+                ));
+            }
         }
 
         return $count;

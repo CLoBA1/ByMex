@@ -220,7 +220,20 @@
             </div>
             <div class="topbar-actions">
                 <!-- Real Notifications from DB -->
-                @php $notifs = $notifications ?? []; @endphp
+                @php 
+                    $adminOwner = \App\Models\AdminOwner::first();
+                    $notifs = $adminOwner ? $adminOwner->unreadNotifications->take(10)->map(function($n) {
+                        return [
+                            'id' => $n->id,
+                            'title' => $n->data['title'] ?? 'Alerta',
+                            'desc' => $n->data['message'] ?? '',
+                            'link' => $n->data['url'] ?? '#',
+                            'icon' => $n->data['icon'] ?? 'fa-bell',
+                            'color' => '#1e40af',
+                            'time' => $n->created_at->diffForHumans()
+                        ];
+                    }) : [];
+                @endphp
                 <div class="dropdown" id="notifDropdown">
                     <div class="notification-bell" onclick="toggleDropdown('notifDropdown')">
                         <i class="fa-regular fa-bell"></i>
@@ -231,22 +244,24 @@
                     <div class="dropdown-content">
                         <div class="dropdown-header"><i class="fa-regular fa-bell"></i> Notificaciones ({{ count($notifs) }})</div>
                         @forelse($notifs as $notif)
-                            <a href="{{ $notif['link'] }}" class="notification-item">
+                            <a href="{{ $notif['link'] }}" class="notification-item" onclick="markOneRead('{{ $notif['id'] }}')">
                                 <div class="notif-icon" style="background: {{ $notif['color'] }}20; color: {{ $notif['color'] }};"><i class="{{ $notif['icon'] }}"></i></div>
                                 <div>
                                     <div style="font-weight: 600; font-size: 0.85rem;">{{ $notif['title'] }}</div>
                                     <div style="font-size: 0.78rem; color: var(--text-muted);">{{ $notif['desc'] }}</div>
                                     <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 2px;">{{ $notif['time'] }}</div>
                                 </div>
-                                @if(isset($notif['whatsapp_link']) && $notif['whatsapp_link'])
-                                <object><a href="{{ $notif['whatsapp_link'] }}" target="_blank" style="color: #25D366; font-size: 1.2rem; align-self: center; margin-left: 0.5rem;" title="Notificar por WhatsApp">
-                                    <i class="fa-brands fa-whatsapp"></i>
-                                </a></object>
-                                @endif
                             </a>
                         @empty
                             <div class="notif-empty"><i class="fa-regular fa-circle-check" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block; color: #166534;"></i>Todo en orden, sin alertas pendientes.</div>
                         @endforelse
+                        @if(count($notifs) > 0)
+                            <div style="text-align: center; padding: 0.5rem; border-top: 1px solid var(--border);">
+                                <button onclick="markAllRead()" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 0.8rem; font-weight: 600;">
+                                    <i class="fa-solid fa-check-double"></i> Marcar todas como leídas
+                                </button>
+                            </div>
+                        @endif
                     </div>
                 </div>
                 <a href="{{ url('/') }}" class="btn-site" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Sitio Web</a>
@@ -341,12 +356,16 @@
             
             // Update or create badge
             let badge = document.querySelector('.notification-badge-count');
-            if (!badge) {
-                badge = document.createElement('span');
-                badge.className = 'notification-badge-count';
-                bellContainer.appendChild(badge);
+            if (data.count > 0) {
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = 'notification-badge-count';
+                    bellContainer.appendChild(badge);
+                }
+                badge.innerText = data.count;
+            } else if (badge) {
+                badge.remove();
             }
-            badge.innerText = data.count;
 
             // Update dropdown header
             const header = document.querySelector('.dropdown-header');
@@ -356,45 +375,54 @@
 
             // Rebuild list
             const dropdownContent = document.querySelector('.dropdown-content');
-            // Keep header, remove the rest
             Array.from(dropdownContent.children).forEach(child => {
                 if (!child.classList.contains('dropdown-header')) {
                     child.remove();
                 }
             });
 
-            if (data.items.length === 0) {
+            if (data.notifications.length === 0) {
                 dropdownContent.innerHTML += `<div class="notif-empty"><i class="fa-regular fa-circle-check" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block; color: #166534;"></i>Todo en orden, sin alertas pendientes.</div>`;
             } else {
-                data.items.forEach(item => {
-                    let color = item.type === 'reservation_new' ? '#1e40af' : '#64748b';
-                    let icon = item.type === 'reservation_new' ? 'fa-solid fa-ticket' : 'fa-solid fa-bell';
+                data.notifications.forEach(item => {
+                    let color = '#1e40af';
+                    let icon = item.icon || 'fa-solid fa-bell';
                     
                     let html = `
-                        <a href="${item.link}" class="notification-item" style="background: #f0f9ff;">
+                        <a href="${item.link}" class="notification-item" style="background: #f0f9ff;" onclick="markOneRead('${item.id}')">
                             <div class="notif-icon" style="background: ${color}20; color: ${color};"><i class="${icon}"></i></div>
                             <div style="flex: 1;">
                                 <div style="font-weight: 600; font-size: 0.85rem;">${item.title}</div>
                                 <div style="font-size: 0.78rem; color: var(--text-muted);">${item.message}</div>
                                 <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 2px;">${item.time}</div>
                             </div>
+                        </a>
                     `;
-                    
-                    if (item.whatsapp_link) {
-                        html += `
-                            <object><a href="${item.whatsapp_link}" target="_blank" style="color: #25D366; font-size: 1.2rem; align-self: center; margin-left: 0.5rem;" title="Notificar por WhatsApp">
-                                <i class="fa-brands fa-whatsapp"></i>
-                            </a></object>
-                        `;
-                    }
-                    
-                    html += `</a>`;
                     dropdownContent.innerHTML += html;
                 });
+
+                dropdownContent.innerHTML += `
+                    <div style="text-align: center; padding: 0.5rem; border-top: 1px solid var(--border);">
+                        <button onclick="markAllRead()" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 0.8rem; font-weight: 600;">
+                            <i class="fa-solid fa-check-double"></i> Marcar todas como leídas
+                        </button>
+                    </div>
+                `;
             }
         }
 
-        function markNotificationsRead() {
+        function markOneRead(id) {
+            fetch('{{ route("admin.notifications.read") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ id: id })
+            });
+        }
+
+        function markAllRead() {
             fetch('{{ route("admin.notifications.read") }}', {
                 method: 'POST',
                 headers: {
@@ -402,14 +430,13 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 }
             }).then(() => {
-                const badge = document.querySelector('.notification-badge-count');
-                if (badge) badge.remove();
                 lastNotifCount = 0;
+                updateNotificationUI({ count: 0, notifications: [] });
             });
         }
 
-        // Poll every 10 seconds
-        setInterval(fetchNotifications, 10000);
+        // Poll every 15 seconds
+        setInterval(fetchNotifications, 15000);
     </script>
     @yield('extra-js')
 </body>

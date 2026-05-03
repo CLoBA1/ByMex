@@ -82,6 +82,16 @@ class ReservationController extends Controller
                 ->delete();
 
             $this->recalculateReservation($passenger->reservation);
+
+            $admin = \App\Models\AdminOwner::first();
+            if ($admin) {
+                $admin->notify(new \App\Notifications\SystemAlert(
+                    'Pasajero Cancelado',
+                    "El pasajero {$passenger->name} fue cancelado en la reserva #{$passenger->reservation->id}.",
+                    route('admin.reservations.show', $passenger->reservation_id),
+                    'fa-solid fa-user-xmark'
+                ));
+            }
         }
 
         return back()->with('success', "Estado del pasajero actualizado a {$request->status}.");
@@ -147,6 +157,19 @@ class ReservationController extends Controller
         $amountAlreadyPaid = $reservation->total_amount - $reservation->balance_due;
         $newBalanceDue = max(0, $newTotalAmount - $amountAlreadyPaid);
 
+        if ($amountAlreadyPaid > $newTotalAmount) {
+            $admin = \App\Models\AdminOwner::first();
+            if ($admin) {
+                $surplus = number_format($amountAlreadyPaid - $newTotalAmount, 2);
+                $admin->notify(new \App\Notifications\SystemAlert(
+                    'Saldo a Favor Generado',
+                    "La reserva #{$reservation->id} ahora tiene un saldo a favor de \${$surplus} por recálculo.",
+                    route('admin.reservations.show', $reservation->id),
+                    'fa-solid fa-hand-holding-dollar'
+                ));
+            }
+        }
+
         $reservation->subtotal = $newSubtotal;
         $reservation->discount_total = $newDiscountTotal;
         $reservation->total_amount = $newTotalAmount;
@@ -177,10 +200,31 @@ class ReservationController extends Controller
                 $reservation->status = \App\Enums\ReservationStatus::PAID;
                 \App\Models\ReservationSeat::where('reservation_id', $reservation->id)
                     ->update(['status' => 'paid']);
+
+                $admin = \App\Models\AdminOwner::first();
+                if ($admin) {
+                    $admin->notify(new \App\Notifications\SystemAlert(
+                        'Reserva Liquidada',
+                        "La reserva #{$reservation->id} de {$reservation->client->name} ha sido pagada en su totalidad.",
+                        route('admin.reservations.show', $reservation->id),
+                        'fa-solid fa-check-double'
+                    ));
+                }
             } else {
                 $reservation->status = \App\Enums\ReservationStatus::PARTIAL;
-            }
+                \App\Models\ReservationSeat::where('reservation_id', $reservation->id)
+                    ->update(['status' => 'reserved']);
 
+                $admin = \App\Models\AdminOwner::first();
+                if ($admin) {
+                    $admin->notify(new \App\Notifications\SystemAlert(
+                        'Abono Registrado',
+                        "Se registró un abono de \$" . number_format($request->amount, 2) . " en la reserva #{$reservation->id}.",
+                        route('admin.reservations.show', $reservation->id),
+                        'fa-solid fa-money-bill-wave'
+                    ));
+                }
+            }
             $reservation->save();
         });
 
@@ -203,7 +247,19 @@ class ReservationController extends Controller
 
         $reservation->save();
 
-        return back()->with('success', 'Estado de la reserva actualizado.');
+        if ($request->status === 'cancelled') {
+            $admin = \App\Models\AdminOwner::first();
+            if ($admin) {
+                $admin->notify(new \App\Notifications\SystemAlert(
+                    'Reserva Cancelada',
+                    "La reserva #{$reservation->id} fue cancelada manualmente.",
+                    route('admin.reservations.show', $reservation->id),
+                    'fa-solid fa-ban'
+                ));
+            }
+        }
+
+        return back()->with('success', 'Estado de la reservación actualizado.');
     }
 
     public function storeAdjustment(Request $request, $id)
