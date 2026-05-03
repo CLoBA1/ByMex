@@ -24,7 +24,7 @@ class EloquentTourRepository implements TourRepositoryInterface
 
     public function findTourWithReservations(int $id)
     {
-        return Tour::with(['reservations.client', 'reservations.seats', 'reservations.passengers.boardingPoint'])->findOrFail($id);
+        return Tour::with(['reservations.client', 'reservations.seats', 'reservations.passengers.boardingPoint', 'reservations.payments', 'reservations.adjustments'])->findOrFail($id);
     }
 
     public function createTour(array $data)

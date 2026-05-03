@@ -283,4 +283,34 @@ class ReservationController extends Controller
         $typeLabels = ['refund' => 'Devolución', 'penalty' => 'Penalización', 'note' => 'Nota'];
         return back()->with('success', "{$typeLabels[$request->type]} registrada correctamente.");
     }
+
+    public function destroy($id)
+    {
+        $reservation = Reservation::with(['payments', 'adjustments'])->findOrFail($id);
+
+        // Safety checks: only allow deletion of cancelled/expired without financial history
+        $safeStatuses = ['cancelled', 'expired'];
+        if (!in_array($reservation->status->value, $safeStatuses)) {
+            return back()->with('error', 'Solo se pueden eliminar reservaciones canceladas o expiradas.');
+        }
+
+        if ($reservation->payments->count() > 0) {
+            return back()->with('error', 'No se puede eliminar: esta reservación tiene pagos registrados.');
+        }
+
+        if ($reservation->adjustments->count() > 0) {
+            return back()->with('error', 'No se puede eliminar: esta reservación tiene ajustes financieros registrados.');
+        }
+
+        $tourId = $reservation->tour_id;
+
+        // Delete related records safely
+        DB::transaction(function () use ($reservation) {
+            \App\Models\ReservationSeat::where('reservation_id', $reservation->id)->delete();
+            \App\Models\ReservationPassenger::where('reservation_id', $reservation->id)->delete();
+            $reservation->delete();
+        });
+
+        return redirect()->route('admin.tours.show', $tourId)->with('success', "Reservación #{$id} eliminada definitivamente.");
+    }
 }

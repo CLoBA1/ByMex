@@ -371,9 +371,15 @@
     <div class="card">
         <div class="card-header">
             <h3 class="card-title"><i class="fa-solid fa-users"></i> Lista de Pasajeros y Reservas</h3>
-            <a href="{{ route('dashboard') }}" class="btn-action" style="background: var(--slate-100); color: var(--navy); border: 1px solid var(--border);">
-                <i class="fa-solid fa-arrow-left"></i> Volver
-            </a>
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--text-muted); cursor: pointer;">
+                    <input type="checkbox" id="showArchived" onchange="toggleArchived()" style="accent-color: var(--primary);">
+                    Mostrar canceladas/expiradas
+                </label>
+                <a href="{{ route('dashboard') }}" class="btn-action" style="background: var(--slate-100); color: var(--navy); border: 1px solid var(--border);">
+                    <i class="fa-solid fa-arrow-left"></i> Volver
+                </a>
+            </div>
         </div>
         
         <div class="card-body" style="padding: 0;">
@@ -390,8 +396,17 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @php
+                            $archivedStatuses = ['cancelled', 'expired'];
+                        @endphp
                         @forelse($tour->reservations as $reservation)
-                            <tr>
+                            @php
+                                $isArchived = in_array($reservation->status->value, $archivedStatuses);
+                                $hasPayments = $reservation->payments->count() > 0;
+                                $hasAdjustments = $reservation->adjustments->count() > 0;
+                                $canDelete = $isArchived && !$hasPayments && !$hasAdjustments;
+                            @endphp
+                            <tr class="{{ $isArchived ? 'archived-row' : '' }}" style="{{ $isArchived ? 'display: none;' : '' }}">
                                 <td style="font-family: monospace; font-weight: 700; color: var(--slate-500);">
                                     RES-{{ str_pad($reservation->id, 4, '0', STR_PAD_LEFT) }}
                                 </td>
@@ -444,10 +459,22 @@
                                         </div>
                                     @else
                                         <div style="display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center;">
-                                            <span style="font-size: 0.8rem; color: var(--text-muted);"><i class="fa-solid fa-lock"></i> Sin acciones</span>
                                             <a href="{{ route('admin.reservations.show', $reservation->id) }}" class="btn-action" style="background: var(--slate-100); color: var(--navy); border: 1px solid var(--border);" title="Ver Detalle">
                                                 <i class="fa-solid fa-eye"></i>
                                             </a>
+                                            @if($canDelete)
+                                                <form action="{{ route('admin.reservations.destroy', $reservation->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn-action" style="background: #dc2626; color: white;" title="Eliminar definitivamente" onclick="return confirm('¿Eliminar esta reservación DEFINITIVAMENTE? Esta acción no se puede deshacer.')">
+                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <span style="font-size: 0.75rem; color: var(--text-muted);" title="No se puede eliminar: tiene pagos o ajustes registrados">
+                                                    <i class="fa-solid fa-lock"></i>
+                                                </span>
+                                            @endif
                                         </div>
                                     @endif
                                 </td>
@@ -465,4 +492,16 @@
             </div>
         </div>
     </div>
+
+    @section('extra-js')
+    <script>
+        function toggleArchived() {
+            const show = document.getElementById('showArchived').checked;
+            document.querySelectorAll('.archived-row').forEach(row => {
+                row.style.display = show ? '' : 'none';
+            });
+        }
+    </script>
+    @endsection
 </x-app-layout>
+
