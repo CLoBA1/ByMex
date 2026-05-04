@@ -262,6 +262,14 @@
                         </div>
                     </div>
 
+                    <div class="form-grid" style="margin-bottom: 1.5rem;">
+                        <div class="form-group">
+                            <label>Número WhatsApp / Servicio a Clientes</label>
+                            <input type="text" name="whatsapp_number" class="form-control" value="{{ old('whatsapp_number', $settings->whatsapp_number) }}" placeholder="Ej: 733 136 2024">
+                            <small style="color: var(--text-muted);">Se usará para generar el enlace automático de WhatsApp.</small>
+                        </div>
+                    </div>
+
                     <div class="form-grid full-width" style="margin-bottom: 1.5rem;">
                         <div class="form-group">
                             <label>Instrucciones Generales de Pago</label>
@@ -272,6 +280,19 @@
                             <label>Nota Final o Advertencia</label>
                             <textarea name="final_note" class="form-control" rows="2">{{ old('final_note', $settings->final_note) }}</textarea>
                             <small style="color: var(--text-muted);">Ej: "Una vez realizado el depósito, enviar comprobante por WhatsApp..."</small>
+                        </div>
+                    </div>
+
+                    <div class="form-grid full-width" style="margin-bottom: 1.5rem;">
+                        <div class="form-group">
+                            <label>Condiciones de Reservación y Pago</label>
+                            <textarea name="reservation_policies" class="form-control" rows="4">{{ old('reservation_policies', $settings->reservation_policies) }}</textarea>
+                            <small style="color: var(--text-muted);">Puedes usar saltos de línea. Este texto se mostrará tal cual al cliente.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Políticas de Cancelación</label>
+                            <textarea name="cancellation_policies" class="form-control" rows="5">{{ old('cancellation_policies', $settings->cancellation_policies) }}</textarea>
+                            <small style="color: var(--text-muted);">Puedes usar saltos de línea. Este texto se mostrará tal cual al cliente.</small>
                         </div>
                     </div>
 

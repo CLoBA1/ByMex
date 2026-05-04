@@ -44,7 +44,10 @@ class ReservationController extends Controller
             ->where('public_token', $token)
             ->firstOrFail();
             
-        return view('checkout.success', compact('reservation'));
+        $paymentSettings = \App\Models\PaymentSetting::first();
+        $activeBanks = \App\Models\BankAccount::where('is_active', true)->orderBy('sort_order')->get();
+            
+        return view('checkout.success', compact('reservation', 'paymentSettings', 'activeBanks'));
     }
 
     public function downloadTicket($token)

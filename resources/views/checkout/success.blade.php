@@ -121,23 +121,50 @@
                     </div>
                 </div>
 
-                <h3 style="margin-bottom: 1rem; color: var(--color-dark);">Datos para Depósito</h3>
-                <div style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; text-align:left; margin-bottom: 2rem;">
-                    <p><strong>Banco:</strong> BBVA Bancomer</p>
-                    <p><strong>CLABE:</strong> 012345678901234567</p>
-                    <p><strong>A nombre de:</strong> Viajes By Mex S.A. de C.V.</p>
-                </div>
+                @if($paymentSettings && $paymentSettings->general_instructions)
+                    <p style="margin-bottom: 1rem; color: var(--color-dark-muted);">{{ $paymentSettings->general_instructions }}</p>
+                @endif
+                
+                @if($activeBanks && $activeBanks->count() > 0)
+                    <h3 style="margin-bottom: 1rem; color: var(--color-dark);">Datos para Depósito</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                        @foreach($activeBanks as $bank)
+                        <div style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; text-align:left;">
+                            <h4 style="color: var(--color-primary); margin-bottom: 0.5rem; font-size: 1.1rem;"><i class="fa-solid fa-building-columns"></i> {{ $bank->bank_name }}</h4>
+                            @if($bank->label)<p style="font-size: 0.85rem; color: var(--color-dark-muted); margin-bottom: 0.5rem;">{{ $bank->label }}</p>@endif
+                            <p><strong>Titular:</strong> {{ $bank->account_holder }}</p>
+                            @if($bank->account_number)<p><strong>Cuenta:</strong> {{ $bank->account_number }}</p>@endif
+                            @if($bank->clabe)<p><strong>CLABE:</strong> {{ $bank->clabe }}</p>@endif
+                            @if($bank->card_number)<p><strong>Tarjeta:</strong> {{ $bank->card_number }}</p>@endif
+                        </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                @if($paymentSettings && $paymentSettings->final_note)
+                    <div style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 2rem; text-align: left;">
+                        <i class="fa-solid fa-circle-info" style="margin-right: 0.5rem;"></i> {{ $paymentSettings->final_note }}
+                    </div>
+                @endif
             @endif
 
             @php
                 $whatsappMsg = urlencode("Hola, mi número de reserva es RES-" . str_pad($reservation->id, 4, '0', STR_PAD_LEFT) . " para el tour {$reservation->tour->title}. Aquí envío mi comprobante de pago.");
+                
+                $cleanWhatsapp = '';
+                if ($paymentSettings && $paymentSettings->whatsapp_number) {
+                    $cleanWhatsapp = preg_replace('/[^0-9]/', '', $paymentSettings->whatsapp_number);
+                    if (strlen($cleanWhatsapp) === 10) {
+                        $cleanWhatsapp = '52' . $cleanWhatsapp;
+                    }
+                }
             @endphp
             <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
                 <a href="{{ route('reservations.ticket', $reservation->public_token) }}" class="btn btn-outline" style="border-width: 2px;">
                     <i class="fa-solid fa-file-pdf"></i> Descargar Ticket PDF
                 </a>
-                @if($reservation->status->value === 'pending')
-                    <a href="https://wa.me/527441295026?text={{ $whatsappMsg }}" target="_blank" class="btn btn-primary">
+                @if($reservation->status->value === 'pending' && !empty($cleanWhatsapp))
+                    <a href="https://wa.me/{{ $cleanWhatsapp }}?text={{ $whatsappMsg }}" target="_blank" class="btn btn-primary">
                         <i class="fa-brands fa-whatsapp"></i> Enviar Comprobante
                     </a>
                 @endif
@@ -168,6 +195,27 @@
                         <img src="https://img.icons8.com/color/36/amex.png" alt="Amex" style="height: 24px; opacity: .7;">
                         <span style="color: #475569; font-size: .7rem;">Powered by Stripe</span>
                     </div>
+                </div>
+            @endif
+            @if($paymentSettings && ($paymentSettings->reservation_policies || $paymentSettings->cancellation_policies))
+                <div style="margin-top: 3rem; text-align: left;">
+                    @if($paymentSettings->reservation_policies)
+                    <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: var(--radius-md); padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                        <h3 style="color: var(--color-dark); margin-bottom: 1rem; font-size: 1.2rem; border-bottom: 2px solid var(--color-primary); padding-bottom: 0.5rem; display: inline-block;">Condiciones de Reservación y Pago</h3>
+                        <div style="color: var(--color-dark-muted); font-size: 0.95rem; line-height: 1.6;">
+                            {!! nl2br(e($paymentSettings->reservation_policies)) !!}
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($paymentSettings->cancellation_policies)
+                    <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: var(--radius-md); padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                        <h3 style="color: var(--color-dark); margin-bottom: 1rem; font-size: 1.2rem; border-bottom: 2px solid #ef4444; padding-bottom: 0.5rem; display: inline-block;">Políticas de Cancelación</h3>
+                        <div style="color: var(--color-dark-muted); font-size: 0.95rem; line-height: 1.6;">
+                            {!! nl2br(e($paymentSettings->cancellation_policies)) !!}
+                        </div>
+                    </div>
+                    @endif
                 </div>
             @endif
         </div>

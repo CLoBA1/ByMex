@@ -14,7 +14,10 @@ class PaymentSetting extends Model
         'rfc',
         'address',
         'phones',
+        'whatsapp_number',
         'general_instructions',
         'final_note',
+        'reservation_policies',
+        'cancellation_policies',
     ];
 }

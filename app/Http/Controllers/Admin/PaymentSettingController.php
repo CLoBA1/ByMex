@@ -32,8 +32,11 @@ class PaymentSettingController extends Controller
             'rfc' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:500',
             'phones' => 'nullable|string|max:255',
+            'whatsapp_number' => 'nullable|string|max:255',
             'general_instructions' => 'nullable|string',
             'final_note' => 'nullable|string',
+            'reservation_policies' => 'nullable|string',
+            'cancellation_policies' => 'nullable|string',
         ]);
 
         $settings = PaymentSetting::firstOrCreate(['id' => 1]);
