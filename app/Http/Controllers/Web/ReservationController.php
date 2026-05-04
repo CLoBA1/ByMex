@@ -55,8 +55,11 @@ class ReservationController extends Controller
         $reservation = Reservation::with(['tour', 'client', 'seats', 'passengers'])
             ->where('public_token', $token)
             ->firstOrFail();
+            
+        $paymentSettings = \App\Models\PaymentSetting::first();
+        $activeBanks = \App\Models\BankAccount::where('is_active', true)->orderBy('sort_order')->get();
         
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.ticket', compact('reservation'));
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.ticket', compact('reservation', 'paymentSettings', 'activeBanks'));
         
         $filename = 'Ticket_ByMex_' . str_pad($reservation->id, 5, '0', STR_PAD_LEFT) . '.pdf';
         

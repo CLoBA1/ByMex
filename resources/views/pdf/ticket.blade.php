@@ -269,12 +269,74 @@
                     <td style="padding: 5px; text-align: right; font-size: 13px; font-weight: bold;">${{ number_format($reservation->balance_due, 2) }}</td>
                 </tr>
             </table>
-            <div class="clear"></div>
-        </div>
+        <div class="clear"></div>
+
+        @if(isset($paymentSettings))
+            <div style="page-break-inside: avoid; margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px;">
+                <div class="section-title">Datos para Pago / Depósito</div>
+                <div class="info-block" style="font-size: 13px;">
+                    @if($paymentSettings->general_instructions)
+                        <p style="margin-bottom: 15px; color: #555;">{{ $paymentSettings->general_instructions }}</p>
+                    @endif
+                    
+                    @if(isset($activeBanks) && $activeBanks->count() > 0)
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 13px;">
+                            @foreach($activeBanks as $bank)
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #ddd; width: 50%; vertical-align: top; background: #fafafa;">
+                                    <strong style="color:#d62828; font-size: 14px;">{{ $bank->bank_name }}</strong><br>
+                                    <strong style="width: 60px;">Titular:</strong> {{ $bank->account_holder }}<br>
+                                    @if($bank->label)<span style="color: #666; font-style: italic; font-size: 11px;">{{ $bank->label }}</span>@endif
+                                </td>
+                                <td style="padding: 10px; border: 1px solid #ddd; width: 50%; vertical-align: top;">
+                                    @if($bank->account_number)<strong style="width: 60px;">Cuenta:</strong> {{ $bank->account_number }}<br>@endif
+                                    @if($bank->clabe)<strong style="width: 60px;">CLABE:</strong> {{ $bank->clabe }}<br>@endif
+                                    @if($bank->card_number)<strong style="width: 60px;">Tarjeta:</strong> {{ $bank->card_number }}<br>@endif
+                                </td>
+                            </tr>
+                            @endforeach
+                        </table>
+                    @endif
+
+                    @if($paymentSettings->final_note)
+                        <div class="note-alert" style="margin-top: 10px; margin-bottom: 0;">
+                            {{ $paymentSettings->final_note }}
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            @if($paymentSettings->reservation_policies || $paymentSettings->cancellation_policies)
+                <div style="page-break-inside: avoid; margin-top: 20px;">
+                    <div class="section-title">Políticas y Condiciones Generales</div>
+                    <div style="font-size: 12px; color: #444; line-height: 1.5; text-align: left; background: #fafafa; padding: 15px; border: 1px solid #eee; border-radius: 5px;">
+                        @if($paymentSettings->reservation_policies)
+                            <strong style="color: #333; font-size: 13px; display: block; margin-bottom: 5px;">Condiciones de Reservación y Pago:</strong>
+                            <div style="margin-bottom: 15px;">{!! nl2br(e($paymentSettings->reservation_policies)) !!}</div>
+                        @endif
+                        @if($paymentSettings->cancellation_policies)
+                            <strong style="color: #d62828; font-size: 13px; display: block; margin-bottom: 5px;">Políticas de Cancelación:</strong>
+                            <div>{!! nl2br(e($paymentSettings->cancellation_policies)) !!}</div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+        @endif
 
         <div class="footer">
             <p><strong>IMPORTANTE:</strong> Este documento es un comprobante de apartado. Para asegurar tus lugares, es indispensable realizar el pago del anticipo antes de la fecha límite indicada.</p>
-            <p>Para dudas o envío de comprobantes de pago, comunícate a nuestro WhatsApp: <strong>744 129 5026</strong></p>
+            @php
+                $cleanWhatsapp = '';
+                if (isset($paymentSettings) && $paymentSettings->whatsapp_number) {
+                    $cleanWhatsapp = preg_replace('/[^0-9]/', '', $paymentSettings->whatsapp_number);
+                    if (strlen($cleanWhatsapp) === 10) {
+                        $cleanWhatsapp = '52' . $cleanWhatsapp;
+                    }
+                }
+            @endphp
+            @if(!empty($cleanWhatsapp))
+                <p>Para dudas o envío de comprobantes de pago, comunícate a nuestro WhatsApp: <strong>{{ $cleanWhatsapp }}</strong></p>
+            @endif
             <p>Viajes By Mex - Hecho en México</p>
         </div>
     </div>
