@@ -189,6 +189,9 @@
             <a href="{{ route('admin.boarding-points.index') }}" class="nav-item {{ request()->routeIs('admin.boarding-points.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-map-marker-alt"></i> Puntos de Abordaje
             </a>
+            <a href="{{ route('admin.settings.payments') }}" class="nav-item {{ request()->routeIs('admin.settings.payments', 'admin.settings.banks.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-money-check-dollar"></i> Cuentas y Pagos
+            </a>
             <a href="{{ route('admin.settings') }}" class="nav-item {{ request()->routeIs('admin.settings') ? 'active' : '' }}">
                 <i class="fa-solid fa-gear"></i> Configuración
             </a>

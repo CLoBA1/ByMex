@@ -60,6 +60,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Configuración
     Route::get('/admin/settings', [AdminSettingController::class, 'index'])->name('admin.settings');
 
+    // Módulo de Pagos y Bancos
+    Route::get('/admin/settings/payments', [\App\Http\Controllers\Admin\PaymentSettingController::class, 'index'])->name('admin.settings.payments');
+    Route::post('/admin/settings/payments', [\App\Http\Controllers\Admin\PaymentSettingController::class, 'updateSettings'])->name('admin.settings.payments.update');
+    Route::post('/admin/settings/banks', [\App\Http\Controllers\Admin\PaymentSettingController::class, 'storeBank'])->name('admin.settings.banks.store');
+    Route::put('/admin/settings/banks/{bank}', [\App\Http\Controllers\Admin\PaymentSettingController::class, 'updateBank'])->name('admin.settings.banks.update');
+    Route::delete('/admin/settings/banks/{bank}', [\App\Http\Controllers\Admin\PaymentSettingController::class, 'destroyBank'])->name('admin.settings.banks.destroy');
+
     // Puntos de Abordaje
     Route::get('/admin/boarding-points', [AdminBoardingPointController::class, 'index'])->name('admin.boarding-points.index');
     Route::post('/admin/boarding-points', [AdminBoardingPointController::class, 'store'])->name('admin.boarding-points.store');
