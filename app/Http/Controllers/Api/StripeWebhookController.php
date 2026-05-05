@@ -38,15 +38,30 @@ class StripeWebhookController extends Controller
         // Handle the event
         switch ($event->type) {
             case 'checkout.session.completed':
+            case 'checkout.session.async_payment_succeeded':
                 $session = $event->data->object;
-                $reservationId = $session->metadata->reservation_id ?? null;
+                
+                // Prioritize client_reference_id, fallback to metadata
+                $reservationId = $session->client_reference_id ?? ($session->metadata->reservation_id ?? null);
 
                 if ($reservationId) {
                     $reservation = Reservation::find($reservationId);
-                    if ($reservation && $reservation->status->value !== 'paid') {
-                        $this->paymentService->markAsPaid($reservation);
-                        Log::info("Stripe Webhook: Reservation #{$reservationId} paid successfully.");
+                    if ($reservation) {
+                        $this->paymentService->processSuccessfulPayment($reservation, $session);
+                    } else {
+                        Log::error("Stripe Webhook: Reservation #{$reservationId} not found.");
                     }
+                }
+                break;
+            
+            case 'checkout.session.async_payment_failed':
+            case 'checkout.session.expired':
+                $session = $event->data->object;
+                $reservationId = $session->client_reference_id ?? ($session->metadata->reservation_id ?? null);
+                if ($reservationId) {
+                    Log::info("Stripe Webhook: Payment failed/expired for Reservation #{$reservationId}.");
+                    // Opcional: Podríamos marcar un intento fallido o liberar si hubiera lógica. 
+                    // Por reglas conservadoras, no tocamos nada, solo registramos log.
                 }
                 break;
 

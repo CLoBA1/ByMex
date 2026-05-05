@@ -488,13 +488,18 @@
                         $timeline = collect();
 
                         foreach ($reservation->payments as $pay) {
+                            $noteParts = [];
+                            if ($pay->proof_image) $noteParts[] = 'Comprobante adjunto';
+                            if ($pay->payment_method === 'stripe') $noteParts[] = 'Pago vía Stripe';
+                            if ($pay->stripe_session_id) $noteParts[] = 'Ref: ' . substr($pay->stripe_session_id, -8);
+                            
                             $timeline->push([
                                 'date'   => $pay->created_at,
                                 'kind'   => 'payment',
                                 'amount' => (float) $pay->amount,
                                 'status' => $pay->status,
-                                'notes'  => $pay->proof_image ? 'Comprobante adjunto' : null,
-                                'user'   => $pay->approvedBy ? $pay->approvedBy->name : null,
+                                'notes'  => !empty($noteParts) ? implode(' | ', $noteParts) : 'Pago manual',
+                                'user'   => $pay->approvedBy ? $pay->approvedBy->name : 'Sistema (Webhook)',
                             ]);
                         }
 

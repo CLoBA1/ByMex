@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Stripe\Stripe;
 use Stripe\Checkout\Session as StripeSession;
 use Stripe\Webhook;
+use App\Models\Payment;
 
 class PaymentService
 {
@@ -47,29 +48,59 @@ class PaymentService
             'metadata' => [
                 'reservation_id' => $reservation->id,
                 'tour_id' => $reservation->tour_id,
-                'client_email' => $reservation->client->email,
             ],
             'customer_email' => $reservation->client->email,
+            'client_reference_id' => (string) $reservation->id,
             'mode' => 'payment',
-            'success_url' => route('reservations.success', $reservation->id) . '?payment=success',
-            'cancel_url' => route('reservations.success', $reservation->id) . '?payment=cancelled',
+            'success_url' => route('reservations.success', $reservation->public_token) . '?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => route('reservations.success', $reservation->public_token) . '?payment=cancelled',
         ]);
     }
 
     /**
-     * Handle a successful payment (called from webhook or redirect).
+     * Handle a successful payment (called from webhook).
      */
-    public function markAsPaid(Reservation $reservation): void
+    public function processSuccessfulPayment(Reservation $reservation, $session): void
     {
-        $reservation->update([
-            'status' => ReservationStatus::PAID,
-            'balance_due' => 0,
+        // Avoid duplicating payment if already paid completely
+        // But Stripe checkout is for full balance in this flow.
+        if ($reservation->status->value === 'paid') {
+            Log::info("Reservation #{$reservation->id} is already marked as PAID. Ignoring webhook.");
+            return;
+        }
+
+        // Check if we already registered this session
+        $existingPayment = Payment::where('stripe_session_id', $session->id)->first();
+        if ($existingPayment) {
+            Log::info("Payment for session {$session->id} already processed.");
+            return;
+        }
+
+        $amountPaid = $session->amount_total / 100;
+
+        Payment::create([
+            'reservation_id' => $reservation->id,
+            'amount' => $amountPaid,
+            'status' => 'approved',
+            'uploaded_at' => now(),
+            'stripe_session_id' => $session->id,
+            'stripe_payment_intent_id' => $session->payment_intent,
+            'payment_method' => 'stripe',
         ]);
 
-        ReservationSeat::where('reservation_id', $reservation->id)
-            ->update(['status' => SeatStatus::PAID]);
+        $newBalance = max(0, $reservation->balance_due - $amountPaid);
 
-        Log::info("Reservation #{$reservation->id} marked as PAID via Stripe.");
+        $reservation->update([
+            'status' => $newBalance == 0 ? ReservationStatus::PAID : ReservationStatus::PARTIAL,
+            'balance_due' => $newBalance,
+        ]);
+
+        if ($newBalance == 0) {
+            ReservationSeat::where('reservation_id', $reservation->id)
+                ->update(['status' => SeatStatus::PAID]);
+        }
+
+        Log::info("Reservation #{$reservation->id} processed payment of {$amountPaid} via Stripe webhook.");
     }
 
     /**
