@@ -40,7 +40,7 @@ class ReservationController extends Controller
 
     public function success($token)
     {
-        $reservation = Reservation::with(['tour', 'client', 'seats', 'passengers'])
+        $reservation = Reservation::with(['tour', 'client', 'seats', 'passengers.documents'])
             ->where('public_token', $token)
             ->firstOrFail();
             
@@ -83,5 +83,35 @@ class ReservationController extends Controller
 
         return redirect()->route('reservations.success', $reservation->public_token)
             ->with('success', '¡Pago procesado exitosamente vía Tarjeta de Crédito (Mock)!');
+    }
+
+    /**
+     * Upload a document for a passenger from the public reservation page.
+     * Protected by public_token — no auth required.
+     */
+    public function uploadPublicDocument(Request $request, $token, $passengerId)
+    {
+        $reservation = Reservation::where('public_token', $token)->firstOrFail();
+
+        // Verify the passenger belongs to this reservation
+        $passenger = $reservation->passengers()->where('id', $passengerId)->firstOrFail();
+
+        $request->validate([
+            'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+
+        $file = $request->file('document');
+        $path = $file->store('passenger-documents', 'public');
+
+        \App\Models\PassengerDocument::create([
+            'reservation_passenger_id' => $passenger->id,
+            'original_name' => $file->getClientOriginalName(),
+            'file_path' => $path,
+            'mime_type' => $file->getClientMimeType(),
+            'file_size' => $file->getSize(),
+        ]);
+
+        return redirect()->route('reservations.success', $token)
+            ->with('success', "Documento subido correctamente para {$passenger->name}.");
     }
 }

@@ -28,6 +28,7 @@ Route::get('/tours/{id}', [WebTourController::class, 'show'])->name('tours.show'
 Route::post('/reservations', [WebReservationController::class, 'store'])->name('reservations.store');
 Route::get('/reservations/{token}/success', [WebReservationController::class, 'success'])->name('reservations.success');
 Route::get('/reservations/{token}/ticket', [WebReservationController::class, 'downloadTicket'])->name('reservations.ticket');
+Route::post('/reservations/{token}/passengers/{passengerId}/document', [WebReservationController::class, 'uploadPublicDocument'])->name('reservations.passenger.document');
 
 // API Pública
 Route::get('/api/seats/{id}', [ApiSeatController::class, 'getSeats']);

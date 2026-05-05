@@ -170,6 +170,69 @@
                 @endif
             </div>
 
+            {{-- DOCUMENTOS POR PASAJERO (PÚBLICO) --}}
+            @if($reservation->passengers->count() > 0)
+                <div style="margin-top: 3rem; text-align: left;">
+                    <h3 style="color: var(--color-dark); margin-bottom: 0.5rem; font-size: 1.2rem;">
+                        <i class="fa-solid fa-folder-open"></i> Documentos por Pasajero
+                    </h3>
+                    <p style="color: var(--color-dark-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                        Sube los documentos de identificación de cada pasajero (INE, credencial, pasaporte, etc.). Formatos aceptados: PDF, JPG, PNG. Máximo 5 MB.
+                    </p>
+
+                    @foreach($reservation->passengers as $passenger)
+                        @if($passenger->status->value !== 'cancelled')
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                <div>
+                                    <strong style="color: var(--color-dark);">Asiento {{ $passenger->seat_number }} — {{ $passenger->name }}</strong>
+                                    <span style="font-size: 0.8rem; color: var(--color-dark-muted); margin-left: 0.5rem;">{{ ucfirst($passenger->passenger_type) }}</span>
+                                </div>
+                                <span style="font-size: 0.75rem; color: var(--color-dark-muted);">{{ $passenger->documents->count() }} archivo(s)</span>
+                            </div>
+
+                            {{-- Archivos existentes --}}
+                            @if($passenger->documents->count() > 0)
+                                <div style="margin-bottom: 0.75rem;">
+                                    @foreach($passenger->documents as $doc)
+                                        @php
+                                            $fileExists = file_exists(storage_path('app/public/' . $doc->file_path));
+                                        @endphp
+                                        <div style="display: flex; align-items: center; padding: 0.4rem 0.6rem; background: white; border: 1px solid #e2e8f0; border-radius: 4px; margin-bottom: 0.3rem; font-size: 0.85rem;">
+                                            @if(str_contains($doc->mime_type ?? '', 'pdf'))
+                                                <i class="fa-solid fa-file-pdf" style="color: #ef4444; margin-right: 0.5rem;"></i>
+                                            @else
+                                                <i class="fa-solid fa-file-image" style="color: #3b82f6; margin-right: 0.5rem;"></i>
+                                            @endif
+                                            @if($fileExists)
+                                                <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" style="color: var(--color-dark); text-decoration: none; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $doc->original_name }}">
+                                                    {{ $doc->original_name }}
+                                                </a>
+                                            @else
+                                                <span style="color: var(--color-dark-muted); flex: 1; font-style: italic;">{{ $doc->original_name }} (no disponible)</span>
+                                            @endif
+                                            @if($doc->file_size)
+                                                <span style="color: var(--color-dark-muted); margin-left: 0.5rem; flex-shrink: 0; font-size: 0.8rem;">{{ number_format($doc->file_size / 1024, 0) }} KB</span>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            {{-- Formulario de subida --}}
+                            <form action="{{ route('reservations.passenger.document', [$reservation->public_token, $passenger->id]) }}" method="POST" enctype="multipart/form-data" style="display: flex; gap: 0.5rem; align-items: center;">
+                                @csrf
+                                <input type="file" name="document" accept=".pdf,.jpg,.jpeg,.png" required style="font-size: 0.85rem; flex: 1; padding: 0.4rem; border: 1px solid #cbd5e1; border-radius: 6px; background: white;">
+                                <button type="submit" class="btn btn-outline" style="padding: 0.45rem 1rem; font-size: 0.85rem; border-width: 1px;">
+                                    <i class="fa-solid fa-upload"></i> Subir
+                                </button>
+                            </form>
+                        </div>
+                        @endif
+                    @endforeach
+                </div>
+            @endif
+
             @if($reservation->status->value === 'pending')
                 <hr style="border:none; border-top: 1px dashed #e2e8f0; margin: 3rem 0;">
                 
