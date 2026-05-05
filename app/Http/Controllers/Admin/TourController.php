@@ -41,6 +41,8 @@ class TourController extends Controller
             'image' => 'nullable|image|max:2048'
         ]);
 
+        $validated['requires_passenger_documents'] = $request->has('requires_passenger_documents');
+
         $this->repository->createTour($validated);
 
         return redirect()->route('admin.tours.index')->with('success', 'Tour creado exitosamente.');
@@ -71,6 +73,8 @@ class TourController extends Controller
             'description' => 'nullable|string',
             'image' => 'nullable|image|max:2048'
         ]);
+
+        $validated['requires_passenger_documents'] = $request->has('requires_passenger_documents');
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image');

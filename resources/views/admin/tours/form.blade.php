@@ -78,6 +78,17 @@
                     <textarea name="description" rows="4" style="width: 100%; padding: .75rem; border: 1px solid var(--border); border-radius: 6px;">{{ old('description', $tour->description ?? '') }}</textarea>
                 </div>
 
+                <div style="margin-bottom: 2rem; background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem;">
+                    <h3 style="font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 0.5rem;"><i class="fa-solid fa-folder-open"></i> Configuración de Documentos</h3>
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" name="requires_passenger_documents" value="1" {{ old('requires_passenger_documents', $tour->requires_passenger_documents ?? false) ? 'checked' : '' }} style="width: 18px; height: 18px; margin-right: 0.75rem;">
+                        <span style="font-weight: 600; color: var(--color-dark);">Este viaje requiere que los pasajeros suban sus documentos de identidad (INE, Pasaporte, etc.)</span>
+                    </label>
+                    <p style="margin-top: 0.5rem; margin-left: 1.8rem; font-size: 0.85rem; color: var(--text-muted);">
+                        Si se activa, el cliente verá la sección para subir documentos en su pantalla de éxito/pago. No bloquea reservaciones actuales.
+                    </p>
+                </div>
+
                 <button type="submit" class="btn-action" style="width: 100%; justify-content: center; padding: 1rem; font-size: 1rem;"><i class="fa-solid fa-save"></i> Guardar Tour</button>
             </form>
         </div>

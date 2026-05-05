@@ -192,8 +192,13 @@
 
             {{-- DOCUMENTOS POR PASAJERO --}}
             <div class="card" style="margin-bottom: 2rem;">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fa-solid fa-folder-open"></i> Documentos por Pasajero</h3>
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 class="card-title" style="margin: 0;"><i class="fa-solid fa-folder-open"></i> Documentos por Pasajero</h3>
+                    @if($reservation->tour->requires_passenger_documents)
+                        <span style="background: #fee2e2; color: #991b1b; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; border: 1px solid #fca5a5;">Requerido por Tour</span>
+                    @else
+                        <span style="background: #f1f5f9; color: #64748b; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; border: 1px solid #cbd5e1;">Opcional (No requerido)</span>
+                    @endif
                 </div>
                 <div class="card-body">
                     @forelse($reservation->passengers as $passenger)

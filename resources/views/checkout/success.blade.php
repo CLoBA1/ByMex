@@ -171,7 +171,7 @@
             </div>
 
             {{-- DOCUMENTOS POR PASAJERO (PÚBLICO) --}}
-            @if($reservation->passengers->count() > 0)
+            @if($reservation->passengers->count() > 0 && $reservation->tour->requires_passenger_documents)
                 <div style="margin-top: 3rem; text-align: left;">
                     <h3 style="color: var(--color-dark); margin-bottom: 0.5rem; font-size: 1.2rem;">
                         <i class="fa-solid fa-folder-open"></i> Documentos por Pasajero

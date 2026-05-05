@@ -6,13 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Tour extends Model
 {
-    protected $fillable = ['title', 'destination', 'departure_date', 'boarding_point', 'price', 'total_seats', 'expiration_hours', 'description', 'status', 'image'];
+    protected $fillable = ['title', 'destination', 'departure_date', 'boarding_point', 'price', 'total_seats', 'expiration_hours', 'description', 'status', 'image', 'requires_passenger_documents'];
 
     protected function casts(): array
     {
         return [
             'status' => \App\Enums\TourStatus::class,
             'departure_date' => 'datetime',
+            'requires_passenger_documents' => 'boolean',
         ];
     }
 
