@@ -7,12 +7,13 @@ use App\Models\Reservation;
 use App\Models\ReservationPassenger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ReservationController extends Controller
 {
     public function show($id)
     {
-        $reservation = Reservation::with(['client', 'tour', 'passengers.boardingPoint', 'seats', 'payments.approvedBy', 'adjustments.user'])->findOrFail($id);
+        $reservation = Reservation::with(['client', 'tour', 'passengers.boardingPoint', 'passengers.documents', 'seats', 'payments.approvedBy', 'adjustments.user'])->findOrFail($id);
         return view('admin.reservations.show', compact('reservation'));
     }
 
@@ -360,5 +361,46 @@ class ReservationController extends Controller
         });
 
         return view('admin.reservations.surplus', compact('reservations', 'totalCount', 'totalSurplus'));
+    }
+
+    /**
+     * Upload a document for a specific passenger.
+     */
+    public function uploadDocument(Request $request, $passengerId)
+    {
+        $passenger = ReservationPassenger::findOrFail($passengerId);
+
+        $request->validate([
+            'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+
+        $file = $request->file('document');
+        $path = $file->store('passenger-documents', 'public');
+
+        \App\Models\PassengerDocument::create([
+            'reservation_passenger_id' => $passenger->id,
+            'original_name' => $file->getClientOriginalName(),
+            'file_path' => $path,
+            'mime_type' => $file->getClientMimeType(),
+            'file_size' => $file->getSize(),
+        ]);
+
+        return back()->with('success', "Documento subido para {$passenger->name}.");
+    }
+
+    /**
+     * Delete a passenger document.
+     */
+    public function deleteDocument($documentId)
+    {
+        $doc = \App\Models\PassengerDocument::findOrFail($documentId);
+
+        if (Storage::disk('public')->exists($doc->file_path)) {
+            Storage::disk('public')->delete($doc->file_path);
+        }
+
+        $doc->delete();
+
+        return back()->with('success', 'Documento eliminado correctamente.');
     }
 }

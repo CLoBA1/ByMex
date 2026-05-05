@@ -53,6 +53,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/admin/passengers/{id}/status', [AdminReservationController::class, 'updatePassengerStatus'])->name('admin.passengers.status');
     Route::post('/admin/passengers/{id}/type', [AdminReservationController::class, 'updatePassengerType'])->name('admin.passengers.type');
     Route::post('/admin/reservations/{id}/adjustment', [AdminReservationController::class, 'storeAdjustment'])->name('admin.reservations.adjustment');
+    Route::post('/admin/passengers/{id}/document', [AdminReservationController::class, 'uploadDocument'])->name('admin.passengers.document.upload');
+    Route::delete('/admin/documents/{id}', [AdminReservationController::class, 'deleteDocument'])->name('admin.documents.destroy');
     Route::delete('/admin/reservations/{id}', [AdminReservationController::class, 'destroy'])->name('admin.reservations.destroy');
 
     // Clientes

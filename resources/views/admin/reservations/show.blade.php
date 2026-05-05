@@ -190,6 +190,72 @@
                 </div>
             </div>
 
+            {{-- DOCUMENTOS POR PASAJERO --}}
+            <div class="card" style="margin-bottom: 2rem;">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fa-solid fa-folder-open"></i> Documentos por Pasajero</h3>
+                </div>
+                <div class="card-body">
+                    @forelse($reservation->passengers as $passenger)
+                        <div style="border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 1rem; {{ $passenger->status->value == 'cancelled' ? 'opacity: 0.5;' : '' }}">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                <div>
+                                    <strong style="color: var(--navy);">Asiento {{ $passenger->seat_number }} — {{ $passenger->name }}</strong>
+                                    <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 0.5rem;">{{ ucfirst($passenger->passenger_type) }}</span>
+                                </div>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">{{ $passenger->documents->count() }} archivo(s)</span>
+                            </div>
+
+                            {{-- Archivos existentes --}}
+                            @if($passenger->documents->count() > 0)
+                                <div style="margin-bottom: 0.75rem;">
+                                    @foreach($passenger->documents as $doc)
+                                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.4rem 0.6rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; margin-bottom: 0.35rem; font-size: 0.8rem;">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 0; flex: 1;">
+                                                @if(str_contains($doc->mime_type ?? '', 'pdf'))
+                                                    <i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i>
+                                                @else
+                                                    <i class="fa-solid fa-file-image" style="color: #3b82f6;"></i>
+                                                @endif
+                                                <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" style="color: var(--navy); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $doc->original_name }}">
+                                                    {{ $doc->original_name }}
+                                                </a>
+                                                @if($doc->file_size)
+                                                    <span style="color: var(--text-muted); flex-shrink: 0;">{{ number_format($doc->file_size / 1024, 0) }} KB</span>
+                                                @endif
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; margin-left: 0.5rem;">
+                                                <span style="color: var(--text-muted);">{{ $doc->created_at->format('d/m/y') }}</span>
+                                                <form action="{{ route('admin.documents.destroy', $doc->id) }}" method="POST" onsubmit="return confirm('¿Eliminar este documento?');" style="margin: 0;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0.2rem;" title="Eliminar">
+                                                        <i class="fa-solid fa-trash-can" style="font-size: 0.75rem;"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            {{-- Formulario de subida --}}
+                            @if($passenger->status->value != 'cancelled')
+                                <form action="{{ route('admin.passengers.document.upload', $passenger->id) }}" method="POST" enctype="multipart/form-data" style="display: flex; gap: 0.5rem; align-items: center;">
+                                    @csrf
+                                    <input type="file" name="document" accept=".pdf,.jpg,.jpeg,.png" required style="font-size: 0.8rem; flex: 1; padding: 0.3rem; border: 1px solid var(--border); border-radius: 4px;">
+                                    <button type="submit" class="btn-action" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; background: var(--navy); border: none;">
+                                        <i class="fa-solid fa-upload"></i> Subir
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    @empty
+                        <p style="color: var(--text-muted); text-align: center;">No hay pasajeros en esta reservación.</p>
+                    @endforelse
+                </div>
+            </div>
+
             <!-- Información Operativa -->
             <div class="card">
                 <div class="card-header">

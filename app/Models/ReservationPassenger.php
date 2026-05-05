@@ -45,4 +45,9 @@ class ReservationPassenger extends Model
     {
         return $this->belongsTo(BoardingPoint::class);
     }
+
+    public function documents()
+    {
+        return $this->hasMany(PassengerDocument::class);
+    }
 }
