@@ -29,6 +29,7 @@ Route::post('/reservations', [WebReservationController::class, 'store'])->name('
 Route::get('/reservations/{token}/success', [WebReservationController::class, 'success'])->name('reservations.success');
 Route::get('/reservations/{token}/ticket', [WebReservationController::class, 'downloadTicket'])->name('reservations.ticket');
 Route::post('/reservations/{token}/passengers/{passengerId}/document', [WebReservationController::class, 'uploadPublicDocument'])->name('reservations.passenger.document');
+Route::get('/reservations/{token}/documents/{documentId}/download', [WebReservationController::class, 'downloadPublicDocument'])->name('reservations.passenger.document.download');
 
 // API Pública
 Route::get('/api/seats/{id}', [ApiSeatController::class, 'getSeats']);
@@ -55,6 +56,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/admin/passengers/{id}/type', [AdminReservationController::class, 'updatePassengerType'])->name('admin.passengers.type');
     Route::post('/admin/reservations/{id}/adjustment', [AdminReservationController::class, 'storeAdjustment'])->name('admin.reservations.adjustment');
     Route::post('/admin/passengers/{id}/document', [AdminReservationController::class, 'uploadDocument'])->name('admin.passengers.document.upload');
+    Route::get('/admin/documents/{id}/download', [AdminReservationController::class, 'downloadDocument'])->name('admin.documents.download');
     Route::delete('/admin/documents/{id}', [AdminReservationController::class, 'deleteDocument'])->name('admin.documents.destroy');
     Route::delete('/admin/reservations/{id}', [AdminReservationController::class, 'destroy'])->name('admin.reservations.destroy');
 

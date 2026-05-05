@@ -205,7 +205,7 @@
                                                 <i class="fa-solid fa-file-image" style="color: #3b82f6; margin-right: 0.5rem;"></i>
                                             @endif
                                             @if($fileExists)
-                                                <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" style="color: var(--color-dark); text-decoration: none; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $doc->original_name }}">
+                                                <a href="{{ route('reservations.passenger.document.download', [$reservation->public_token, $doc->id]) }}" target="_blank" style="color: var(--color-dark); text-decoration: none; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $doc->original_name }}">
                                                     {{ $doc->original_name }}
                                                 </a>
                                             @else

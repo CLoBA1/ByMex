@@ -217,7 +217,7 @@
                                                 @else
                                                     <i class="fa-solid fa-file-image" style="color: #3b82f6;"></i>
                                                 @endif
-                                                <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" style="color: var(--navy); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $doc->original_name }}">
+                                                <a href="{{ route('admin.documents.download', $doc->id) }}" target="_blank" style="color: var(--navy); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $doc->original_name }}">
                                                     {{ $doc->original_name }}
                                                 </a>
                                                 @if($doc->file_size)

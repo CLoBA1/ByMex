@@ -403,4 +403,18 @@ class ReservationController extends Controller
 
         return back()->with('success', 'Documento eliminado correctamente.');
     }
+
+    /**
+     * Download a passenger document securely (Admin).
+     */
+    public function downloadDocument($documentId)
+    {
+        $doc = \App\Models\PassengerDocument::findOrFail($documentId);
+
+        if (!Storage::disk('public')->exists($doc->file_path)) {
+            return back()->with('error', 'El archivo físico no se encuentra disponible.');
+        }
+
+        return Storage::disk('public')->download($doc->file_path, $doc->original_name);
+    }
 }

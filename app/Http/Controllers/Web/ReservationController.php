@@ -114,4 +114,23 @@ class ReservationController extends Controller
         return redirect()->route('reservations.success', $token)
             ->with('success', "Documento subido correctamente para {$passenger->name}.");
     }
+
+    /**
+     * Download a passenger document securely from the public page.
+     * Protected by public_token.
+     */
+    public function downloadPublicDocument($token, $documentId)
+    {
+        $reservation = Reservation::where('public_token', $token)->firstOrFail();
+
+        $doc = \App\Models\PassengerDocument::whereHas('passenger', function ($q) use ($reservation) {
+            $q->where('reservation_id', $reservation->id);
+        })->findOrFail($documentId);
+
+        if (!\Illuminate\Support\Facades\Storage::disk('public')->exists($doc->file_path)) {
+            return back()->with('error', 'El archivo no se encuentra disponible.');
+        }
+
+        return \Illuminate\Support\Facades\Storage::disk('public')->download($doc->file_path, $doc->original_name);
+    }
 }
