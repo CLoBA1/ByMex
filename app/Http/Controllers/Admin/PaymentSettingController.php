@@ -37,6 +37,8 @@ class PaymentSettingController extends Controller
             'final_note' => 'nullable|string',
             'reservation_policies' => 'nullable|string',
             'cancellation_policies' => 'nullable|string',
+            'no_show_policies' => 'nullable|string',
+            'refund_policies' => 'nullable|string',
         ]);
 
         $settings = PaymentSetting::firstOrCreate(['id' => 1]);

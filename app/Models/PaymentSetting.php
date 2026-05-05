@@ -19,5 +19,7 @@ class PaymentSetting extends Model
         'final_note',
         'reservation_policies',
         'cancellation_policies',
+        'no_show_policies',
+        'refund_policies',
     ];
 }

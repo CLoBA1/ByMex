@@ -290,9 +290,19 @@
                             <small style="color: var(--text-muted);">Puedes usar saltos de línea. Este texto se mostrará tal cual al cliente.</small>
                         </div>
                         <div class="form-group">
-                            <label>Políticas de Cancelación</label>
-                            <textarea name="cancellation_policies" class="form-control" rows="5">{{ old('cancellation_policies', $settings->cancellation_policies) }}</textarea>
+                            <label>Políticas de Cancelación (Cliente)</label>
+                            <textarea name="cancellation_policies" class="form-control" rows="4">{{ old('cancellation_policies', $settings->cancellation_policies) }}</textarea>
                             <small style="color: var(--text-muted);">Puedes usar saltos de línea. Este texto se mostrará tal cual al cliente.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Políticas de No-Show (Operativo)</label>
+                            <textarea name="no_show_policies" class="form-control" rows="4">{{ old('no_show_policies', $settings->no_show_policies) }}</textarea>
+                            <small style="color: var(--text-muted);">Define qué procede si el cliente no se presenta. Visible en admin para referencia.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Políticas de Devoluciones y Penalizaciones (Operativo)</label>
+                            <textarea name="refund_policies" class="form-control" rows="4">{{ old('refund_policies', $settings->refund_policies) }}</textarea>
+                            <small style="color: var(--text-muted);">Define reglas internas sobre cómo y cuándo aplica una devolución o penalización. Visible en admin.</small>
                         </div>
                     </div>
 

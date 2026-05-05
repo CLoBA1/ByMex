@@ -14,7 +14,8 @@ class ReservationController extends Controller
     public function show($id)
     {
         $reservation = Reservation::with(['client', 'tour', 'passengers.boardingPoint', 'passengers.documents', 'seats', 'payments.approvedBy', 'adjustments.user'])->findOrFail($id);
-        return view('admin.reservations.show', compact('reservation'));
+        $settings = \App\Models\PaymentSetting::first();
+        return view('admin.reservations.show', compact('reservation', 'settings'));
     }
 
     public function validatePassenger(Request $request, $id)

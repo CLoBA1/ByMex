@@ -303,6 +303,41 @@
                 </div>
             </div>
 
+            <!-- Marco Operativo -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fa-solid fa-scale-balanced"></i> Marco Operativo / Políticas</h3>
+                </div>
+                <div class="card-body" style="font-size: 0.85rem; color: var(--slate-600);">
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: var(--navy); display: block; margin-bottom: 0.25rem;">Políticas de Cancelación</strong>
+                        @if(!empty($settings->cancellation_policies))
+                            <div style="background: #f8fafc; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border);">{{ $settings->cancellation_policies }}</div>
+                        @else
+                            <span style="color: var(--text-muted); font-style: italic;">No configuradas.</span>
+                        @endif
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: var(--navy); display: block; margin-bottom: 0.25rem;">Políticas de No-Show</strong>
+                        @if(!empty($settings->no_show_policies))
+                            <div style="background: #fffbeb; padding: 0.5rem; border-radius: 4px; border: 1px solid #fde68a; color: #92400e;">{{ $settings->no_show_policies }}</div>
+                        @else
+                            <span style="color: var(--text-muted); font-style: italic;">No configuradas.</span>
+                        @endif
+                    </div>
+
+                    <div>
+                        <strong style="color: var(--navy); display: block; margin-bottom: 0.25rem;">Devoluciones y Penalizaciones</strong>
+                        @if(!empty($settings->refund_policies))
+                            <div style="background: #f0fdf4; padding: 0.5rem; border-radius: 4px; border: 1px solid #bbf7d0; color: #166534;">{{ $settings->refund_policies }}</div>
+                        @else
+                            <span style="color: var(--text-muted); font-style: italic;">No configuradas.</span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
             <!-- Finanzas -->
             <div class="card">
                 <div class="card-header">
@@ -374,7 +409,7 @@
                                 </div>
                             </div>
                             <div style="margin-bottom: 0.75rem;">
-                                <input type="text" name="notes" placeholder="Motivo o nota (ej. Devuelto en efectivo, Penalización por no show...)" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem;">
+                                <input type="text" name="notes" placeholder="Motivo operativo (ej. Cancelación por cliente, No show, Devolución...)" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem;" required>
                             </div>
                             <button type="submit" class="btn-action" style="background: var(--navy); border: none; width: 100%; justify-content: center;">
                                 <i class="fa-solid fa-receipt"></i> Registrar Movimiento
