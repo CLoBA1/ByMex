@@ -371,6 +371,146 @@
                 </div>
             </div>
 
+            {{-- HISTORIAL COMBINADO DE MOVIMIENTOS --}}
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Historial de Movimientos</h3>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    @php
+                        // Combinar pagos y ajustes en una sola línea de tiempo
+                        $timeline = collect();
+
+                        foreach ($reservation->payments as $pay) {
+                            $timeline->push([
+                                'date'   => $pay->created_at,
+                                'kind'   => 'payment',
+                                'amount' => (float) $pay->amount,
+                                'status' => $pay->status,
+                                'notes'  => $pay->proof_image ? 'Comprobante adjunto' : null,
+                                'user'   => $pay->approvedBy ? $pay->approvedBy->name : null,
+                            ]);
+                        }
+
+                        foreach ($reservation->adjustments as $adj) {
+                            $timeline->push([
+                                'date'   => $adj->created_at,
+                                'kind'   => 'adjustment',
+                                'type'   => $adj->type,
+                                'amount' => (float) $adj->amount,
+                                'status' => null,
+                                'notes'  => $adj->notes,
+                                'user'   => $adj->user ? $adj->user->name : 'Sistema',
+                            ]);
+                        }
+
+                        $timeline = $timeline->sortByDesc('date')->values();
+                    @endphp
+
+                    @if($timeline->isEmpty())
+                        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                            <i class="fa-regular fa-folder-open" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem; color: #cbd5e1;"></i>
+                            No hay movimientos registrados en esta reservación.
+                        </div>
+                    @else
+                        <table class="data-table" style="font-size: 0.85rem;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 140px;">Fecha</th>
+                                    <th>Tipo</th>
+                                    <th style="text-align: right;">Monto</th>
+                                    <th>Estado</th>
+                                    <th>Nota / Referencia</th>
+                                    <th>Operador</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($timeline as $mov)
+                                    @php
+                                        // Estilos por tipo
+                                        if ($mov['kind'] === 'payment') {
+                                            $icon = 'fa-solid fa-circle-dollar-to-slot';
+                                            $label = 'Pago';
+                                            if ($mov['status'] === 'approved') {
+                                                $iconColor = '#166534';
+                                                $rowBg = '';
+                                                $badgeBg = '#dcfce7'; $badgeColor = '#166534'; $badgeText = 'Aprobado';
+                                            } elseif ($mov['status'] === 'pending') {
+                                                $iconColor = '#d97706';
+                                                $rowBg = '';
+                                                $badgeBg = '#fef3c7'; $badgeColor = '#92400e'; $badgeText = 'Pendiente';
+                                            } else {
+                                                $iconColor = '#ef4444';
+                                                $rowBg = 'opacity: 0.6;';
+                                                $badgeBg = '#fee2e2'; $badgeColor = '#991b1b'; $badgeText = ucfirst($mov['status'] ?? 'Rechazado');
+                                            }
+                                            $amountColor = '#166534';
+                                            $amountPrefix = '+';
+                                        } else {
+                                            // adjustment
+                                            $subType = $mov['type'] ?? 'note';
+                                            if ($subType === 'refund') {
+                                                $icon = 'fa-solid fa-arrow-rotate-left';
+                                                $label = 'Devolución';
+                                                $iconColor = '#059669';
+                                                $amountColor = '#059669';
+                                                $amountPrefix = '-';
+                                            } elseif ($subType === 'penalty') {
+                                                $icon = 'fa-solid fa-gavel';
+                                                $label = 'Penalización';
+                                                $iconColor = '#ea580c';
+                                                $amountColor = '#ea580c';
+                                                $amountPrefix = '-';
+                                            } else {
+                                                $icon = 'fa-regular fa-note-sticky';
+                                                $label = 'Nota';
+                                                $iconColor = '#64748b';
+                                                $amountColor = '#64748b';
+                                                $amountPrefix = '';
+                                            }
+                                            $rowBg = '';
+                                            $badgeBg = ''; $badgeColor = ''; $badgeText = '';
+                                        }
+                                    @endphp
+                                    <tr style="{{ $rowBg }}">
+                                        <td style="white-space: nowrap; color: var(--text-muted);">
+                                            {{ $mov['date']->format('d/m/Y H:i') }}
+                                        </td>
+                                        <td>
+                                            <span style="color: {{ $iconColor }}; font-weight: 600;">
+                                                <i class="{{ $icon }}"></i> {{ $label }}
+                                            </span>
+                                        </td>
+                                        <td style="text-align: right; font-weight: 700; color: {{ $amountColor }};">
+                                            @if($mov['amount'] > 0)
+                                                {{ $amountPrefix }}${{ number_format($mov['amount'], 2) }}
+                                            @else
+                                                <span style="color: var(--text-muted);">—</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if(!empty($badgeText))
+                                                <span style="display: inline-block; padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; background: {{ $badgeBg }}; color: {{ $badgeColor }};">
+                                                    {{ $badgeText }}
+                                                </span>
+                                            @else
+                                                <span style="color: var(--text-muted);">—</span>
+                                            @endif
+                                        </td>
+                                        <td style="color: var(--slate-500); font-size: 0.8rem;">
+                                            {{ $mov['notes'] ?? '—' }}
+                                        </td>
+                                        <td style="color: var(--text-muted); font-size: 0.8rem;">
+                                            {{ $mov['user'] ?? '—' }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @endif
+                </div>
+            </div>
+
             <!-- Validación de Pasajeros -->
             <div class="card" style="margin-top: 2rem;">
                 <div class="card-header">

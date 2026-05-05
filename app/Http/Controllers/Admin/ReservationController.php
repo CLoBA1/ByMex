@@ -12,7 +12,7 @@ class ReservationController extends Controller
 {
     public function show($id)
     {
-        $reservation = Reservation::with(['client', 'tour', 'passengers.boardingPoint', 'seats', 'payments', 'adjustments.user'])->findOrFail($id);
+        $reservation = Reservation::with(['client', 'tour', 'passengers.boardingPoint', 'seats', 'payments.approvedBy', 'adjustments.user'])->findOrFail($id);
         return view('admin.reservations.show', compact('reservation'));
     }
 
