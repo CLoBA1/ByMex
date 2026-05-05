@@ -313,4 +313,52 @@ class ReservationController extends Controller
 
         return redirect()->route('admin.tours.show', $tourId)->with('success', "Reservación #{$id} eliminada definitivamente.");
     }
+
+    /**
+     * Listado operativo de reservaciones con saldo a favor pendiente de atención.
+     * Solo lectura – no altera estados, pagos ni cálculos.
+     */
+    public function surplusList(Request $request)
+    {
+        $query = Reservation::with(['client', 'tour'])
+            ->withSum(['payments as amount_paid' => fn($q) => $q->where('status', 'approved')], 'amount')
+            ->withSum('adjustments as adjustments_total', 'amount');
+
+        // Filtro por búsqueda (folio o nombre de cliente)
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                  ->orWhereHas('client', fn($c) => $c->where('name', 'like', "%{$search}%")
+                      ->orWhere('phone', 'like', "%{$search}%"));
+            });
+        }
+
+        // Filtro por estado
+        if ($status = $request->input('status')) {
+            $query->where('status', $status);
+        }
+
+        $allReservations = $query->orderBy('updated_at', 'desc')->get();
+
+        // Filtrar solo las que tienen saldo a favor disponible > 0
+        $reservations = $allReservations->filter(function ($r) {
+            $paid = (float) ($r->amount_paid ?? 0);
+            $total = (float) $r->total_amount;
+            $adjustments = (float) ($r->adjustments_total ?? 0);
+            $surplusBruto = max(0, $paid - $total);
+            $available = max(0, $surplusBruto - $adjustments);
+            return $available > 0;
+        })->values();
+
+        // Totalizadores para las cards
+        $totalCount = $reservations->count();
+        $totalSurplus = $reservations->sum(function ($r) {
+            $paid = (float) ($r->amount_paid ?? 0);
+            $total = (float) $r->total_amount;
+            $adjustments = (float) ($r->adjustments_total ?? 0);
+            return max(0, max(0, $paid - $total) - $adjustments);
+        });
+
+        return view('admin.reservations.surplus', compact('reservations', 'totalCount', 'totalSurplus'));
+    }
 }

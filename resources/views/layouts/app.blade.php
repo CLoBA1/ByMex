@@ -192,6 +192,9 @@
             <a href="{{ route('admin.settings.payments') }}" class="nav-item {{ request()->routeIs('admin.settings.payments', 'admin.settings.banks.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-money-check-dollar"></i> Cuentas y Pagos
             </a>
+            <a href="{{ route('admin.reservations.surplus') }}" class="nav-item {{ request()->routeIs('admin.reservations.surplus') ? 'active' : '' }}">
+                <i class="fa-solid fa-hand-holding-dollar"></i> Saldos a Favor
+            </a>
             <a href="{{ route('admin.settings') }}" class="nav-item {{ request()->routeIs('admin.settings') ? 'active' : '' }}">
                 <i class="fa-solid fa-gear"></i> Configuración
             </a>
