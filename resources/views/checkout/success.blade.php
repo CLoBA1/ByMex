@@ -67,6 +67,18 @@
                 </div>
             @endif
 
+            @if(session('error'))
+                <div style="background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 2rem;">
+                    <i class="fa-solid fa-circle-exclamation"></i> {{ session('error') }}
+                </div>
+            @endif
+
+            @if(session('info'))
+                <div style="background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 2rem;">
+                    <i class="fa-solid fa-circle-info"></i> {{ session('info') }}
+                </div>
+            @endif
+
             @if($reservation->status->value === 'paid')
                 <i class="fa-solid fa-check-double success-icon" style="color: #10b981;"></i>
                 <h1 style="color: var(--color-dark); font-size: 2.5rem;">¡Pago Confirmado!</h1>
