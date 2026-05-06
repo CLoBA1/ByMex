@@ -51,17 +51,118 @@
         </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
-        
-        <!-- COLUMNA IZQUIERDA -->
-        <div>
+    
+    <style>
+        .res-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; align-items: start; }
+        .res-main { display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
+        .res-sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
+        .info-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+        @media (min-width: 1024px) {
+            .res-grid { grid-template-columns: 3fr 1.2fr; gap: 2rem; }
+            .res-sidebar { position: sticky; top: 2rem; }
+            .info-grid { grid-template-columns: 1fr 1fr; }
+        }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
+        .table-responsive::-webkit-scrollbar { height: 6px; }
+        .table-responsive::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        details > summary::-webkit-details-marker { display: none; }
+    </style>
+
+    <div class="res-grid">
+        <div class="res-main">
+            <div class="info-grid">
+            <!-- Información Operativa -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fa-solid fa-bus"></i> Datos del Tour y Operación</h3>
+                </div>
+                <div class="card-body">
+                    <p style="margin-bottom: 0.5rem;"><strong>Destino:</strong> {{ $reservation->tour->destination }} ({{ $reservation->tour->title }})</p>
+                    <p style="margin-bottom: 0.5rem;"><strong>Salida:</strong> {{ $reservation->tour->departure_date->translatedFormat('d \d\e F Y - H:i') }} hrs</p>
+                    <p style="margin-bottom: 0;"><strong>Asientos Reservados (Legacy/Total):</strong> <span style="font-weight: 700; color: var(--navy);">{{ $reservation->seats->pluck('seat_number')->implode(', ') }}</span></p>
+                    
+                    @if($reservation->status->value == 'pending' && $reservation->expires_at)
+                        <div style="margin-top: 1rem; padding: 1rem; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; color: #b45309;">
+                            <i class="fa-solid fa-triangle-exclamation"></i> <strong>Expiración:</strong> Esta reserva vencerá el {{ $reservation->expires_at->translatedFormat('d M, H:i') }} si no es pagada.
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Contacto Principal -->
+            <div class="card" style="margin-bottom: 0;">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fa-solid fa-address-card"></i> Contacto Principal</h3>
+                </div>
+                <div class="card-body">
+                    <h4 style="font-weight: 700; color: var(--navy); margin-bottom: 0.5rem; font-size: 1.1rem;">{{ $reservation->client->name }}</h4>
+                    <p style="margin-bottom: 0.5rem; color: var(--slate-600);">
+                        <i class="fa-regular fa-envelope" style="width: 20px;"></i> {{ $reservation->client->email }}
+                    </p>
+                    <p style="margin-bottom: 0.5rem; color: var(--slate-600);">
+                        <i class="fa-solid fa-phone" style="width: 20px;"></i> {{ $reservation->client->phone }}
+                    </p>
+                    @if($reservation->client->whatsapp)
+                        <p style="margin-bottom: 0; color: var(--slate-600);">
+                            <i class="fa-brands fa-whatsapp" style="width: 20px; color: #25D366;"></i> {{ $reservation->client->whatsapp }}
+                        </p>
+                    @endif
+                </div>
+            </div>
+
+            </div>
+            <!-- Validación de Pasajeros -->
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fa-solid fa-id-card"></i> Validación Pendiente</h3>
+                </div>
+                <div class="card-body">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+                    @php
+                        $pendingPassengers = $reservation->passengers->where('validation_status', 'pending');
+                    @endphp
+                    @if($pendingPassengers->isEmpty())
+                        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">
+                            <i class="fa-solid fa-check-circle" style="color: #166534;"></i> No hay pasajeros pendientes de validación en esta reserva.
+                        </p>
+                    @else
+                        @foreach($pendingPassengers as $passenger)
+                            <div style="border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 1rem;">
+                                <div style="font-weight: 700; color: var(--navy); margin-bottom: 0.25rem;">
+                                    Asiento {{ $passenger->seat_number }} - {{ $passenger->name }}
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+                                    Solicita: <strong style="color: var(--navy);">{{ ucfirst($passenger->passenger_type) }} ({{ $passenger->benefit_label }})</strong>
+                                </div>
+                                <form action="{{ route('admin.passengers.validate', $passenger->id) }}" method="POST">
+                                    @csrf
+                                    <div style="margin-bottom: 0.75rem;">
+                                        <input type="text" name="validation_notes" placeholder="Añadir nota opcional (ej. credencial borrosa)..." style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem;">
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <button type="submit" name="validation_status" value="validated" class="btn-action" style="background: #166534; padding: 0.5rem; font-size: 0.85rem; flex: 1; justify-content: center;" onclick="return confirm('¿Aprobar el descuento para este pasajero?');">
+                                            <i class="fa-solid fa-check"></i> Validar
+                                        </button>
+                                        <button type="submit" name="validation_status" value="rejected" class="btn-action" style="background: var(--primary); padding: 0.5rem; font-size: 0.85rem; flex: 1; justify-content: center;" onclick="return confirm('¿Rechazar el descuento? El pago seguirá igual por ahora.');">
+                                            <i class="fa-solid fa-xmark"></i> Rechazar
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        @endforeach
+                    </div>
+                    @endif
+                </div>
+            </div>
+
             <!-- Pasajeros -->
             <div class="card" style="margin-bottom: 2rem;">
                 <div class="card-header">
                     <h3 class="card-title"><i class="fa-solid fa-users"></i> Desglose de Pasajeros</h3>
                 </div>
                 <div class="card-body" style="padding: 0;">
-                    <table class="data-table">
+                    <div class="table-responsive">
+                        <table class="data-table">
                         <thead>
                             <tr>
                                 <th>Asiento</th>
@@ -187,6 +288,7 @@
                             @endforelse
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
 
@@ -261,83 +363,155 @@
                 </div>
             </div>
 
-            <!-- Información Operativa -->
-            <div class="card">
+            {{-- HISTORIAL COMBINADO DE MOVIMIENTOS --}}
+            <div class="card" style="margin-top: 2rem;">
                 <div class="card-header">
-                    <h3 class="card-title"><i class="fa-solid fa-bus"></i> Datos del Tour y Operación</h3>
+                    <h3 class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Historial de Movimientos</h3>
                 </div>
-                <div class="card-body">
-                    <p style="margin-bottom: 0.5rem;"><strong>Destino:</strong> {{ $reservation->tour->destination }} ({{ $reservation->tour->title }})</p>
-                    <p style="margin-bottom: 0.5rem;"><strong>Salida:</strong> {{ $reservation->tour->departure_date->translatedFormat('d \d\e F Y - H:i') }} hrs</p>
-                    <p style="margin-bottom: 0;"><strong>Asientos Reservados (Legacy/Total):</strong> <span style="font-weight: 700; color: var(--navy);">{{ $reservation->seats->pluck('seat_number')->implode(', ') }}</span></p>
-                    
-                    @if($reservation->status->value == 'pending' && $reservation->expires_at)
-                        <div style="margin-top: 1rem; padding: 1rem; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; color: #b45309;">
-                            <i class="fa-solid fa-triangle-exclamation"></i> <strong>Expiración:</strong> Esta reserva vencerá el {{ $reservation->expires_at->translatedFormat('d M, H:i') }} si no es pagada.
+                <div class="card-body" style="padding: 0;">
+                    @php
+                        // Combinar pagos y ajustes en una sola línea de tiempo
+                        $timeline = collect();
+
+                        foreach ($reservation->payments as $pay) {
+                            $noteParts = [];
+                            if ($pay->proof_image) $noteParts[] = 'Comprobante adjunto';
+                            if ($pay->payment_method === 'stripe') $noteParts[] = 'Pago vía Stripe';
+                            if ($pay->stripe_session_id) $noteParts[] = 'Ref: ' . substr($pay->stripe_session_id, -8);
+                            
+                            $timeline->push([
+                                'date'   => $pay->created_at,
+                                'kind'   => 'payment',
+                                'amount' => (float) $pay->amount,
+                                'status' => $pay->status,
+                                'notes'  => !empty($noteParts) ? implode(' | ', $noteParts) : 'Pago manual',
+                                'user'   => $pay->approvedBy ? $pay->approvedBy->name : 'Sistema (Webhook)',
+                            ]);
+                        }
+
+                        foreach ($reservation->adjustments as $adj) {
+                            $timeline->push([
+                                'date'   => $adj->created_at,
+                                'kind'   => 'adjustment',
+                                'type'   => $adj->type,
+                                'amount' => (float) $adj->amount,
+                                'status' => null,
+                                'notes'  => $adj->notes,
+                                'user'   => $adj->user ? $adj->user->name : 'Sistema',
+                            ]);
+                        }
+
+                        $timeline = $timeline->sortByDesc('date')->values();
+                    @endphp
+
+                    @if($timeline->isEmpty())
+                        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                            <i class="fa-regular fa-folder-open" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem; color: #cbd5e1;"></i>
+                            No hay movimientos registrados en esta reservación.
                         </div>
+                    @else
+                        <div class="table-responsive">
+                        <table class="data-table" style="font-size: 0.85rem;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 140px;">Fecha</th>
+                                    <th>Tipo</th>
+                                    <th style="text-align: right;">Monto</th>
+                                    <th>Estado</th>
+                                    <th>Nota / Referencia</th>
+                                    <th>Operador</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($timeline as $mov)
+                                    @php
+                                        // Estilos por tipo
+                                        if ($mov['kind'] === 'payment') {
+                                            $icon = 'fa-solid fa-circle-dollar-to-slot';
+                                            $label = 'Pago';
+                                            if ($mov['status'] === 'approved') {
+                                                $iconColor = '#166534';
+                                                $rowBg = '';
+                                                $badgeBg = '#dcfce7'; $badgeColor = '#166534'; $badgeText = 'Aprobado';
+                                            } elseif ($mov['status'] === 'pending') {
+                                                $iconColor = '#d97706';
+                                                $rowBg = '';
+                                                $badgeBg = '#fef3c7'; $badgeColor = '#92400e'; $badgeText = 'Pendiente';
+                                            } else {
+                                                $iconColor = '#ef4444';
+                                                $rowBg = 'opacity: 0.6;';
+                                                $badgeBg = '#fee2e2'; $badgeColor = '#991b1b'; $badgeText = ucfirst($mov['status'] ?? 'Rechazado');
+                                            }
+                                            $amountColor = '#166534';
+                                            $amountPrefix = '+';
+                                        } else {
+                                            // adjustment
+                                            $subType = $mov['type'] ?? 'note';
+                                            if ($subType === 'refund') {
+                                                $icon = 'fa-solid fa-arrow-rotate-left';
+                                                $label = 'Devolución';
+                                                $iconColor = '#059669';
+                                                $amountColor = '#059669';
+                                                $amountPrefix = '-';
+                                            } elseif ($subType === 'penalty') {
+                                                $icon = 'fa-solid fa-gavel';
+                                                $label = 'Penalización';
+                                                $iconColor = '#ea580c';
+                                                $amountColor = '#ea580c';
+                                                $amountPrefix = '-';
+                                            } else {
+                                                $icon = 'fa-regular fa-note-sticky';
+                                                $label = 'Nota';
+                                                $iconColor = '#64748b';
+                                                $amountColor = '#64748b';
+                                                $amountPrefix = '';
+                                            }
+                                            $rowBg = '';
+                                            $badgeBg = ''; $badgeColor = ''; $badgeText = '';
+                                        }
+                                    @endphp
+                                    <tr style="{{ $rowBg }}">
+                                        <td style="white-space: nowrap; color: var(--text-muted);">
+                                            {{ $mov['date']->format('d/m/Y H:i') }}
+                                        </td>
+                                        <td>
+                                            <span style="color: {{ $iconColor }}; font-weight: 600;">
+                                                <i class="{{ $icon }}"></i> {{ $label }}
+                                            </span>
+                                        </td>
+                                        <td style="text-align: right; font-weight: 700; color: {{ $amountColor }};">
+                                            @if($mov['amount'] > 0)
+                                                {{ $amountPrefix }}${{ number_format($mov['amount'], 2) }}
+                                            @else
+                                                <span style="color: var(--text-muted);">—</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if(!empty($badgeText))
+                                                <span style="display: inline-block; padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; background: {{ $badgeBg }}; color: {{ $badgeColor }};">
+                                                    {{ $badgeText }}
+                                                </span>
+                                            @else
+                                                <span style="color: var(--text-muted);">—</span>
+                                            @endif
+                                        </td>
+                                        <td style="color: var(--slate-500); font-size: 0.8rem;">
+                                            {{ $mov['notes'] ?? '—' }}
+                                        </td>
+                                        <td style="color: var(--text-muted); font-size: 0.8rem;">
+                                            {{ $mov['user'] ?? '—' }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                     @endif
                 </div>
             </div>
+
         </div>
-
-        <!-- COLUMNA DERECHA -->
-        <div>
-            <!-- Contacto Principal -->
-            <div class="card" style="margin-bottom: 2rem;">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fa-solid fa-address-card"></i> Contacto Principal</h3>
-                </div>
-                <div class="card-body">
-                    <h4 style="font-weight: 700; color: var(--navy); margin-bottom: 0.5rem; font-size: 1.1rem;">{{ $reservation->client->name }}</h4>
-                    <p style="margin-bottom: 0.5rem; color: var(--slate-600);">
-                        <i class="fa-regular fa-envelope" style="width: 20px;"></i> {{ $reservation->client->email }}
-                    </p>
-                    <p style="margin-bottom: 0.5rem; color: var(--slate-600);">
-                        <i class="fa-solid fa-phone" style="width: 20px;"></i> {{ $reservation->client->phone }}
-                    </p>
-                    @if($reservation->client->whatsapp)
-                        <p style="margin-bottom: 0; color: var(--slate-600);">
-                            <i class="fa-brands fa-whatsapp" style="width: 20px; color: #25D366;"></i> {{ $reservation->client->whatsapp }}
-                        </p>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Marco Operativo -->
-            <div class="card" style="margin-bottom: 2rem;">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fa-solid fa-scale-balanced"></i> Marco Operativo / Políticas</h3>
-                </div>
-                <div class="card-body" style="font-size: 0.85rem; color: var(--slate-600);">
-                    <div style="margin-bottom: 1rem;">
-                        <strong style="color: var(--navy); display: block; margin-bottom: 0.25rem;">Políticas de Cancelación</strong>
-                        @if(!empty($settings->cancellation_policies))
-                            <div style="background: #f8fafc; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border);">{{ $settings->cancellation_policies }}</div>
-                        @else
-                            <span style="color: var(--text-muted); font-style: italic;">No configuradas.</span>
-                        @endif
-                    </div>
-                    
-                    <div style="margin-bottom: 1rem;">
-                        <strong style="color: var(--navy); display: block; margin-bottom: 0.25rem;">Políticas de No-Show</strong>
-                        @if(!empty($settings->no_show_policies))
-                            <div style="background: #fffbeb; padding: 0.5rem; border-radius: 4px; border: 1px solid #fde68a; color: #92400e;">{{ $settings->no_show_policies }}</div>
-                        @else
-                            <span style="color: var(--text-muted); font-style: italic;">No configuradas.</span>
-                        @endif
-                    </div>
-
-                    <div>
-                        <strong style="color: var(--navy); display: block; margin-bottom: 0.25rem;">Devoluciones y Penalizaciones</strong>
-                        @if(!empty($settings->refund_policies))
-                            <div style="background: #f0fdf4; padding: 0.5rem; border-radius: 4px; border: 1px solid #bbf7d0; color: #166534;">{{ $settings->refund_policies }}</div>
-                        @else
-                            <span style="color: var(--text-muted); font-style: italic;">No configuradas.</span>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
+        <div class="res-sidebar">
             <!-- Finanzas -->
             <div class="card">
                 <div class="card-header">
@@ -477,193 +651,8 @@
                 </div>
             </div>
 
-            {{-- HISTORIAL COMBINADO DE MOVIMIENTOS --}}
-            <div class="card" style="margin-top: 2rem;">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Historial de Movimientos</h3>
-                </div>
-                <div class="card-body" style="padding: 0;">
-                    @php
-                        // Combinar pagos y ajustes en una sola línea de tiempo
-                        $timeline = collect();
 
-                        foreach ($reservation->payments as $pay) {
-                            $noteParts = [];
-                            if ($pay->proof_image) $noteParts[] = 'Comprobante adjunto';
-                            if ($pay->payment_method === 'stripe') $noteParts[] = 'Pago vía Stripe';
-                            if ($pay->stripe_session_id) $noteParts[] = 'Ref: ' . substr($pay->stripe_session_id, -8);
-                            
-                            $timeline->push([
-                                'date'   => $pay->created_at,
-                                'kind'   => 'payment',
-                                'amount' => (float) $pay->amount,
-                                'status' => $pay->status,
-                                'notes'  => !empty($noteParts) ? implode(' | ', $noteParts) : 'Pago manual',
-                                'user'   => $pay->approvedBy ? $pay->approvedBy->name : 'Sistema (Webhook)',
-                            ]);
-                        }
-
-                        foreach ($reservation->adjustments as $adj) {
-                            $timeline->push([
-                                'date'   => $adj->created_at,
-                                'kind'   => 'adjustment',
-                                'type'   => $adj->type,
-                                'amount' => (float) $adj->amount,
-                                'status' => null,
-                                'notes'  => $adj->notes,
-                                'user'   => $adj->user ? $adj->user->name : 'Sistema',
-                            ]);
-                        }
-
-                        $timeline = $timeline->sortByDesc('date')->values();
-                    @endphp
-
-                    @if($timeline->isEmpty())
-                        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                            <i class="fa-regular fa-folder-open" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem; color: #cbd5e1;"></i>
-                            No hay movimientos registrados en esta reservación.
-                        </div>
-                    @else
-                        <table class="data-table" style="font-size: 0.85rem;">
-                            <thead>
-                                <tr>
-                                    <th style="width: 140px;">Fecha</th>
-                                    <th>Tipo</th>
-                                    <th style="text-align: right;">Monto</th>
-                                    <th>Estado</th>
-                                    <th>Nota / Referencia</th>
-                                    <th>Operador</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($timeline as $mov)
-                                    @php
-                                        // Estilos por tipo
-                                        if ($mov['kind'] === 'payment') {
-                                            $icon = 'fa-solid fa-circle-dollar-to-slot';
-                                            $label = 'Pago';
-                                            if ($mov['status'] === 'approved') {
-                                                $iconColor = '#166534';
-                                                $rowBg = '';
-                                                $badgeBg = '#dcfce7'; $badgeColor = '#166534'; $badgeText = 'Aprobado';
-                                            } elseif ($mov['status'] === 'pending') {
-                                                $iconColor = '#d97706';
-                                                $rowBg = '';
-                                                $badgeBg = '#fef3c7'; $badgeColor = '#92400e'; $badgeText = 'Pendiente';
-                                            } else {
-                                                $iconColor = '#ef4444';
-                                                $rowBg = 'opacity: 0.6;';
-                                                $badgeBg = '#fee2e2'; $badgeColor = '#991b1b'; $badgeText = ucfirst($mov['status'] ?? 'Rechazado');
-                                            }
-                                            $amountColor = '#166534';
-                                            $amountPrefix = '+';
-                                        } else {
-                                            // adjustment
-                                            $subType = $mov['type'] ?? 'note';
-                                            if ($subType === 'refund') {
-                                                $icon = 'fa-solid fa-arrow-rotate-left';
-                                                $label = 'Devolución';
-                                                $iconColor = '#059669';
-                                                $amountColor = '#059669';
-                                                $amountPrefix = '-';
-                                            } elseif ($subType === 'penalty') {
-                                                $icon = 'fa-solid fa-gavel';
-                                                $label = 'Penalización';
-                                                $iconColor = '#ea580c';
-                                                $amountColor = '#ea580c';
-                                                $amountPrefix = '-';
-                                            } else {
-                                                $icon = 'fa-regular fa-note-sticky';
-                                                $label = 'Nota';
-                                                $iconColor = '#64748b';
-                                                $amountColor = '#64748b';
-                                                $amountPrefix = '';
-                                            }
-                                            $rowBg = '';
-                                            $badgeBg = ''; $badgeColor = ''; $badgeText = '';
-                                        }
-                                    @endphp
-                                    <tr style="{{ $rowBg }}">
-                                        <td style="white-space: nowrap; color: var(--text-muted);">
-                                            {{ $mov['date']->format('d/m/Y H:i') }}
-                                        </td>
-                                        <td>
-                                            <span style="color: {{ $iconColor }}; font-weight: 600;">
-                                                <i class="{{ $icon }}"></i> {{ $label }}
-                                            </span>
-                                        </td>
-                                        <td style="text-align: right; font-weight: 700; color: {{ $amountColor }};">
-                                            @if($mov['amount'] > 0)
-                                                {{ $amountPrefix }}${{ number_format($mov['amount'], 2) }}
-                                            @else
-                                                <span style="color: var(--text-muted);">—</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if(!empty($badgeText))
-                                                <span style="display: inline-block; padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; background: {{ $badgeBg }}; color: {{ $badgeColor }};">
-                                                    {{ $badgeText }}
-                                                </span>
-                                            @else
-                                                <span style="color: var(--text-muted);">—</span>
-                                            @endif
-                                        </td>
-                                        <td style="color: var(--slate-500); font-size: 0.8rem;">
-                                            {{ $mov['notes'] ?? '—' }}
-                                        </td>
-                                        <td style="color: var(--text-muted); font-size: 0.8rem;">
-                                            {{ $mov['user'] ?? '—' }}
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Validación de Pasajeros -->
-            <div class="card" style="margin-top: 2rem;">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fa-solid fa-id-card"></i> Validación Pendiente</h3>
-                </div>
-                <div class="card-body">
-                    @php
-                        $pendingPassengers = $reservation->passengers->where('validation_status', 'pending');
-                    @endphp
-                    @if($pendingPassengers->isEmpty())
-                        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">
-                            <i class="fa-solid fa-check-circle" style="color: #166534;"></i> No hay pasajeros pendientes de validación en esta reserva.
-                        </p>
-                    @else
-                        @foreach($pendingPassengers as $passenger)
-                            <div style="border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 1rem;">
-                                <div style="font-weight: 700; color: var(--navy); margin-bottom: 0.25rem;">
-                                    Asiento {{ $passenger->seat_number }} - {{ $passenger->name }}
-                                </div>
-                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
-                                    Solicita: <strong style="color: var(--navy);">{{ ucfirst($passenger->passenger_type) }} ({{ $passenger->benefit_label }})</strong>
-                                </div>
-                                <form action="{{ route('admin.passengers.validate', $passenger->id) }}" method="POST">
-                                    @csrf
-                                    <div style="margin-bottom: 0.75rem;">
-                                        <input type="text" name="validation_notes" placeholder="Añadir nota opcional (ej. credencial borrosa)..." style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem;">
-                                    </div>
-                                    <div style="display: flex; gap: 0.5rem;">
-                                        <button type="submit" name="validation_status" value="validated" class="btn-action" style="background: #166534; padding: 0.5rem; font-size: 0.85rem; flex: 1; justify-content: center;" onclick="return confirm('¿Aprobar el descuento para este pasajero?');">
-                                            <i class="fa-solid fa-check"></i> Validar
-                                        </button>
-                                        <button type="submit" name="validation_status" value="rejected" class="btn-action" style="background: var(--primary); padding: 0.5rem; font-size: 0.85rem; flex: 1; justify-content: center;" onclick="return confirm('¿Rechazar el descuento? El pago seguirá igual por ahora.');">
-                                            <i class="fa-solid fa-xmark"></i> Rechazar
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        @endforeach
-                    @endif
-                </div>
-            </div>
         </div>
-
     </div>
+
 </x-app-layout>
