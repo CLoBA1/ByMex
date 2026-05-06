@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <select class="form-control p-type" name="passengers[${index}][passenger_type]" style="padding: 0.5rem; font-size: 0.85rem; height: auto;">
                                 <option value="Adulto" ${prevData.type === 'Adulto' ? 'selected' : ''}>Adulto (100%)</option>
                                 <option value="Niño" ${prevData.type === 'Niño' ? 'selected' : ''}>Niño 3-10 (50%)</option>
-                                <option value="Adulto Mayor" ${prevData.type === 'Adulto Mayor' ? 'selected' : ''}>Adulto Mayor (70%)</option>
+                                <option value="Adulto Mayor" ${prevData.type === 'Adulto Mayor' ? 'selected' : ''}>Adulto Mayor</option>
                             </select>
                         </div>
                         <div style="flex: 1; min-width: 120px;">
@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (select.value === 'Niño') {
                     pPrice = pricePerSeat * 0.5;
                 } else if (select.value === 'Adulto Mayor') {
-                    pPrice = pricePerSeat * 0.7;
+                    pPrice = pricePerSeat; // No discount for Adulto Mayor
                 }
                 finalTotal += pPrice;
             });

@@ -16,7 +16,17 @@ class PaymentService
 {
     public function __construct()
     {
-        Stripe::setApiKey(config('services.stripe.secret'));
+        $key = config('services.stripe.key');
+        $secret = config('services.stripe.secret');
+
+        Log::info('Stripe Config Debug', [
+            'has_key' => !empty($key),
+            'has_secret' => !empty($secret),
+            'key_prefix' => !empty($key) ? substr($key, 0, 8) . '...' : null,
+            'secret_prefix' => !empty($secret) ? substr($secret, 0, 8) . '...' : null,
+        ]);
+
+        Stripe::setApiKey($secret);
     }
 
     /**

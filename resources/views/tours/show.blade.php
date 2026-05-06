@@ -4,6 +4,56 @@
 
 @section('extra-css')
     <link rel="stylesheet" href="{{ asset('css/tour.css') }}">
+    <style>
+        /* Mejoras de legibilidad general */
+        .info-card p, .info-card ul li {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--navy);
+        }
+        
+        /* Sistema "Ver más" / "Ver menos" */
+        .expandable-text {
+            position: relative;
+            overflow: hidden;
+            max-height: 6.4rem; /* Aprox 4 líneas */
+            transition: max-height 0.3s ease-out;
+        }
+        .expandable-text.expanded {
+            max-height: 5000px; /* Suficiente para texto largo */
+            transition: max-height 0.5s ease-in;
+        }
+        .expandable-text.has-overflow::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 45px;
+            background: linear-gradient(to bottom, transparent, #ffffff);
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .expandable-text.expanded::after {
+            opacity: 0;
+        }
+        .btn-ver-mas {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-weight: 700;
+            cursor: pointer;
+            padding: 0;
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        .btn-ver-mas:hover {
+            color: var(--navy);
+            text-decoration: underline;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -40,7 +90,10 @@
                 {{-- Card: Description --}}
                 <div class="info-card" data-aos="fade-up" data-aos-delay="100">
                     <h3><i class="fa-solid fa-clipboard-list"></i> Descripción del Viaje</h3>
-                    <p>{{ $tour->description ?? 'Disfruta de una experiencia inolvidable. Nuestro viaje está diseñado para que te relajes y disfrutes al máximo, nosotros nos encargamos de la logística, el transporte y la seguridad.' }}</p>
+                    <div class="expandable-text js-expandable">
+                        <p>{!! nl2br(e($tour->description ?? 'Disfruta de una experiencia inolvidable. Nuestro viaje está diseñado para que te relajes y disfrutes al máximo, nosotros nos encargamos de la logística, el transporte y la seguridad.')) !!}</p>
+                    </div>
+                    <button class="btn-ver-mas js-btn-expand" type="button">Ver más <i class="fa-solid fa-chevron-down"></i></button>
                 </div>
 
                 {{-- Card: What's Included --}}
@@ -181,6 +234,29 @@
     <script>
         window.API_URL_SEATS = "{{ url('api/seats') }}/{{ $tour->id }}";
         window.BOARDING_POINTS = @json($boardingPoints);
+        
+        // Lógica de "Ver más / Ver menos"
+        document.addEventListener('DOMContentLoaded', function() {
+            const expandableBlocks = document.querySelectorAll('.js-expandable');
+            
+            expandableBlocks.forEach(block => {
+                const btn = block.nextElementSibling;
+                // Verificar si el contenido desborda el max-height actual
+                if (block.scrollHeight > block.clientHeight) {
+                    block.classList.add('has-overflow');
+                    btn.style.display = 'inline-block';
+                    
+                    btn.addEventListener('click', function() {
+                        block.classList.toggle('expanded');
+                        if (block.classList.contains('expanded')) {
+                            this.innerHTML = 'Ver menos <i class="fa-solid fa-chevron-up"></i>';
+                        } else {
+                            this.innerHTML = 'Ver más <i class="fa-solid fa-chevron-down"></i>';
+                        }
+                    });
+                }
+            });
+        });
     </script>
     <script src="{{ asset('js/tour.js') }}?v={{ filemtime(public_path('js/tour.js')) }}"></script>
 @endsection

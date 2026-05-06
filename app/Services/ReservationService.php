@@ -193,8 +193,6 @@ class ReservationService
         
         if ($passengerType === 'Niño') {
             $discount = $basePrice * 0.5; // 50% descuento
-        } elseif ($passengerType === 'Adulto Mayor') {
-            $discount = $basePrice * 0.3; // 30% descuento
         }
         
         return [
