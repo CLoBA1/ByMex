@@ -3,82 +3,8 @@
 @section('title', 'Inicio')
 
 @section('content')
-    <!-- Hero Swiper (Pantalla Completa) -->
-    <section class="hero-swiper-container">
-        <div class="swiper heroSwiper" style="width: 100%; height: 100%;">
-            <div class="swiper-wrapper">
-                @if(isset($banners) && $banners->count() > 0)
-                    @foreach($banners as $banner)
-                        <div class="swiper-slide">
-                            <picture>
-                                @if($banner->image_mobile)
-                                    <source media="(max-width: 768px)" srcset="{{ Storage::url($banner->image_mobile) }}">
-                                @endif
-                                <img src="{{ Storage::url($banner->image_desktop) }}" class="hero-slide-bg" alt="{{ $banner->title ?? 'Banner Promocional' }}">
-                            </picture>
-                            <div class="hero-overlay"></div>
-                            <div class="hero-content">
-                                @if($banner->title)
-                                    <h1 data-aos="fade-up" data-aos-delay="200" style="color:white; font-size:clamp(2.5rem, 6vw, 4.5rem); margin-bottom:1rem; font-weight:800; text-transform:uppercase; letter-spacing:2px; line-height:1.1;">
-                                        {!! nl2br(e($banner->title)) !!}
-                                    </h1>
-                                @endif
-                                @if($banner->subtitle)
-                                    <p data-aos="fade-up" data-aos-delay="300" style="color:#e2e8f0; font-size:1.2rem; max-width:600px; margin-bottom:2rem;">{{ $banner->subtitle }}</p>
-                                @endif
-                                @if($banner->link && $banner->button_text)
-                                    <a href="{{ $banner->link }}" class="btn btn-primary" style="font-size:1.1rem; padding:1rem 2rem;" data-aos="zoom-in" data-aos-delay="400">
-                                        {{ $banner->button_text }} <i class="fa-solid fa-arrow-right"></i>
-                                    </a>
-                                @endif
-                            </div>
-                        </div>
-                    @endforeach
-                @else
-                    <!-- Fallback if no banners -->
-                    <div class="swiper-slide">
-                        <img src="https://images.unsplash.com/photo-1512813195386-6cf811ad3542?auto=format&fit=crop&q=80&w=1920" class="hero-slide-bg" alt="México">
-                        <div class="hero-overlay"></div>
-                        <div class="hero-content">
-                            <div class="hero-badge" data-aos="fade-down" data-aos-delay="100"><i class="fa-solid fa-star"></i> EXPERIENCIAS PREMIUM</div>
-                            <h1 data-aos="fade-up" data-aos-delay="200" style="color:white; font-size:clamp(2.5rem, 6vw, 4.5rem); margin-bottom:1rem; font-weight:800; text-transform:uppercase; letter-spacing:2px; line-height:1.1;">
-                                Descubre México<br><span style="color:var(--gold);">A Otro Nivel</span>
-                            </h1>
-                            <p data-aos="fade-up" data-aos-delay="300" style="color:#e2e8f0; font-size:1.2rem; max-width:600px; margin-bottom:2rem;">Autobuses de lujo, hospedaje 4 estrellas y atención personalizada.</p>
-                            <a href="{{ route('tours.index') }}" class="btn btn-primary" style="font-size:1.1rem; padding:1rem 2rem;" data-aos="zoom-in" data-aos-delay="400">Ver Catálogo <i class="fa-solid fa-arrow-right"></i></a>
-                        </div>
-                    </div>
-                @endif
-            </div>
-            @if(isset($banners) && $banners->count() > 1)
-                <div class="swiper-button-next"></div>
-                <div class="swiper-button-prev"></div>
-            @endif
-        </div>
-    </section>
-
-    <!-- Floating Search Widget -->
-    <div class="search-widget-floating" data-aos="fade-up" data-aos-delay="500">
-        <div class="form-group">
-            <label>Destino</label>
-            <select id="searchDest">
-                <option value="">¿A dónde vamos?</option>
-                @foreach($tours ?? [] as $t)
-                    <option value="{{ $t->id }}">{{ $t->destination }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Pasajeros</label>
-            <input type="number" min="1" max="10" value="2">
-        </div>
-        <button class="btn btn-primary btn-search" id="btnSearch" onclick="window.location.href='{{ route('tours.index') }}'"><i class="fa-solid fa-magnifying-glass" style="margin-right: .5rem;"></i> Buscar</button>
-    </div>
-
-
-
     <!-- Horizontal Scroll Destinos Destacados -->
-    <section class="section-pad bg-light" id="tours">
+    <section class="section-pad bg-light" id="tours" style="padding-top: 8rem;">
         <div class="container" style="max-width: 1400px; padding: 0;">
             <div class="text-center" style="margin-bottom: 3rem;">
                 <div class="section-label" data-aos="fade-up"><i class="fa-solid fa-circle"></i> PRÓXIMAS SALIDAS</div>
@@ -121,27 +47,4 @@
         </div>
     </section>
 
-
-
-@endsection
-
-@section('extra-js')
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        if(typeof Swiper !== 'undefined') {
-            const heroSwiper = new Swiper('.heroSwiper', {
-                loop: true,
-                effect: 'fade',
-                autoplay: {
-                    delay: 5000,
-                    disableOnInteraction: false,
-                },
-                navigation: {
-                    nextEl: '.swiper-button-next',
-                    prevEl: '.swiper-button-prev',
-                },
-            });
-        }
-    });
-</script>
 @endsection
