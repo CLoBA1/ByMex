@@ -68,11 +68,6 @@
                 @endforeach
             </select>
         </div>
-        <div class="form-group" style="border-left: 1px solid var(--border); padding-left: 1rem; display: flex; align-items: center; justify-content: center;">
-            <div style="background: var(--primary); color: white; padding: 0.5rem 1rem; border-radius: 8px; font-weight: bold; font-size: 0.9rem; text-align: center; width: 100%;">
-                <i class="fa-solid fa-tag"></i> ¡Reserva ahora y aparta tu lugar!
-            </div>
-        </div>
         <div class="form-group">
             <label>Pasajeros</label>
             <input type="number" min="1" max="10" value="2">
