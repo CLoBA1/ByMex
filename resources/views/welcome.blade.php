@@ -80,25 +80,7 @@
         <button class="btn btn-primary btn-search" id="btnSearch" onclick="window.location.href='{{ route('tours.index') }}'"><i class="fa-solid fa-magnifying-glass" style="margin-right: .5rem;"></i> Buscar</button>
     </div>
 
-    <!-- Trust Bar -->
-    <section class="trust-bar" style="position:relative; z-index:10; margin-top: 2rem;">
-        <div class="container">
-            <div class="trust-grid" style="background:var(--white); padding:2rem; border-radius:var(--radius-xl); border:1px solid var(--slate-100);">
-                <div class="trust-item" data-aos="zoom-in" data-aos-delay="0">
-                    <div class="trust-icon red"><i class="fa-solid fa-bus"></i></div><span>Autobuses de lujo</span>
-                </div>
-                <div class="trust-item" data-aos="zoom-in" data-aos-delay="100">
-                    <div class="trust-icon gold"><i class="fa-solid fa-hotel"></i></div><span>Hoteles 4 estrellas</span>
-                </div>
-                <div class="trust-item" data-aos="zoom-in" data-aos-delay="200">
-                    <div class="trust-icon teal"><i class="fa-solid fa-shield-heart"></i></div><span>Seguro de viajero</span>
-                </div>
-                <div class="trust-item" data-aos="zoom-in" data-aos-delay="300">
-                    <div class="trust-icon navy"><i class="fa-solid fa-headset"></i></div><span>Atención personalizada</span>
-                </div>
-            </div>
-        </div>
-    </section>
+
 
     <!-- Horizontal Scroll Destinos Destacados -->
     <section class="section-pad bg-light" id="tours">
