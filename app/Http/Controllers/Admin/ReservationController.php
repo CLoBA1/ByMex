@@ -187,7 +187,9 @@ class ReservationController extends Controller
             'amount' => 'required|numeric|min:0.01',
         ]);
 
-        DB::transaction(function () use ($reservation, $request) {
+        $notificationData = null;
+
+        DB::transaction(function () use ($reservation, $request, &$notificationData) {
             \App\Models\Payment::create([
                 'reservation_id' => $reservation->id,
                 'amount' => $request->amount,
@@ -203,32 +205,43 @@ class ReservationController extends Controller
                 \App\Models\ReservationSeat::where('reservation_id', $reservation->id)
                     ->update(['status' => 'paid']);
 
-                $admin = \App\Models\AdminOwner::first();
-                if ($admin) {
-                    $admin->notify(new \App\Notifications\SystemAlert(
-                        'Reserva Liquidada',
-                        "La reserva #{$reservation->id} de {$reservation->client->name} ha sido pagada en su totalidad.",
-                        route('admin.reservations.show', $reservation->id),
-                        'fa-solid fa-check-double'
-                    ));
-                }
+                $notificationData = [
+                    'title' => 'Reserva Liquidada',
+                    'message' => "La reserva #{$reservation->id} de {$reservation->client->name} ha sido pagada en su totalidad.",
+                    'url' => route('admin.reservations.show', $reservation->id),
+                    'icon' => 'fa-solid fa-check-double',
+                ];
             } else {
                 $reservation->status = \App\Enums\ReservationStatus::PARTIAL;
                 \App\Models\ReservationSeat::where('reservation_id', $reservation->id)
                     ->update(['status' => 'reserved']);
 
-                $admin = \App\Models\AdminOwner::first();
-                if ($admin) {
-                    $admin->notify(new \App\Notifications\SystemAlert(
-                        'Abono Registrado',
-                        "Se registró un abono de \$" . number_format($request->amount, 2) . " en la reserva #{$reservation->id}.",
-                        route('admin.reservations.show', $reservation->id),
-                        'fa-solid fa-money-bill-wave'
-                    ));
-                }
+                $notificationData = [
+                    'title' => 'Abono Registrado',
+                    'message' => "Se registró un abono de \$" . number_format($request->amount, 2) . " en la reserva #{$reservation->id}.",
+                    'url' => route('admin.reservations.show', $reservation->id),
+                    'icon' => 'fa-solid fa-money-bill-wave',
+                ];
             }
             $reservation->save();
         });
+
+        // Enviar notificación FUERA de la transacción para que un fallo de SMTP no reviente el pago
+        if ($notificationData) {
+            try {
+                $admin = \App\Models\AdminOwner::first();
+                if ($admin) {
+                    $admin->notify(new \App\Notifications\SystemAlert(
+                        $notificationData['title'],
+                        $notificationData['message'],
+                        $notificationData['url'],
+                        $notificationData['icon']
+                    ));
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Notificación de abono falló (el pago SÍ se registró correctamente): ' . $e->getMessage());
+            }
+        }
 
         return back()->with('success', 'Pago registrado correctamente. Saldo actualizado.');
     }
