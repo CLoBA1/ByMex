@@ -7,48 +7,53 @@
     <section class="hero-swiper-container">
         <div class="swiper heroSwiper" style="width: 100%; height: 100%;">
             <div class="swiper-wrapper">
-                <!-- Slide 1 -->
-                <div class="swiper-slide">
-                    <img src="https://images.unsplash.com/photo-1512813195386-6cf811ad3542?auto=format&fit=crop&q=80&w=1920" class="hero-slide-bg" alt="México">
-                    <div class="hero-overlay"></div>
-                    <div class="hero-content">
-                        <div class="hero-badge" data-aos="fade-down" data-aos-delay="100"><i class="fa-solid fa-star"></i> EXPERIENCIAS PREMIUM</div>
-                        <h1 data-aos="fade-up" data-aos-delay="200" style="color:white; font-size:clamp(2.5rem, 6vw, 4.5rem); margin-bottom:1rem; font-weight:800; text-transform:uppercase; letter-spacing:2px; line-height:1.1;">
-                            Descubre México<br><span style="color:var(--gold);">A Otro Nivel</span>
-                        </h1>
-                        <p data-aos="fade-up" data-aos-delay="300" style="color:#e2e8f0; font-size:1.2rem; max-width:600px; margin-bottom:2rem;">Autobuses de lujo, hospedaje 4 estrellas y atención personalizada.</p>
-                        <a href="{{ route('tours.index') }}" class="btn btn-primary" style="font-size:1.1rem; padding:1rem 2rem;" data-aos="zoom-in" data-aos-delay="400">Ver Catálogo <i class="fa-solid fa-arrow-right"></i></a>
+                @if(isset($banners) && $banners->count() > 0)
+                    @foreach($banners as $banner)
+                        <div class="swiper-slide">
+                            <picture>
+                                @if($banner->image_mobile)
+                                    <source media="(max-width: 768px)" srcset="{{ Storage::url($banner->image_mobile) }}">
+                                @endif
+                                <img src="{{ Storage::url($banner->image_desktop) }}" class="hero-slide-bg" alt="{{ $banner->title ?? 'Banner Promocional' }}">
+                            </picture>
+                            <div class="hero-overlay"></div>
+                            <div class="hero-content">
+                                @if($banner->title)
+                                    <h1 data-aos="fade-up" data-aos-delay="200" style="color:white; font-size:clamp(2.5rem, 6vw, 4.5rem); margin-bottom:1rem; font-weight:800; text-transform:uppercase; letter-spacing:2px; line-height:1.1;">
+                                        {!! nl2br(e($banner->title)) !!}
+                                    </h1>
+                                @endif
+                                @if($banner->subtitle)
+                                    <p data-aos="fade-up" data-aos-delay="300" style="color:#e2e8f0; font-size:1.2rem; max-width:600px; margin-bottom:2rem;">{{ $banner->subtitle }}</p>
+                                @endif
+                                @if($banner->link && $banner->button_text)
+                                    <a href="{{ $banner->link }}" class="btn btn-primary" style="font-size:1.1rem; padding:1rem 2rem;" data-aos="zoom-in" data-aos-delay="400">
+                                        {{ $banner->button_text }} <i class="fa-solid fa-arrow-right"></i>
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                @else
+                    <!-- Fallback if no banners -->
+                    <div class="swiper-slide">
+                        <img src="https://images.unsplash.com/photo-1512813195386-6cf811ad3542?auto=format&fit=crop&q=80&w=1920" class="hero-slide-bg" alt="México">
+                        <div class="hero-overlay"></div>
+                        <div class="hero-content">
+                            <div class="hero-badge" data-aos="fade-down" data-aos-delay="100"><i class="fa-solid fa-star"></i> EXPERIENCIAS PREMIUM</div>
+                            <h1 data-aos="fade-up" data-aos-delay="200" style="color:white; font-size:clamp(2.5rem, 6vw, 4.5rem); margin-bottom:1rem; font-weight:800; text-transform:uppercase; letter-spacing:2px; line-height:1.1;">
+                                Descubre México<br><span style="color:var(--gold);">A Otro Nivel</span>
+                            </h1>
+                            <p data-aos="fade-up" data-aos-delay="300" style="color:#e2e8f0; font-size:1.2rem; max-width:600px; margin-bottom:2rem;">Autobuses de lujo, hospedaje 4 estrellas y atención personalizada.</p>
+                            <a href="{{ route('tours.index') }}" class="btn btn-primary" style="font-size:1.1rem; padding:1rem 2rem;" data-aos="zoom-in" data-aos-delay="400">Ver Catálogo <i class="fa-solid fa-arrow-right"></i></a>
+                        </div>
                     </div>
-                </div>
-                <!-- Slide 2 -->
-                <div class="swiper-slide">
-                    <img src="https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?auto=format&fit=crop&q=80&w=1920" class="hero-slide-bg" alt="Naturaleza">
-                    <div class="hero-overlay"></div>
-                    <div class="hero-content">
-                        <div class="hero-badge"><i class="fa-solid fa-leaf"></i> NATURALEZA Y CULTURA</div>
-                        <h1 style="color:white; font-size:clamp(2.5rem, 6vw, 4.5rem); margin-bottom:1rem; font-weight:800; text-transform:uppercase; letter-spacing:2px; line-height:1.1;">
-                            Conecta con tus<br><span style="color:var(--teal);">Raíces</span>
-                        </h1>
-                        <p style="color:#e2e8f0; font-size:1.2rem; max-width:600px; margin-bottom:2rem;">Visita santuarios, playas y pueblos mágicos con total comodidad.</p>
-                        <a href="{{ route('tours.index') }}" class="btn btn-primary" style="font-size:1.1rem; padding:1rem 2rem;">Reservar Ahora <i class="fa-solid fa-arrow-right"></i></a>
-                    </div>
-                </div>
-                <!-- Slide 3 -->
-                <div class="swiper-slide">
-                    <img src="https://images.unsplash.com/photo-1582650517303-b42616d56fba?auto=format&fit=crop&q=80&w=1920" class="hero-slide-bg" alt="Santuarios">
-                    <div class="hero-overlay"></div>
-                    <div class="hero-content">
-                        <div class="hero-badge"><i class="fa-solid fa-bus"></i> VIAJA SEGURO</div>
-                        <h1 style="color:white; font-size:clamp(2.5rem, 6vw, 4.5rem); margin-bottom:1rem; font-weight:800; text-transform:uppercase; letter-spacing:2px; line-height:1.1;">
-                            Tu única tarea es<br><span style="color:var(--primary);">Disfrutar</span>
-                        </h1>
-                        <p style="color:#e2e8f0; font-size:1.2rem; max-width:600px; margin-bottom:2rem;">Nosotros nos encargamos de todo lo demás.</p>
-                        <a href="{{ route('about') }}" class="btn btn-outline" style="border-width:2px; color:white; border-color:white; font-size:1.1rem; padding:1rem 2rem;">Conoce Nuestra Historia <i class="fa-solid fa-arrow-right"></i></a>
-                    </div>
-                </div>
+                @endif
             </div>
-            <div class="swiper-button-next"></div>
-            <div class="swiper-button-prev"></div>
+            @if(isset($banners) && $banners->count() > 1)
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+            @endif
         </div>
     </section>
 
@@ -63,9 +68,10 @@
                 @endforeach
             </select>
         </div>
-        <div class="form-group">
-            <label>Mes de Viaje</label>
-            <input type="month" value="{{ date('Y-m') }}">
+        <div class="form-group" style="border-left: 1px solid var(--border); padding-left: 1rem; display: flex; align-items: center; justify-content: center;">
+            <div style="background: var(--primary); color: white; padding: 0.5rem 1rem; border-radius: 8px; font-weight: bold; font-size: 0.9rem; text-align: center; width: 100%;">
+                <i class="fa-solid fa-tag"></i> ¡Reserva ahora y aparta tu lugar!
+            </div>
         </div>
         <div class="form-group">
             <label>Pasajeros</label>
@@ -138,29 +144,7 @@
         </div>
     </section>
 
-    <!-- Masonry Gallery -->
-    <section class="section-pad">
-        <div class="container text-center">
-            <div class="section-label" data-aos="fade-up"><i class="fa-solid fa-circle"></i> EXPERIENCIAS RECOMENDADAS</div>
-            <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">Momentos Inolvidables By Mex</h2>
-            <p class="section-desc" data-aos="fade-up" data-aos-delay="200" style="margin-bottom:3rem;">Nuestros viajeros son nuestra mejor garantía.</p>
 
-            <div class="masonry-gallery" data-aos="fade-up" data-aos-delay="300">
-                <div class="masonry-item tall">
-                    <img src="https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?auto=format&fit=crop&q=80&w=800" alt="Viajeros">
-                </div>
-                <div class="masonry-item square">
-                    <img src="https://images.unsplash.com/photo-1527668752968-14ce70a27dd3?auto=format&fit=crop&q=80&w=600" alt="Paisaje">
-                </div>
-                <div class="masonry-item square">
-                    <img src="https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=600" alt="Playa">
-                </div>
-                <div class="masonry-item wide">
-                    <img src="https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&q=80&w=1200" alt="Piramide">
-                </div>
-            </div>
-        </div>
-    </section>
 
 @endsection
 

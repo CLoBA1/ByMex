@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ClientController as AdminClientController;
 use App\Http\Controllers\Admin\ReservationController as AdminReservationController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\BoardingPointController as AdminBoardingPointController;
+use App\Http\Controllers\Admin\BannerController as AdminBannerController;
 
 use App\Http\Controllers\Api\SeatController as ApiSeatController;
 use App\Http\Controllers\Api\NotificationController as ApiNotificationController;
@@ -59,6 +60,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/documents/{id}/download', [AdminReservationController::class, 'downloadDocument'])->name('admin.documents.download');
     Route::delete('/admin/documents/{id}', [AdminReservationController::class, 'deleteDocument'])->name('admin.documents.destroy');
     Route::delete('/admin/reservations/{id}', [AdminReservationController::class, 'destroy'])->name('admin.reservations.destroy');
+
+    // Banners CRUD
+    Route::resource('admin/banners', AdminBannerController::class)->names([
+        'index' => 'admin.banners.index',
+        'create' => 'admin.banners.create',
+        'store' => 'admin.banners.store',
+        'edit' => 'admin.banners.edit',
+        'update' => 'admin.banners.update',
+        'destroy' => 'admin.banners.destroy',
+    ]);
 
     // Clientes
     Route::get('/admin/clients', [AdminClientController::class, 'index'])->name('admin.clients.index');
