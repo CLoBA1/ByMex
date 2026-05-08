@@ -64,7 +64,9 @@
                             <div class="card-content">
                                 <div class="card-tags">
                                     @if($i === 1)<span class="tag hot"><i class="fa-solid fa-fire"></i> Más vendido</span>@endif
-                                    <span class="tag"><i class="fa-solid fa-bus"></i> Transporte Lujo</span>
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--slate-500); margin-bottom: 0.5rem; font-weight: 500;">
+                                    <i class="fa-solid fa-map-pin" style="color: var(--primary);"></i> Salidas desde: Acapulco, Chilpancingo e Iguala
                                 </div>
                                 <h3 class="card-title">{{ $tour->title }}</h3>
                                 <div class="card-date"><i class="fa-regular fa-calendar"></i> {{ \Carbon\Carbon::parse($tour->departure_date)->translatedFormat('d \d\e F') }}</div>

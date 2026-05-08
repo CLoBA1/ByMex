@@ -82,8 +82,7 @@
                     <h2>{{ $tour->title }}</h2>
                     <div class="tour-meta-row">
                         <span><i class="fa-regular fa-calendar"></i> Salida: {{ \Carbon\Carbon::parse($tour->departure_date)->translatedFormat('d \d\e F Y - H:i') }} hrs</span>
-                        <span><i class="fa-solid fa-users"></i> {{ $tour->total_seats }} Lugares en total</span>
-                        <span><i class="fa-solid fa-bus"></i> Transporte Lujo</span>
+                        <span><i class="fa-solid fa-map-pin"></i> Salidas desde: Acapulco, Chilpancingo e Iguala</span>
                     </div>
                 </div>
 
