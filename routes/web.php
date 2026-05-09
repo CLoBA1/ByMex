@@ -57,6 +57,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/admin/passengers/{id}/validate', [AdminReservationController::class, 'validatePassenger'])->name('admin.passengers.validate');
     Route::post('/admin/passengers/{id}/status', [AdminReservationController::class, 'updatePassengerStatus'])->name('admin.passengers.status');
     Route::post('/admin/passengers/{id}/type', [AdminReservationController::class, 'updatePassengerType'])->name('admin.passengers.type');
+    // Autobuses (Flota)
+    Route::resource('admin/buses', \App\Http\Controllers\Admin\BusController::class)->names([
+        'index' => 'admin.buses.index',
+        'create' => 'admin.buses.create',
+        'store' => 'admin.buses.store',
+        'edit' => 'admin.buses.edit',
+        'update' => 'admin.buses.update',
+        'destroy' => 'admin.buses.destroy',
+    ]);
+    Route::delete('/admin/buses/images/{image}', [\App\Http\Controllers\Admin\BusController::class, 'destroyImage'])->name('admin.buses.images.destroy');
+    Route::post('/admin/buses/images/{image}/primary', [\App\Http\Controllers\Admin\BusController::class, 'setPrimaryImage'])->name('admin.buses.images.primary');
+
     Route::post('/admin/reservations/{id}/adjustment', [AdminReservationController::class, 'storeAdjustment'])->name('admin.reservations.adjustment');
     Route::post('/admin/passengers/{id}/document', [AdminReservationController::class, 'uploadDocument'])->name('admin.passengers.document.upload');
     Route::get('/admin/documents/{id}/download', [AdminReservationController::class, 'downloadDocument'])->name('admin.documents.download');

@@ -24,7 +24,8 @@ class HomeController extends Controller
 
     public function about()
     {
-        return view('about');
+        $buses = \App\Models\Bus::where('is_active', true)->with('images')->get();
+        return view('about', compact('buses'));
     }
 
     public function services()

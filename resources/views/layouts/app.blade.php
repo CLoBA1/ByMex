@@ -192,6 +192,9 @@
             <a href="{{ route('admin.banners.index') }}" class="nav-item {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-images"></i> Banners Inicio
             </a>
+            <a href="{{ route('admin.buses.index') }}" class="nav-item {{ request()->routeIs('admin.buses.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-bus-simple"></i> Flota de Autobuses
+            </a>
             <a href="{{ route('admin.settings.payments') }}" class="nav-item {{ request()->routeIs('admin.settings.payments', 'admin.settings.banks.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-money-check-dollar"></i> Cuentas y Pagos
             </a>
