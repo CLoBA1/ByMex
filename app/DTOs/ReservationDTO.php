@@ -9,7 +9,7 @@ class ReservationDTO
         public readonly string $seats,
         public readonly string $name,
         public readonly string $phone,
-        public readonly string $email,
+        public readonly ?string $email = null,
         public readonly ?string $whatsapp = null,
         public readonly ?array $passengers = null
     ) {}
@@ -21,7 +21,7 @@ class ReservationDTO
             seats: $data['seats'],
             name: $data['name'],
             phone: $data['phone'],
-            email: $data['email'],
+            email: $data['email'] ?? null,
             whatsapp: $data['whatsapp'] ?? null,
             passengers: $data['passengers'] ?? null
         );
