@@ -95,7 +95,14 @@
                     <h3 class="card-title"><i class="fa-solid fa-address-card"></i> Contacto Principal</h3>
                 </div>
                 <div class="card-body">
-                    <h4 style="font-weight: 700; color: var(--navy); margin-bottom: 0.5rem; font-size: 1.1rem;">{{ $reservation->client->name }}</h4>
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                        <h4 style="font-weight: 700; color: var(--navy); margin: 0; font-size: 1.1rem;">{{ $reservation->client->name }}</h4>
+                        @if($reservation->client->membership_number)
+                            <span style="background: var(--navy); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; letter-spacing: 0.5px;">
+                                <i class="fa-solid fa-crown" style="color: #fbbf24; margin-right: 3px;"></i> {{ $reservation->client->membership_number }}
+                            </span>
+                        @endif
+                    </div>
                     <p style="margin-bottom: 0.5rem; color: var(--slate-600);">
                         <i class="fa-regular fa-envelope" style="width: 20px;"></i> {{ $reservation->client->email }}
                     </p>

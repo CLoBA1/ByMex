@@ -14,6 +14,7 @@
                     <thead>
                         <tr>
                             <th>Nombre Completo</th>
+                            <th>Membresía</th>
                             <th>Contacto</th>
                             <th>Lugar de Origen</th>
                             <th style="text-align: center;">Total Reservas</th>
@@ -34,6 +35,11 @@
                                 <td style="font-weight: 700; color: var(--navy);">
                                     {{ $client->name }}<br>
                                     <span style="font-size: 0.75rem; font-weight: 400; color: var(--text-muted);">CURP: {{ $client->curp ?? 'N/A' }}</span>
+                                </td>
+                                <td>
+                                    <span style="background: var(--navy); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">
+                                        {{ $client->membership_number ?? 'SIN MEMBRESÍA' }}
+                                    </span>
                                 </td>
                                 <td>
                                     <div style="font-size: 0.85rem;"><i class="fa-solid fa-phone" style="color:var(--slate-400);"></i> {{ $client->phone }}</div>
