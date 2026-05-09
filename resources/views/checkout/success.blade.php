@@ -83,6 +83,10 @@
                 <i class="fa-solid fa-check-double success-icon" style="color: #10b981;"></i>
                 <h1 style="color: var(--color-dark); font-size: 2.5rem;">¡Pago Confirmado!</h1>
                 <p style="color: var(--color-dark-muted); font-size: 1.1rem;">Tu reserva está pagada. ¡Prepara tus maletas!</p>
+            @elseif(request('mp_status') === 'approved' || request('mp_status') === 'pending')
+                <i class="fa-solid fa-clock-rotate-left success-icon" style="color: #f59e0b;"></i>
+                <h1 style="color: var(--color-dark); font-size: 2.5rem;">Validando Pago...</h1>
+                <p style="color: var(--color-dark-muted); font-size: 1.1rem;">Hemos recibido tu solicitud de pago. Estamos esperando la confirmación del sistema. En breve actualizaremos el estado.</p>
             @else
                 <i class="fa-solid fa-circle-check success-icon"></i>
                 <h1 style="color: var(--color-dark); font-size: 2.5rem;">¡Reserva Generada!</h1>

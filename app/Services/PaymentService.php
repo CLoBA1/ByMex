@@ -92,7 +92,7 @@ class PaymentService
                         'description' => "Asientos: {$seatList} ({$seatCount} lugar" . ($seatCount > 1 ? 'es' : '') . ")",
                         'quantity' => 1,
                         'currency_id' => 'MXN',
-                        'unit_price' => (float) $reservation->total_amount,
+                        'unit_price' => (float) $reservation->balance_due,
                     ]
                 ],
                 'payer' => [

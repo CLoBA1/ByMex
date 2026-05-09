@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -100,6 +99,8 @@ class MercadoPagoWebhookController extends Controller
             }
 
             Log::info("Reserva #{$reservation->id} procesó abono de {$amountPaid} vía Mercado Pago.");
+        } else {
+            Log::info("Mercado Pago Webhook: Pago {$paymentId} ignorado porque su estado es '{$paymentData['status']}'.");
         }
     }
 }
