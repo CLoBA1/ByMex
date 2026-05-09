@@ -36,7 +36,7 @@
                 <a href="{{ route('home') }}" onclick="document.getElementById('mobile-nav-links').classList.remove('mobile-active')">Inicio</a>
                 <a href="{{ route('about') }}" onclick="document.getElementById('mobile-nav-links').classList.remove('mobile-active')">Nosotros</a>
                 <a href="{{ route('tours.index') }}" onclick="document.getElementById('mobile-nav-links').classList.remove('mobile-active')">Destinos</a>
-                <a href="{{ route('home') }}#servicios" onclick="document.getElementById('mobile-nav-links').classList.remove('mobile-active')">Servicios</a>
+                <a href="{{ route('services') }}" onclick="document.getElementById('mobile-nav-links').classList.remove('mobile-active')">Servicios</a>
             </div>
             
             <div class="nav-actions">

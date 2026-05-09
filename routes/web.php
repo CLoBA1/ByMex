@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 // Rutas Públicas (Web)
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
+Route::get('/servicios', [HomeController::class, 'services'])->name('services');
 
 Route::get('/tours', [WebTourController::class, 'index'])->name('tours.index');
 Route::get('/tours/{id}', [WebTourController::class, 'show'])->name('tours.show');
