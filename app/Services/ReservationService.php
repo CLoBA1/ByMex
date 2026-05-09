@@ -36,7 +36,7 @@ class ReservationService
             // MODO NUEVO: Se recibieron pasajeros detallados
             foreach ($dto->passengers as $p) {
                 $basePrice = $tour->price;
-                $pricing = $this->calculatePassengerPricing($basePrice, $p['passenger_type']);
+                $pricing = $this->calculatePassengerPricing($tour, $p['passenger_type']);
                 $discount = $pricing['discount_amount'];
                 $finalPrice = $pricing['final_price'];
 
@@ -47,6 +47,7 @@ class ReservationService
                 $passengersData[] = [
                     'seat_number' => $p['seat_number'],
                     'name' => $p['name'],
+                    'phone' => $p['phone'] ?? null,
                     'passenger_type' => $p['passenger_type'],
                     'birthdate' => $p['birthdate'] ?? null,
                     'benefit_label' => $p['benefit_label'] ?? null,
@@ -83,14 +84,26 @@ class ReservationService
         DB::beginTransaction();
         try {
             // 1. Create or Find Client
-            $client = Client::firstOrCreate(
-                ['email' => $dto->email],
-                [
-                    'name' => $dto->name,
-                    'phone' => $dto->phone,
-                    'whatsapp' => $dto->whatsapp ?? $dto->phone,
-                ]
-            );
+            // Since email is no longer required, we find by phone instead of email
+            if (!empty($dto->email)) {
+                $client = Client::firstOrCreate(
+                    ['email' => $dto->email],
+                    [
+                        'name' => $dto->name,
+                        'phone' => $dto->phone,
+                        'whatsapp' => $dto->whatsapp ?? $dto->phone,
+                    ]
+                );
+            } else {
+                $client = Client::firstOrCreate(
+                    ['phone' => $dto->phone],
+                    [
+                        'name' => $dto->name,
+                        'whatsapp' => $dto->whatsapp ?? $dto->phone,
+                        'email' => null,
+                    ]
+                );
+            }
 
             // 2. Create Reservation
             $reservation = Reservation::create([
@@ -187,12 +200,17 @@ class ReservationService
     /**
      * Calcula los precios y descuentos base para un tipo de pasajero
      */
-    public function calculatePassengerPricing(float $basePrice, string $passengerType): array
+    public function calculatePassengerPricing(Tour $tour, string $passengerType): array
     {
         $discount = 0;
+        $basePrice = (float) $tour->price;
         
         if ($passengerType === 'Niño') {
-            $discount = $basePrice * 0.5; // 50% descuento
+            if ($tour->duration_days <= 2) {
+                $discount = $basePrice * 0.5; // 50% descuento
+            } else {
+                $discount = $basePrice * 0.75; // 75% descuento
+            }
         }
         
         return [

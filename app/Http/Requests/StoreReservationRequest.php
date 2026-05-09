@@ -25,12 +25,13 @@ class StoreReservationRequest extends FormRequest
             'name' => 'required|string|max:150',
             'phone' => 'required|string|max:20',
             'whatsapp' => 'nullable|string|max:20',
-            'email' => 'required|email|max:100',
+            'email' => 'nullable|email|max:100',
             
             // Nuevo modo con pasajeros (opcional por ahora para compatibilidad)
             'passengers' => 'nullable|array',
             'passengers.*.seat_number' => 'required_with:passengers|string',
             'passengers.*.name' => 'required_with:passengers|string|max:150',
+            'passengers.*.phone' => 'required_with:passengers|string|max:20',
             'passengers.*.passenger_type' => 'required_with:passengers|string',
             'passengers.*.birthdate' => 'nullable|date',
             'passengers.*.benefit_label' => 'nullable|string',

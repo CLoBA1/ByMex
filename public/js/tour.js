@@ -96,9 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.passenger-block').forEach(block => {
             const seat = block.dataset.seat;
             const nameInput = block.querySelector('.p-name').value;
+            const phoneInput = block.querySelector('.p-phone') ? block.querySelector('.p-phone').value : '';
             const typeSelect = block.querySelector('.p-type').value;
             const bpSelect = block.querySelector('.p-bp');
-            existingBlocks[seat] = { name: nameInput, type: typeSelect, bp: bpSelect ? bpSelect.value : '' };
+            existingBlocks[seat] = { name: nameInput, phone: phoneInput, type: typeSelect, bp: bpSelect ? bpSelect.value : '' };
         });
 
         if (selectedSeats.length === 0) {
@@ -116,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
         passengersContainer.innerHTML = '<h3 style="margin-top: 1rem; margin-bottom: 0.5rem; font-size: 1.05rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--navy);"><i class="fa-solid fa-users"></i> Detalle de Pasajeros</h3>';
 
         selectedSeats.forEach((seat, index) => {
-            const prevData = existingBlocks[seat] || { name: '', type: 'Adulto', bp: '' };
+            const prevData = existingBlocks[seat] || { name: '', phone: '', type: 'Adulto', bp: '' };
             const seatLabel = seat.toString().padStart(2, '0');
 
             // Re-seleccionar la opción de boarding point guardada
@@ -126,18 +127,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="passenger-block" data-seat="${seat}" style="background: var(--bg-body); padding: 0.75rem; border-radius: 8px; margin-bottom: 0.75rem; border: 1px solid var(--border);">
                     <p style="font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; color: var(--navy);">Pasajero del Asiento ${seatLabel}</p>
                     <input type="hidden" name="passengers[${index}][seat_number]" value="${seat}">
-                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
                         <div style="flex: 2; min-width: 150px;">
-                            <input type="text" class="form-control p-name" name="passengers[${index}][name]" value="${prevData.name}" required placeholder="Nombre completo" style="padding: 0.5rem; font-size: 0.85rem; height: auto;">
+                            <label style="font-size: 0.75rem; color: var(--slate-500); margin-bottom: 0.25rem; display: block;">Nombre Completo</label>
+                            <input type="text" class="form-control p-name" name="passengers[${index}][name]" value="${prevData.name}" required placeholder="Nombre del pasajero" style="padding: 0.5rem; font-size: 0.85rem; height: auto;">
                         </div>
+                        <div style="flex: 1; min-width: 120px;">
+                            <label style="font-size: 0.75rem; color: var(--slate-500); margin-bottom: 0.25rem; display: block;">Teléfono</label>
+                            <input type="tel" class="form-control p-phone" name="passengers[${index}][phone]" value="${prevData.phone || ''}" required placeholder="10 dígitos" style="padding: 0.5rem; font-size: 0.85rem; height: auto;">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
                         <div style="flex: 1; min-width: 100px;">
+                            <label style="font-size: 0.75rem; color: var(--slate-500); margin-bottom: 0.25rem; display: block;">Categoría</label>
                             <select class="form-control p-type" name="passengers[${index}][passenger_type]" style="padding: 0.5rem; font-size: 0.85rem; height: auto;">
                                 <option value="Adulto" ${prevData.type === 'Adulto' ? 'selected' : ''}>Adulto (100%)</option>
-                                <option value="Niño" ${prevData.type === 'Niño' ? 'selected' : ''}>Niño 3-10 (50%)</option>
-                                <option value="Adulto Mayor" ${prevData.type === 'Adulto Mayor' ? 'selected' : ''}>Adulto Mayor</option>
+                                <option value="Niño" ${prevData.type === 'Niño' ? 'selected' : ''}>Niño</option>
+                                <option value="Adulto Mayor" ${prevData.type === 'Adulto Mayor' ? 'selected' : ''}>Adulto Mayor (100%)</option>
                             </select>
                         </div>
                         <div style="flex: 1; min-width: 120px;">
+                            <label style="font-size: 0.75rem; color: var(--slate-500); margin-bottom: 0.25rem; display: block;">Lugar de abordaje</label>
                             <select class="form-control p-bp" name="passengers[${index}][boarding_point_id]" style="padding: 0.5rem; font-size: 0.85rem; height: auto;">
                                 ${bpOptionsWithSel}
                             </select>
@@ -165,11 +175,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const typeSelects = document.querySelectorAll('.p-type');
+        const durationDaysInput = document.getElementById('tourDuration');
+        const durationDays = durationDaysInput ? parseInt(durationDaysInput.value) || 1 : 1;
+
         if (typeSelects.length > 0) {
             typeSelects.forEach(select => {
                 let pPrice = pricePerSeat;
                 if (select.value === 'Niño') {
-                    pPrice = pricePerSeat * 0.5;
+                    if (durationDays <= 2) {
+                        pPrice = pricePerSeat * 0.5; // 50% discount
+                    } else {
+                        pPrice = pricePerSeat * 0.25; // 75% discount (pays 25%)
+                    }
                 } else if (select.value === 'Adulto Mayor') {
                     pPrice = pricePerSeat; // No discount for Adulto Mayor
                 }

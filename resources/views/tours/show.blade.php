@@ -198,6 +198,7 @@
     {{-- Hidden inputs for JS --}}
     <input type="hidden" id="tourId" value="{{ $tour->id }}">
     <input type="hidden" id="tourPrice" value="{{ $tour->price }}">
+    <input type="hidden" id="tourDuration" value="{{ $tour->duration_days ?? 1 }}">
 
     {{-- ============================================================
          POLICIES MODAL
@@ -260,10 +261,6 @@
                         <label>WhatsApp (Opcional)</label>
                         <input type="tel" class="form-control" name="whatsapp" placeholder="Si es diferente">
                     </div>
-                </div>
-                <div class="form-group">
-                    <label>Correo Electrónico</label>
-                    <input type="email" class="form-control" name="email" required placeholder="tu@correo.com">
                 </div>
 
                 <!-- Contenedor dinámico de pasajeros -->
