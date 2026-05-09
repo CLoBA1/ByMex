@@ -141,9 +141,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div style="flex: 1; min-width: 100px;">
                             <label style="font-size: 0.75rem; color: var(--slate-500); margin-bottom: 0.25rem; display: block;">Categoría</label>
                             <select class="form-control p-type" name="passengers[${index}][passenger_type]" style="padding: 0.5rem; font-size: 0.85rem; height: auto;">
-                                <option value="Adulto" ${prevData.type === 'Adulto' ? 'selected' : ''}>Adulto (100%)</option>
+                                <option value="Adulto" ${prevData.type === 'Adulto' ? 'selected' : ''}>Adulto</option>
                                 <option value="Niño" ${prevData.type === 'Niño' ? 'selected' : ''}>Niño</option>
-                                <option value="Adulto Mayor" ${prevData.type === 'Adulto Mayor' ? 'selected' : ''}>Adulto Mayor (100%)</option>
+                                <option value="Adulto Mayor" ${prevData.type === 'Adulto Mayor' ? 'selected' : ''}>Adulto Mayor</option>
                             </select>
                         </div>
                         <div style="flex: 1; min-width: 120px;">
