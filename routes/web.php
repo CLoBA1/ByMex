@@ -96,10 +96,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/api/admin/notifications', [ApiNotificationController::class, 'index'])->name('admin.notifications.api');
     Route::post('/api/admin/notifications/read', [ApiNotificationController::class, 'markRead'])->name('admin.notifications.read');
 });
-// Pagos con Stripe
+// Pagos en línea (Mercado Pago)
 Route::get('/reservations/{token}/pay', [\App\Http\Controllers\Web\PaymentController::class, 'checkout'])->name('reservations.pay');
 
-// Stripe Webhook (excluido de CSRF)
+// Mercado Pago Webhook (excluido de CSRF)
+Route::post('/mercadopago/webhook', [\App\Http\Controllers\Api\MercadoPagoWebhookController::class, 'handle'])->name('mercadopago.webhook');
+
+// Stripe Webhook (Legacy / desactivado)
 Route::post('/stripe/webhook', [\App\Http\Controllers\Api\StripeWebhookController::class, 'handle'])->name('stripe.webhook');
 
 // Mock de Pago (Fallback para pruebas sin Stripe)

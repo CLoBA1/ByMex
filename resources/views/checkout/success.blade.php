@@ -248,29 +248,32 @@
             @if($reservation->status->value === 'pending')
                 <hr style="border:none; border-top: 1px dashed #e2e8f0; margin: 3rem 0;">
                 
-                {{-- STRIPE REAL PAYMENT --}}
-                <div style="background: linear-gradient(135deg, #0f172a, #1e293b); padding: 2.5rem; border-radius: var(--radius-xl); text-align: center;">
-                    <div style="display: flex; align-items: center; justify-content: center; gap: .5rem; margin-bottom: .75rem;">
-                        <i class="fa-solid fa-shield-halved" style="color: #a78bfa; font-size: 1.2rem;"></i>
-                        <span style="color: #94a3b8; font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">Pago Seguro con Stripe</span>
+                {{-- MERCADO PAGO REAL PAYMENT --}}
+                @if(config('services.mercadopago.access_token'))
+                    <div style="background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; text-align: center; margin-top: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1rem;">
+                            <i class="fa-solid fa-lock" style="color: #64748b; font-size: 0.8rem;"></i>
+                            <span style="color: #94a3b8; font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">Pago Seguro en línea</span>
+                        </div>
+                        
+                        <p style="color: var(--slate-600); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                            Paga de forma rápida y segura con tarjeta de crédito, débito o dinero en cuenta a través de Mercado Pago.
+                        </p>
+
+                        <a href="{{ route('reservations.pay', $reservation->public_token) }}" 
+                           class="btn-primary" 
+                           style="display: block; width: 100%; padding: 1rem; font-size: 1.1rem; text-decoration: none; margin-bottom: 1rem;"
+                           onclick="this.innerHTML = '<i class=\'fa-solid fa-spinner fa-spin\'></i> Redirigiendo a Mercado Pago...';">
+                            <i class="fa-solid fa-credit-card"></i> Pagar en línea — ${{ number_format($reservation->total_amount, 2) }}
+                        </a>
+                        
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <i class="fa-brands fa-cc-mastercard" style="color: #cbd5e1; font-size: 1.5rem;"></i>
+                            <i class="fa-brands fa-cc-visa" style="color: #cbd5e1; font-size: 1.5rem;"></i>
+                            <span style="color: #475569; font-size: .7rem;">Powered by Mercado Pago</span>
+                        </div>
                     </div>
-                    <h3 style="color: white; font-size: 1.3rem; margin-bottom: .5rem;">Paga en línea al instante</h3>
-                    <p style="color: #94a3b8; font-size: .88rem; margin-bottom: 1.5rem;">Aceptamos Visa, Mastercard, American Express. Tu información está protegida con encriptación SSL.</p>
-                    
-                    <a href="{{ route('reservations.pay', $reservation->public_token) }}" 
-                       class="btn" 
-                       style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 1rem 3rem; font-size: 1.05rem; border-radius: var(--radius-lg); box-shadow: 0 8px 24px rgba(99,102,241,.35);"
-                       onclick="this.innerHTML = '<i class=\'fa-solid fa-spinner fa-spin\'></i> Redirigiendo a Stripe...';">
-                        <i class="fa-solid fa-credit-card"></i> Pagar ${{ number_format($reservation->total_amount, 0) }} MXN con Tarjeta
-                    </a>
-                    
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 1.5rem; margin-top: 1.5rem;">
-                        <img src="https://img.icons8.com/color/36/visa.png" alt="Visa" style="height: 24px; opacity: .7;">
-                        <img src="https://img.icons8.com/color/36/mastercard-logo.png" alt="Mastercard" style="height: 24px; opacity: .7;">
-                        <img src="https://img.icons8.com/color/36/amex.png" alt="Amex" style="height: 24px; opacity: .7;">
-                        <span style="color: #475569; font-size: .7rem;">Powered by Stripe</span>
-                    </div>
-                </div>
+                @endif
             @endif
             @if($paymentSettings && ($paymentSettings->reservation_policies || $paymentSettings->cancellation_policies))
                 <div style="margin-top: 3rem; text-align: left;">

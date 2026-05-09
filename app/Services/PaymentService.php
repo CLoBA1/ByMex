@@ -68,6 +68,56 @@ class PaymentService
     }
 
     /**
+     * Create a Mercado Pago Preference for a reservation.
+     */
+    public function createMercadoPagoPreference(Reservation $reservation)
+    {
+        $reservation->loadMissing(['tour', 'client', 'seats']);
+
+        $seatCount = $reservation->seats->count();
+        $seatList = $reservation->seats->pluck('seat_number')->sort()->implode(', ');
+
+        $accessToken = config('services.mercadopago.access_token');
+
+        if (empty($accessToken)) {
+            throw new \Exception('Mercado Pago no está configurado correctamente (Falta Access Token).');
+        }
+
+        $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
+            ->post('https://api.mercadopago.com/checkout/preferences', [
+                'items' => [
+                    [
+                        'id' => 'RES-' . $reservation->id,
+                        'title' => $reservation->tour->title,
+                        'description' => "Asientos: {$seatList} ({$seatCount} lugar" . ($seatCount > 1 ? 'es' : '') . ")",
+                        'quantity' => 1,
+                        'currency_id' => 'MXN',
+                        'unit_price' => (float) $reservation->total_amount,
+                    ]
+                ],
+                'payer' => [
+                    'name' => $reservation->client->name,
+                    'email' => $reservation->client->email ?? 'no-reply@bymex.com',
+                ],
+                'back_urls' => [
+                    'success' => route('reservations.success', $reservation->public_token) . '?mp_status=approved',
+                    'failure' => route('reservations.success', $reservation->public_token) . '?mp_status=failure',
+                    'pending' => route('reservations.success', $reservation->public_token) . '?mp_status=pending',
+                ],
+                'auto_return' => 'approved',
+                'external_reference' => (string) $reservation->id,
+                'notification_url' => route('mercadopago.webhook'),
+            ]);
+
+        if ($response->failed()) {
+            Log::error('Error Mercado Pago: ' . $response->body());
+            throw new \Exception('No se pudo generar la preferencia de pago con Mercado Pago.');
+        }
+
+        return $response->json();
+    }
+
+    /**
      * Handle a successful payment (called from webhook).
      */
     public function processSuccessfulPayment(Reservation $reservation, $session): void

@@ -124,7 +124,7 @@
             
             <div style="font-size: 14px; color: #475569;">
                 <strong>Fecha:</strong> {{ $payment->created_at->format('d/m/Y H:i') }}<br>
-                <strong>Método:</strong> {{ $payment->payment_method === 'stripe' ? 'Pago en línea (Stripe)' : 'Depósito / Transferencia' }}
+                <strong>Método:</strong> {{ $payment->payment_method === 'stripe' ? 'Pago en línea (Stripe)' : ($payment->payment_method === 'mercadopago' ? 'Pago en línea (Mercado Pago)' : 'Depósito / Transferencia') }}
                 @if($payment->stripe_session_id)
                     <br><strong>Ref:</strong> {{ substr($payment->stripe_session_id, -12) }}
                 @endif

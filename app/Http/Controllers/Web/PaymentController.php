@@ -17,7 +17,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Create Stripe Checkout Session and redirect.
+     * Create Mercado Pago Preference and redirect.
      */
     public function checkout($token)
     {
@@ -30,8 +30,8 @@ class PaymentController extends Controller
         }
 
         try {
-            $session = $this->paymentService->createCheckoutSession($reservation);
-            return redirect()->away($session->url);
+            $preference = $this->paymentService->createMercadoPagoPreference($reservation);
+            return redirect()->away($preference['init_point']); // Redirect to Mercado Pago checkout
         } catch (\Exception $e) {
             return redirect()->route('reservations.success', $reservation->public_token)
                 ->with('error', 'Error al conectar con el procesador de pagos: ' . $e->getMessage());

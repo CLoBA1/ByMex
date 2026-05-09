@@ -407,6 +407,7 @@
                             $noteParts = [];
                             if ($pay->proof_image) $noteParts[] = 'Comprobante adjunto';
                             if ($pay->payment_method === 'stripe') $noteParts[] = 'Pago vía Stripe';
+                            if ($pay->payment_method === 'mercadopago') $noteParts[] = 'Pago vía Mercado Pago';
                             if ($pay->stripe_session_id) $noteParts[] = 'Ref: ' . substr($pay->stripe_session_id, -8);
                             
                             $timeline->push([
@@ -689,15 +690,17 @@
                                 </button>
                             </form>
 
-                            <!-- Stripe Checkout (link independiente, NO es form submit) -->
-                            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--border);">
-                                <a href="{{ route('reservations.pay', $reservation->public_token) }}"
-                                   class="btn-action"
-                                   style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; width: 100%; justify-content: center; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1rem; border-radius: 6px; font-weight: 600; font-size: 0.85rem;"
-                                   onclick="this.innerHTML = '<i class=\'fa-solid fa-spinner fa-spin\'></i> Redirigiendo a Stripe...'; return true;">
-                                    <i class="fa-brands fa-cc-stripe"></i> Cobrar vía Stripe — ${{ number_format($reservation->balance_due, 2) }}
+                            <!-- Mercado Pago Checkout (link independiente, NO es form submit) -->
+                            @if(config('services.mercadopago.access_token') && $reservation->status->value != 'paid')
+                                <a href="{{ route('reservations.pay', $reservation->public_token) }}" 
+                                   target="_blank"
+                                   class="btn-action" 
+                                   style="background: #009ee3; width: 100%; justify-content: center; margin-top: 0.5rem; text-decoration: none;"
+                                   onclick="this.innerHTML = '<i class=\'fa-solid fa-spinner fa-spin\'></i> Redirigiendo a Mercado Pago...'; return true;">
+                                    <i class="fa-solid fa-handshake"></i> Cobrar vía Mercado Pago — ${{ number_format($reservation->balance_due, 2) }}
                                 </a>
-                                <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.35rem; text-align: center;">Abre Stripe Checkout para cobrar con tarjeta de crédito/débito.</p>
+                                <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.35rem; text-align: center;">Abre Mercado Pago para cobrar con tarjeta/efectivo.</p>
+                            @endif
                             </div>
                         </div>
                     @endif
