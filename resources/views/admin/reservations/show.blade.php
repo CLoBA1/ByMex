@@ -110,9 +110,32 @@
                         <i class="fa-solid fa-phone" style="width: 20px;"></i> {{ $reservation->client->phone }}
                     </p>
                     @if($reservation->client->whatsapp)
-                        <p style="margin-bottom: 0; color: var(--slate-600);">
+                        <p style="margin-bottom: 0.5rem; color: var(--slate-600);">
                             <i class="fa-brands fa-whatsapp" style="width: 20px; color: #25D366;"></i> {{ $reservation->client->whatsapp }}
                         </p>
+                    @endif
+                    
+                    <hr style="border: none; border-top: 1px solid var(--border); margin: 1rem 0;">
+                    
+                    <div style="font-size: 0.85rem; font-weight: 600; color: var(--navy); margin-bottom: 0.5rem;">
+                        Programa de Bonificaciones
+                    </div>
+                    @if($reservation->client->available_bonuses > 0)
+                        <div style="background: #dcfce7; border: 1px solid #22c55e; color: #166534; padding: 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-gift" style="font-size: 1.1rem;"></i> 
+                            <span>{{ $reservation->client->available_bonuses }} Bonificación(es) Disponible(s)</span>
+                        </div>
+                    @else
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--slate-500); font-weight: 600; margin-bottom: 4px;">
+                            <span>Avance para beneficio</span>
+                            <span>{{ $reservation->client->next_bonus_progress }} / {{ \App\Models\Client::TRIPS_FOR_BONUS }} viajes</span>
+                        </div>
+                        <div style="width: 100%; background-color: #e2e8f0; border-radius: 4px; height: 8px;">
+                            @php
+                                $percentage = ($reservation->client->next_bonus_progress / \App\Models\Client::TRIPS_FOR_BONUS) * 100;
+                            @endphp
+                            <div style="background-color: var(--primary); height: 8px; border-radius: 4px; width: {{ $percentage }}%;"></div>
+                        </div>
                     @endif
                 </div>
             </div>
