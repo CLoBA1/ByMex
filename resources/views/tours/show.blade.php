@@ -95,8 +95,14 @@
                     <button class="btn-ver-mas js-btn-expand" type="button">Ver más <i class="fa-solid fa-chevron-down"></i></button>
                 </div>
 
+                {{-- Card: Itinerary --}}
+                <div class="info-card" data-aos="fade-up" data-aos-delay="150">
+                    <h3><i class="fa-solid fa-map-location-dot"></i> Itinerario</h3>
+                    <p style="color: var(--slate-500); font-style: italic;">Itinerario disponible próximamente.</p>
+                </div>
+
                 {{-- Card: What's Included --}}
-                <div class="info-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="info-card" data-aos="fade-up" data-aos-delay="200" style="background: var(--slate-50); box-shadow: none; border: 1px solid var(--slate-200);">
                     <h3><i class="fa-solid fa-check-circle"></i> Qué Incluye</h3>
                     <ul class="feature-grid">
                         <li><i class="fa-solid fa-bus"></i> Transporte viaje redondo</li>
@@ -108,7 +114,7 @@
                 </div>
 
                 {{-- Card: Not Included --}}
-                <div class="info-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="info-card" data-aos="fade-up" data-aos-delay="300" style="background: var(--slate-50); box-shadow: none; border: 1px solid var(--slate-200);">
                     <h3><i class="fa-solid fa-circle-xmark red"></i> No Incluye</h3>
                     <ul class="feature-grid not-included">
                         <li><i class="fa-solid fa-utensils"></i> Alimentos no mencionados</li>
@@ -130,8 +136,18 @@
                         <div class="price">${{ number_format($tour->price, 0) }} MXN</div>
                     </div>
 
-                    {{-- Bus Map (Dark Glassmorphism) --}}
-                    <div class="bk-bus-section">
+                    {{-- Initial Booking Button --}}
+                    <div id="bookingStartArea" style="padding: 2rem 1.5rem; text-align: center;">
+                        <button class="bk-cta-btn" id="btnStartFlow" style="font-size: 1.1rem;">
+                            Reservar Ahora <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                        <p style="color: var(--slate-500); font-size: 0.85rem; margin-top: 1rem;">Seleccionarás tus asientos en el siguiente paso.</p>
+                    </div>
+
+                    {{-- Bus Map and Summary (Hidden initially) --}}
+                    <div id="bookingFlowContainer" style="display: none;">
+                        {{-- Bus Map (Dark Glassmorphism) --}}
+                        <div class="bk-bus-section">
                         <div class="bus-frame">
                             <div class="bus-front-label">
                                 <i class="fa-solid fa-tv"></i> Frente del Autobús — Elige tus asientos
@@ -171,6 +187,7 @@
                             <i class="fa-solid fa-lock"></i> Proceso de reserva 100% seguro
                         </div>
                     </div>
+                    </div> <!-- End bookingFlowContainer -->
 
                 </div>
             </aside>
@@ -181,6 +198,40 @@
     {{-- Hidden inputs for JS --}}
     <input type="hidden" id="tourId" value="{{ $tour->id }}">
     <input type="hidden" id="tourPrice" value="{{ $tour->price }}">
+
+    {{-- ============================================================
+         POLICIES MODAL
+         ============================================================ --}}
+    @php
+        $settings = \App\Models\PaymentSetting::first();
+        $reservationPolicies = $settings->reservation_policies ?? 'Las políticas de reservación estarán disponibles próximamente.';
+        $cancellationPolicies = $settings->cancellation_policies ?? 'Las políticas de cancelación estarán disponibles próximamente.';
+    @endphp
+    <div class="modal-overlay" id="policiesModal" style="z-index: 10000;">
+        <div class="modal-content" style="max-width: 600px;">
+            <button class="close-modal" id="closePoliciesModal">&times;</button>
+            <h2 class="modal-title" style="margin-bottom: 1.5rem;"><i class="fa-solid fa-file-contract" style="color:var(--primary);"></i> Políticas del Viaje</h2>
+            
+            <div style="max-height: 50vh; overflow-y: auto; padding-right: 1rem; margin-bottom: 1.5rem; color: var(--slate-600); font-size: 0.95rem; line-height: 1.6;">
+                <h4 style="color: var(--navy); margin-bottom: 0.5rem; font-weight: 700;">Políticas de Reservación</h4>
+                <p style="margin-bottom: 1.5rem; white-space: pre-line;">{{ $reservationPolicies }}</p>
+                
+                <h4 style="color: var(--navy); margin-bottom: 0.5rem; font-weight: 700;">Políticas de Cancelación</h4>
+                <p style="margin-bottom: 1rem; white-space: pre-line;">{{ $cancellationPolicies }}</p>
+            </div>
+
+            <div style="background: var(--slate-50); padding: 1rem; border-radius: 8px; border: 1px solid var(--slate-200); margin-bottom: 1.5rem;">
+                <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; margin: 0;">
+                    <input type="checkbox" id="chkAcceptPolicies" style="width: 20px; height: 20px; margin-top: 2px; accent-color: var(--primary);">
+                    <span style="font-weight: 600; color: var(--navy);">He leído y acepto las políticas de reservación y cancelación para este viaje.</span>
+                </label>
+            </div>
+
+            <button class="bk-cta-btn" id="btnAcceptPolicies" disabled style="opacity: 0.5;">
+                Aceptar y Continuar a Asientos <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
 
     {{-- ============================================================
          CHECKOUT MODAL
@@ -256,6 +307,42 @@
                 }
             });
         });
+        // Lógica del Modal de Políticas
+        const btnStartFlow = document.getElementById('btnStartFlow');
+        const policiesModal = document.getElementById('policiesModal');
+        const closePoliciesModal = document.getElementById('closePoliciesModal');
+        const chkAcceptPolicies = document.getElementById('chkAcceptPolicies');
+        const btnAcceptPolicies = document.getElementById('btnAcceptPolicies');
+        const bookingStartArea = document.getElementById('bookingStartArea');
+        const bookingFlowContainer = document.getElementById('bookingFlowContainer');
+
+        if (btnStartFlow && policiesModal) {
+            btnStartFlow.addEventListener('click', () => {
+                policiesModal.classList.add('active');
+            });
+
+            closePoliciesModal.addEventListener('click', () => {
+                policiesModal.classList.remove('active');
+            });
+
+            chkAcceptPolicies.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    btnAcceptPolicies.disabled = false;
+                    btnAcceptPolicies.style.opacity = '1';
+                } else {
+                    btnAcceptPolicies.disabled = true;
+                    btnAcceptPolicies.style.opacity = '0.5';
+                }
+            });
+
+            btnAcceptPolicies.addEventListener('click', () => {
+                policiesModal.classList.remove('active');
+                bookingStartArea.style.display = 'none';
+                bookingFlowContainer.style.display = 'block';
+                // Trigger resize or custom event if the bus map needs it to render properly when unhidden
+                window.dispatchEvent(new Event('resize'));
+            });
+        }
     </script>
     <script src="{{ asset('js/tour.js') }}?v={{ filemtime(public_path('js/tour.js')) }}"></script>
 @endsection
