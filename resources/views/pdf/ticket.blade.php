@@ -143,7 +143,19 @@
 <body>
     <div class="ticket-wrapper">
         <div class="header">
-            <h1>Viajes By Mex</h1>
+            @php
+                $logoPath = public_path('img/logobymex.jpeg');
+                $logoBase64 = '';
+                if(file_exists($logoPath)) {
+                    $logoData = file_get_contents($logoPath);
+                    $logoBase64 = 'data:image/jpeg;base64,' . base64_encode($logoData);
+                }
+            @endphp
+            @if($logoBase64)
+                <img src="{{ $logoBase64 }}" alt="Viajes By Mex Logo" style="max-height: 90px; margin-bottom: 10px; border-radius: 8px;">
+            @else
+                <h1>Viajes By Mex</h1>
+            @endif
             <p>Agencia de Viajes y Excursiones Premium</p>
             <p style="margin-top:5px;">Comprobante de Reserva: <strong>#{{ str_pad($reservation->id, 5, '0', STR_PAD_LEFT) }}</strong></p>
         </div>
@@ -161,16 +173,12 @@
                 <div class="section-title">Estado de la Reserva</div>
                 <div class="info-block">
                     <div class="financial-status">
-                        @if($reservation->status->value == 'pending')
-                            <span class="status-badge status-pending">PENDIENTE DE PAGO</span>
-                        @elseif($reservation->status->value == 'partial')
-                            <span class="badge" style="background: #fef08a; color: #854d0e; border: 1px solid #fde047;">ANTICIPO PAGADO</span>
-                        @elseif($reservation->status->value == 'paid')
-                            <span class="status-badge status-paid">PAGADO</span>
-                        @elseif($reservation->status->value == 'expired')
-                            <span class="badge" style="background: #e2e8f0; color: #475569;">EXPIRADO</span>
+                        @if($reservation->balance_due <= 0)
+                            <span class="badge" style="background: #dcfce7; color: #166534; border: 1px solid #22c55e; padding: 8px 15px; font-size: 16px;">PAGADO</span>
+                        @elseif($reservation->total_amount > $reservation->balance_due)
+                            <span class="badge" style="background: #fef08a; color: #854d0e; border: 1px solid #fde047; padding: 8px 15px; font-size: 16px;">PAGO PARCIAL</span>
                         @else
-                            <span class="badge" style="background: #f1f5f9; color: #64748b;">CANCELADO</span>
+                            <span class="badge" style="background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; padding: 8px 15px; font-size: 16px;">PENDIENTE DE PAGO</span>
                         @endif
                     </div>
                     <br><br>
