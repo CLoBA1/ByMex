@@ -36,7 +36,7 @@
                     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
                         @foreach($bus->images as $img)
                             <div style="border: 1px solid var(--border); border-radius: 8px; overflow: hidden; position: relative; background: #f8fafc;">
-                                <img src="{{ Storage::disk('public')->url($img->image_path) }}" style="width: 100%; height: 120px; object-fit: cover;">
+                                <img src="{{ Storage::url($img->image_path) }}" style="width: 100%; height: 120px; object-fit: cover;">
                                 
                                 @if($img->is_primary)
                                     <div style="position: absolute; top: 5px; left: 5px; background: var(--primary); color: white; padding: 0.2rem 0.5rem; font-size: 0.7rem; border-radius: 4px; font-weight: bold;">

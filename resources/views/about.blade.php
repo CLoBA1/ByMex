@@ -56,7 +56,7 @@
                                     <div style="position:relative; width:100%; height:260px; overflow:hidden;">
                                         @foreach($bus->images as $imgIdx => $img)
                                             <img 
-                                                src="{{ Storage::disk('public')->url($img->image_path) }}" 
+                                                src="{{ Storage::url($img->image_path) }}" 
                                                 alt="{{ $bus->name }}" 
                                                 class="bus-slide" 
                                                 data-gallery="{{ $bus->id }}" 
@@ -81,7 +81,7 @@
                                         <div style="display:flex; gap:4px; padding:8px; overflow-x:auto; background:#f8fafc;">
                                             @foreach($bus->images as $tIdx => $thumb)
                                                 <img 
-                                                    src="{{ Storage::disk('public')->url($thumb->image_path) }}" 
+                                                    src="{{ Storage::url($thumb->image_path) }}" 
                                                     alt="Miniatura" 
                                                     onclick="busGoTo('{{ $bus->id }}', {{ $tIdx }})" 
                                                     class="bus-thumb" 
