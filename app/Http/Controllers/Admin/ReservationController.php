@@ -246,6 +246,15 @@ class ReservationController extends Controller
         return back()->with('success', 'Pago registrado correctamente. Saldo actualizado.');
     }
 
+    public function downloadVoucher($id)
+    {
+        $payment = \App\Models\Payment::with('reservation.client', 'reservation.tour')->findOrFail($id);
+        $paymentSettings = \App\Models\PaymentSetting::first();
+        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.voucher', compact('payment', 'paymentSettings'));
+        return $pdf->download('Comprobante_Pago_' . str_pad($payment->id, 5, '0', STR_PAD_LEFT) . '.pdf');
+    }
+
     public function updateStatus(Request $request, $id)
     {
         $reservation = Reservation::findOrFail($id);

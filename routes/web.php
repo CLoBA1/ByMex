@@ -51,6 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::post('/admin/reservations/{id}/status', [AdminReservationController::class, 'updateStatus'])->name('admin.reservations.status');
     Route::post('/admin/reservations/{id}/payment', [AdminReservationController::class, 'storePayment'])->name('admin.reservations.payment');
+    Route::get('/admin/payments/{id}/voucher', [AdminReservationController::class, 'downloadVoucher'])->name('admin.payments.voucher');
     Route::get('/admin/reservations/surplus', [AdminReservationController::class, 'surplusList'])->name('admin.reservations.surplus');
     Route::get('/admin/reservations/{id}', [AdminReservationController::class, 'show'])->name('admin.reservations.show');
     Route::post('/admin/passengers/{id}/validate', [AdminReservationController::class, 'validatePassenger'])->name('admin.passengers.validate');

@@ -380,6 +380,7 @@
                             if ($pay->stripe_session_id) $noteParts[] = 'Ref: ' . substr($pay->stripe_session_id, -8);
                             
                             $timeline->push([
+                                'id'     => $pay->id,
                                 'date'   => $pay->created_at,
                                 'kind'   => 'payment',
                                 'amount' => (float) $pay->amount,
@@ -391,6 +392,7 @@
 
                         foreach ($reservation->adjustments as $adj) {
                             $timeline->push([
+                                'id'     => $adj->id,
                                 'date'   => $adj->created_at,
                                 'kind'   => 'adjustment',
                                 'type'   => $adj->type,
@@ -420,6 +422,7 @@
                                     <th>Estado</th>
                                     <th>Nota / Referencia</th>
                                     <th>Operador</th>
+                                    <th style="text-align: center;">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -500,6 +503,15 @@
                                         </td>
                                         <td style="color: var(--text-muted); font-size: 0.8rem;">
                                             {{ $mov['user'] ?? '—' }}
+                                        </td>
+                                        <td style="text-align: center;">
+                                            @if($mov['kind'] === 'payment')
+                                                <a href="{{ route('admin.payments.voucher', $mov['id']) }}" class="btn-action" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: var(--navy); text-decoration: none; display: inline-block;" title="Descargar Voucher">
+                                                    <i class="fa-solid fa-file-pdf"></i> Voucher
+                                                </a>
+                                            @else
+                                                <span style="color: var(--text-muted);">—</span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach
