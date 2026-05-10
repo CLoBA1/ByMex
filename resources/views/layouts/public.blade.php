@@ -44,39 +44,12 @@
                     <a href="{{ route('dashboard') }}" class="btn btn-outline" style="font-size:.82rem;padding:.55rem 1.15rem; background: var(--navy); color: white; border: none;">
                         <i class="fa-solid fa-shield-halved"></i> Admin
                     </a>
+                @endauth
+                
+                @auth('client')
+                    <a href="{{ route('client.dashboard') }}" class="btn btn-outline" style="font-size:.82rem;padding:.55rem 1.15rem"><i class="fa-solid fa-user-circle"></i> Mi Cuenta</a>
                 @else
-                    <div x-data="{ open: false }" style="position: relative; display: inline-block;">
-                        @auth('client')
-                            <button @click="open = !open" @click.away="open = false" class="btn btn-outline" style="font-size:.82rem;padding:.55rem 1.15rem; display: flex; align-items: center; gap: 0.5rem; background: white;">
-                                <i class="fa-solid fa-user-circle"></i> Mi Cuenta <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem;"></i>
-                            </button>
-                        @else
-                            <button @click="open = !open" @click.away="open = false" class="btn btn-outline" style="border:none;padding:.5rem;font-size:1rem; background: transparent;" title="Opciones de Sesión">
-                                <i class="fa-solid fa-user"></i>
-                            </button>
-                        @endauth
-
-                        <div x-show="open" style="display: none; position: absolute; right: 0; top: 120%; background: white; border: 1px solid var(--border, #e2e8f0); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-radius: 8px; width: 200px; z-index: 50; overflow: hidden;" x-transition>
-                            @auth('client')
-                                <a href="{{ route('client.dashboard') }}" style="display: block; padding: 0.75rem 1rem; color: var(--navy, #1e293b); text-decoration: none; font-size: 0.9rem; border-bottom: 1px solid var(--border, #e2e8f0);">
-                                    <i class="fa-solid fa-suitcase-rolling" style="width: 20px;"></i> Mis Viajes
-                                </a>
-                                <form action="{{ route('client.logout') }}" method="POST" style="margin: 0; border-bottom: 1px solid var(--border, #e2e8f0);">
-                                    @csrf
-                                    <button type="submit" style="width: 100%; text-align: left; background: none; border: none; padding: 0.75rem 1rem; color: var(--navy, #1e293b); font-size: 0.9rem; cursor: pointer;">
-                                        <i class="fa-solid fa-sign-out-alt" style="width: 20px;"></i> Cerrar Sesión
-                                    </button>
-                                </form>
-                            @else
-                                <a href="{{ route('client.login') }}" style="display: block; padding: 0.75rem 1rem; color: var(--navy, #1e293b); text-decoration: none; font-size: 0.9rem; border-bottom: 1px solid var(--border, #e2e8f0);">
-                                    <i class="fa-solid fa-user" style="width: 20px;"></i> Mi Cuenta
-                                </a>
-                            @endauth
-                            <a href="{{ route('login') }}" style="display: block; padding: 0.75rem 1rem; color: #64748b; text-decoration: none; font-size: 0.85rem; background: #f8fafc;">
-                                <i class="fa-solid fa-lock" style="width: 20px;"></i> Acceso Admin
-                            </a>
-                        </div>
-                    </div>
+                    <a href="{{ route('client.login') }}" class="btn btn-outline" style="border:none;padding:.5rem;font-size:1rem" title="Iniciar Sesión"><i class="fa-solid fa-user"></i></a>
                 @endauth
 
                 <a href="{{ route('tours.index') }}" class="btn btn-primary btn-cta-nav">Explorar <i class="fa-solid fa-arrow-right"></i></a>
