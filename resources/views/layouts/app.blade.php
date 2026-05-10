@@ -188,7 +188,11 @@
             </a>
             
             @php
-                $pendingBonuses = \App\Models\BonusRequest::where('status', 'pending')->count();
+                try {
+                    $pendingBonuses = \App\Models\BonusRequest::where('status', 'pending')->count();
+                } catch (\Throwable $e) {
+                    $pendingBonuses = 0;
+                }
             @endphp
             <a href="{{ route('admin.bonus-requests.index') }}" class="nav-item {{ request()->routeIs('admin.bonus-requests.*') ? 'active' : '' }}" style="display: flex; justify-content: space-between; align-items: center;">
                 <div><i class="fa-solid fa-gift"></i> Solicitudes Bonos</div>
