@@ -29,7 +29,11 @@ class DashboardController extends Controller
             ->latest()
             ->first();
 
-        return view('client.dashboard', compact('client', 'activeTrips', 'pastTrips', 'activeBonusRequest'));
+        $bonusRequestsHistory = \App\Models\BonusRequest::where('client_id', $client->id)
+            ->latest()
+            ->get();
+
+        return view('client.dashboard', compact('client', 'activeTrips', 'pastTrips', 'activeBonusRequest', 'bonusRequestsHistory'));
     }
 
     public function reservation($id)

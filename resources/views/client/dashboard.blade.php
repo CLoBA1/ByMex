@@ -312,5 +312,65 @@
             </div>
         @endif
 
+        <h2 class="section-title" style="margin-top: 3rem;"><i class="fa-solid fa-list-check"></i> Historial de Solicitudes</h2>
+        
+        @if(isset($bonusRequestsHistory) && $bonusRequestsHistory->count() > 0)
+            <div style="background: white; border-radius: var(--radius-md); border: 1px solid var(--color-border); overflow: hidden; box-shadow: var(--shadow-sm);">
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead style="background: var(--color-light); border-bottom: 1px solid var(--color-border);">
+                            <tr>
+                                <th style="padding: 1rem; font-size: 0.9rem; color: var(--color-dark-muted);">Fecha</th>
+                                <th style="padding: 1rem; font-size: 0.9rem; color: var(--color-dark-muted);">Solicitud</th>
+                                <th style="padding: 1rem; font-size: 0.9rem; color: var(--color-dark-muted);">Estado</th>
+                                <th style="padding: 1rem; font-size: 0.9rem; color: var(--color-dark-muted);">Notas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($bonusRequestsHistory as $req)
+                                @php
+                                    $badgeBg = '#f1f5f9'; $badgeColor = '#64748b'; $badgeLabel = 'Desconocido';
+                                    if ($req->status === 'pending') {
+                                        $badgeBg = '#fef08a'; $badgeColor = '#854d0e'; $badgeLabel = 'En Revisión';
+                                    } elseif ($req->status === 'approved') {
+                                        $badgeBg = '#dcfce7'; $badgeColor = '#166534'; $badgeLabel = 'Aprobada';
+                                    } elseif ($req->status === 'rejected') {
+                                        $badgeBg = '#fee2e2'; $badgeColor = '#991b1b'; $badgeLabel = 'Rechazada';
+                                    } elseif ($req->status === 'applied') {
+                                        $badgeBg = '#eff6ff'; $badgeColor = '#1e3a8a'; $badgeLabel = 'Aplicada';
+                                    }
+                                @endphp
+                                <tr style="border-bottom: 1px solid var(--color-border);">
+                                    <td style="padding: 1rem; font-size: 0.9rem;">{{ $req->created_at->format('d/m/Y') }}</td>
+                                    <td style="padding: 1rem; font-size: 0.9rem; font-weight: 600;">{{ $req->request_type }}</td>
+                                    <td style="padding: 1rem; font-size: 0.9rem;">
+                                        <span style="background: {{ $badgeBg }}; color: {{ $badgeColor }}; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;">
+                                            {{ $badgeLabel }}
+                                        </span>
+                                    </td>
+                                    <td style="padding: 1rem; font-size: 0.85rem; color: var(--color-dark-muted);">
+                                        @if($req->client_notes)
+                                            <div style="margin-bottom: 0.25rem;"><strong>Tú:</strong> {{ $req->client_notes }}</div>
+                                        @endif
+                                        @if($req->admin_notes)
+                                            <div style="color: var(--color-dark);"><strong>Admin:</strong> {{ $req->admin_notes }}</div>
+                                        @endif
+                                        @if(!$req->client_notes && !$req->admin_notes)
+                                            -
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @else
+            <div style="background: #f8fafc; padding: 2rem; border-radius: var(--radius-md); text-align: center; color: var(--color-dark-muted); border: 1px dashed #cbd5e1;">
+                <i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 1rem; color: #cbd5e1;"></i>
+                <p>Aún no has realizado ninguna solicitud de bonificación.</p>
+            </div>
+        @endif
+
     </main>
 @endsection
