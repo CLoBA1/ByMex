@@ -11,12 +11,21 @@
                 @if($client->membership_number) | Membresía: <span style="font-weight: 600; color: var(--primary);">{{ $client->membership_number }}</span> @endif
             </p>
         </div>
-        <div>
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="{{ route('admin.clients.edit', $client->id) }}" class="btn-action" style="background: var(--navy); color: #fff; border: none; text-decoration: none;">
+                <i class="fa-solid fa-user-pen"></i> Editar Cliente
+            </a>
             <a href="{{ route('admin.clients.index') }}" class="btn-action" style="background: var(--slate-100); color: var(--navy); border: 1px solid var(--border);">
                 <i class="fa-solid fa-arrow-left"></i> Volver a Clientes
             </a>
         </div>
     </div>
+
+    @if(session('success'))
+        <div style="background: #dcfce7; border: 1px solid #22c55e; color: #166534; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem;">
+            <i class="fa-solid fa-check-circle"></i> {{ session('success') }}
+        </div>
+    @endif
 
     @php
         $totalPaid = 0;
