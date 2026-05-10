@@ -87,6 +87,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'destroy' => 'admin.banners.destroy',
     ]);
 
+    // --- Solicitudes de Bonos ---
+    Route::prefix('admin/solicitudes-bonos')->name('admin.bonus-requests.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\BonusRequestController::class, 'index'])->name('index');
+        Route::post('/{id}/estado', [\App\Http\Controllers\Admin\BonusRequestController::class, 'updateStatus'])->name('update-status');
+    });
+
     // Clientes
     Route::get('/admin/clients', [AdminClientController::class, 'index'])->name('admin.clients.index');
     Route::get('/admin/clients/{id}', [AdminClientController::class, 'show'])->name('admin.clients.show');
@@ -141,6 +147,7 @@ Route::post('/mi-cuenta/logout', [\App\Http\Controllers\Client\AuthController::c
 Route::middleware('auth:client')->prefix('mi-cuenta')->group(function () {
     Route::get('/', [\App\Http\Controllers\Client\DashboardController::class, 'index'])->name('client.dashboard');
     Route::get('/reservacion/{id}', [\App\Http\Controllers\Client\DashboardController::class, 'reservation'])->name('client.reservation');
+    Route::post('/bonificaciones/solicitar', [\App\Http\Controllers\Client\DashboardController::class, 'requestBonus'])->name('client.bonus.request');
 });
 
 require __DIR__.'/auth.php';

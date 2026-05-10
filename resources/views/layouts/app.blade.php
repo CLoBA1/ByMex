@@ -186,6 +186,17 @@
             <a href="{{ route('admin.clients.index') }}" class="nav-item {{ request()->routeIs('admin.clients.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-users"></i> Clientes
             </a>
+            
+            @php
+                $pendingBonuses = \App\Models\BonusRequest::where('status', 'pending')->count();
+            @endphp
+            <a href="{{ route('admin.bonus-requests.index') }}" class="nav-item {{ request()->routeIs('admin.bonus-requests.*') ? 'active' : '' }}" style="display: flex; justify-content: space-between; align-items: center;">
+                <div><i class="fa-solid fa-gift"></i> Solicitudes Bonos</div>
+                @if($pendingBonuses > 0)
+                    <span style="background: #ef4444; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; line-height: 1;">{{ $pendingBonuses }}</span>
+                @endif
+            </a>
+
             <a href="{{ route('admin.boarding-points.index') }}" class="nav-item {{ request()->routeIs('admin.boarding-points.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-map-marker-alt"></i> Puntos de Abordaje
             </a>

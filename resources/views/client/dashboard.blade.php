@@ -273,11 +273,44 @@
                     </div>
                 </div>
             </div>
-            <div style="text-align: center; min-width: 150px;">
-                <div style="font-size: 3rem; font-weight: 900; color: var(--color-dark); line-height: 1;">{{ $client->available_bonuses }}</div>
-                <div style="font-size: 0.9rem; color: var(--color-dark-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-top: 0.5rem;">Bonos Disponibles</div>
+            <div style="text-align: center; min-width: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;">
+                <div>
+                    <div style="font-size: 3rem; font-weight: 900; color: var(--color-dark); line-height: 1;">{{ $client->available_bonuses }}</div>
+                    <div style="font-size: 0.9rem; color: var(--color-dark-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-top: 0.5rem;">Bonos Disponibles</div>
+                </div>
+                
+                @if(isset($activeBonusRequest))
+                    @if($activeBonusRequest->status === 'pending')
+                        <div style="background: #fef08a; color: #854d0e; padding: 0.5rem 1rem; border-radius: var(--radius-md); font-size: 0.85rem; font-weight: 600; width: 100%;">
+                            <i class="fa-solid fa-clock-rotate-left"></i> Solicitud en Revisión
+                        </div>
+                    @elseif($activeBonusRequest->status === 'approved')
+                        <div style="background: #dcfce7; color: #166534; padding: 0.5rem 1rem; border-radius: var(--radius-md); font-size: 0.85rem; font-weight: 600; width: 100%;">
+                            <i class="fa-solid fa-check-circle"></i> Solicitud Aprobada
+                        </div>
+                    @endif
+                @elseif($client->available_bonuses > 0)
+                    <form action="{{ route('client.bonus.request') }}" method="POST" style="margin: 0; width: 100%;">
+                        @csrf
+                        <input type="hidden" name="request_type" value="Descuento en próximo viaje">
+                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 0.9rem; font-weight: 600; background: var(--color-dark); border: none; border-radius: var(--radius-md); color: white; cursor: pointer; transition: background 0.2s;">
+                            <i class="fa-solid fa-hand-pointer"></i> Solicitar Canje
+                        </button>
+                    </form>
+                @endif
             </div>
         </div>
+
+        @if(session('success'))
+            <div style="background: #dcfce7; border: 1px solid #22c55e; color: #166534; padding: 1rem; border-radius: 6px; margin-top: 1.5rem;">
+                <i class="fa-solid fa-check-circle"></i> {{ session('success') }}
+            </div>
+        @endif
+        @if(session('error'))
+            <div style="background: #fee2e2; border: 1px solid #ef4444; color: #991b1b; padding: 1rem; border-radius: 6px; margin-top: 1.5rem;">
+                <i class="fa-solid fa-circle-exclamation"></i> {{ session('error') }}
+            </div>
+        @endif
 
     </main>
 @endsection
