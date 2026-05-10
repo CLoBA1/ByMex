@@ -45,11 +45,17 @@ class ClientController extends Controller
             'birthdate'         => 'nullable|date',
             'emergency_contact' => 'nullable|string|max:150',
             'membership_number' => 'nullable|string|max:50|unique:clients,membership_number,' . $client->id,
+            'password'          => 'nullable|string|min:8',
         ], [
             'membership_number.unique' => 'Este código de membresía ya está asignado a otro cliente.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
         ]);
 
         $data = $request->only(['name', 'phone', 'email', 'whatsapp', 'origin_city', 'curp', 'birthdate', 'emergency_contact', 'membership_number']);
+
+        if ($request->filled('password')) {
+            $data['password'] = $request->password;
+        }
 
         // Normalise empty string to null for membership_number
         if (empty($data['membership_number'])) {

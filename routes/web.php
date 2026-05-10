@@ -133,4 +133,14 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Portal del Cliente
+Route::get('/mi-cuenta/login', [\App\Http\Controllers\Client\AuthController::class, 'showLogin'])->name('client.login');
+Route::post('/mi-cuenta/login', [\App\Http\Controllers\Client\AuthController::class, 'login'])->name('client.login.submit');
+Route::post('/mi-cuenta/logout', [\App\Http\Controllers\Client\AuthController::class, 'logout'])->name('client.logout');
+
+Route::middleware('auth:client')->prefix('mi-cuenta')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Client\DashboardController::class, 'index'])->name('client.dashboard');
+    Route::get('/reservacion/{id}', [\App\Http\Controllers\Client\DashboardController::class, 'reservation'])->name('client.reservation');
+});
+
 require __DIR__.'/auth.php';

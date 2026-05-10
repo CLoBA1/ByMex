@@ -65,6 +65,43 @@
             </div>
         </div>
 
+        {{-- ACCESOS DEL CLIENTE --}}
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fa-solid fa-key"></i> Acceso al Portal</h3>
+            </div>
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start;">
+                    <div>
+                        <label for="password" style="display: block; font-weight: 600; color: var(--navy); margin-bottom: 0.5rem;">
+                            Asignar o Cambiar Contraseña
+                        </label>
+                        <input type="text" name="password" id="password"
+                            placeholder="Déjalo en blanco para no modificar"
+                            style="width: 100%; padding: 0.75rem; border: 1px solid {{ $errors->has('password') ? '#ef4444' : 'var(--border)' }}; border-radius: 6px; font-size: 1rem;">
+                        @if($errors->has('password'))
+                            <p style="color: #ef4444; font-size: 0.85rem; margin-top: 0.25rem;">{{ $errors->first('password') }}</p>
+                        @endif
+                        <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.5rem;">
+                            Mínimo 8 caracteres. Escribe aquí para cambiar o establecer la contraseña del cliente.
+                        </p>
+                    </div>
+                    <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; padding: 1rem;">
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;"><i class="fa-solid fa-circle-info"></i> Estado de la cuenta:</div>
+                        @if($client->password)
+                            <span style="background: #16a34a; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">
+                                <i class="fa-solid fa-check"></i> El cliente ya tiene contraseña asignada
+                            </span>
+                        @else
+                            <span style="background: #ef4444; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">
+                                <i class="fa-solid fa-xmark"></i> El cliente no tiene contraseña (no puede iniciar sesión)
+                            </span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {{-- DATOS PERSONALES --}}
         <div class="card" style="margin-bottom: 1.5rem;">
             <div class="card-header">

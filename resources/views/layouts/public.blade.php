@@ -40,11 +40,16 @@
             </div>
             
             <div class="nav-actions">
-                @auth
-                    <a href="{{ route('dashboard') }}" class="btn btn-outline" style="font-size:.82rem;padding:.55rem 1.15rem"><i class="fa-solid fa-gauge-high"></i> Panel</a>
-                @else
-                    <a href="{{ route('login') }}" class="btn btn-outline" style="border:none;padding:.5rem;font-size:1rem"><i class="fa-solid fa-user"></i></a>
+                @auth('web')
+                    <a href="{{ route('dashboard') }}" class="btn btn-outline" style="font-size:.82rem;padding:.55rem 1.15rem"><i class="fa-solid fa-shield-halved"></i> Admin</a>
                 @endauth
+                
+                @auth('client')
+                    <a href="{{ route('client.dashboard') }}" class="btn btn-outline" style="font-size:.82rem;padding:.55rem 1.15rem"><i class="fa-solid fa-user-circle"></i> Mi Cuenta</a>
+                @else
+                    <a href="{{ route('client.login') }}" class="btn btn-outline" style="border:none;padding:.5rem;font-size:1rem" title="Iniciar Sesión"><i class="fa-solid fa-user"></i></a>
+                @endauth
+
                 <a href="{{ route('tours.index') }}" class="btn btn-primary btn-cta-nav">Explorar <i class="fa-solid fa-arrow-right"></i></a>
                 <button class="mobile-menu-btn" onclick="document.getElementById('mobile-nav-links').classList.toggle('mobile-active')">
                     <i class="fa-solid fa-bars"></i>
