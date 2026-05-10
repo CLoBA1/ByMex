@@ -13,41 +13,7 @@
     <section class="section-pad bg-light">
         <div class="container">
             <div class="catalog-container">
-                <!-- Sidebar Filtros -->
-                <aside class="catalog-sidebar" data-aos="fade-right">
-                    <h4><i class="fa-solid fa-filter" style="color:var(--primary); margin-right:.5rem;"></i> Filtros</h4>
-                    
-                    <div class="catalog-filter-group">
-                        <label>Mes de Salida</label>
-                        <select>
-                            <option value="">Cualquier fecha</option>
-                            <option value="2026-05">Mayo 2026</option>
-                            <option value="2026-06">Junio 2026</option>
-                            <option value="2026-07">Julio 2026</option>
-                        </select>
-                    </div>
-
-                    <div class="catalog-filter-group">
-                        <label>Tipo de Viaje</label>
-                        <select>
-                            <option value="">Todos</option>
-                            <option value="playa">Playa</option>
-                            <option value="santuarios">Santuarios</option>
-                            <option value="pueblos">Pueblos Mágicos</option>
-                        </select>
-                    </div>
-
-                    <div class="catalog-filter-group">
-                        <label>Precio Máximo</label>
-                        <input type="range" min="1000" max="20000" step="500" style="width:100%; accent-color:var(--primary);">
-                        <div style="display:flex; justify-content:space-between; font-size:.8rem; color:var(--slate-500); margin-top:.5rem;">
-                            <span>$1,000</span>
-                            <span>$20,000+</span>
-                        </div>
-                    </div>
-
-                    <button class="btn btn-primary btn-block" style="margin-top: 1rem;">Aplicar Filtros</button>
-                </aside>
+                <!-- El sidebar de filtros fue retirado según requerimiento del cliente -->
 
                 <!-- Grid de Tours -->
                 <div class="catalog-grid">

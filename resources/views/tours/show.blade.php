@@ -12,46 +12,52 @@
             color: var(--navy);
         }
         
-        /* Sistema "Ver más" / "Ver menos" */
-        .expandable-text {
-            position: relative;
+        /* Sistema de Acordeones (Details/Summary) */
+        .tour-accordion {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--slate-100);
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 0.3s var(--ease);
             overflow: hidden;
-            max-height: 6.4rem; /* Aprox 4 líneas */
-            transition: max-height 0.3s ease-out;
         }
-        .expandable-text.expanded {
-            max-height: 5000px; /* Suficiente para texto largo */
-            transition: max-height 0.5s ease-in;
+        .tour-accordion:hover {
+            box-shadow: var(--shadow-md);
         }
-        .expandable-text.has-overflow::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 45px;
-            background: linear-gradient(to bottom, transparent, #ffffff);
-            pointer-events: none;
-            transition: opacity 0.2s;
-        }
-        .expandable-text.expanded::after {
-            opacity: 0;
-        }
-        .btn-ver-mas {
-            display: none;
-            background: none;
-            border: none;
-            color: var(--primary);
+        .tour-accordion summary {
+            padding: 1.5rem 2rem;
+            font-size: 1.15rem;
             font-weight: 700;
-            cursor: pointer;
-            padding: 0;
-            margin-top: 0.5rem;
-            font-size: 0.95rem;
-            transition: color 0.2s;
-        }
-        .btn-ver-mas:hover {
             color: var(--navy);
-            text-decoration: underline;
+            cursor: pointer;
+            list-style: none; /* Quita el triangulito por defecto */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.2s;
+            background: var(--white);
+        }
+        .tour-accordion summary::-webkit-details-marker {
+            display: none;
+        }
+        .tour-accordion summary:hover {
+            background: var(--slate-50);
+        }
+        .tour-accordion summary .icon-arrow {
+            color: var(--slate-400);
+            transition: transform 0.3s ease;
+            font-size: 0.9rem;
+        }
+        .tour-accordion[open] summary .icon-arrow {
+            transform: rotate(180deg);
+        }
+        .tour-accordion[open] summary {
+            border-bottom: 1px solid var(--slate-100);
+        }
+        .tour-accordion-content {
+            padding: 1.5rem 2rem;
+            background: var(--white);
         }
     </style>
 @endsection
@@ -87,41 +93,70 @@
                 </div>
 
                 {{-- Card: Description --}}
-                <div class="info-card" data-aos="fade-up" data-aos-delay="100">
-                    <h3><i class="fa-solid fa-clipboard-list"></i> Descripción del Viaje</h3>
-                    <div class="expandable-text js-expandable">
+                <details class="tour-accordion" open data-aos="fade-up" data-aos-delay="100">
+                    <summary>
+                        <div style="display:flex; align-items:center; gap:0.6rem;">
+                            <i class="fa-solid fa-clipboard-list" style="color:var(--primary);"></i> Descripción del Viaje
+                        </div>
+                        <i class="fa-solid fa-chevron-down icon-arrow"></i>
+                    </summary>
+                    <div class="tour-accordion-content">
                         <p>{!! nl2br(e($tour->description ?? 'Disfruta de una experiencia inolvidable. Nuestro viaje está diseñado para que te relajes y disfrutes al máximo, nosotros nos encargamos de la logística, el transporte y la seguridad.')) !!}</p>
                     </div>
-                    <button class="btn-ver-mas js-btn-expand" type="button">Ver más <i class="fa-solid fa-chevron-down"></i></button>
-                </div>
+                </details>
 
                 {{-- Card: Itinerary --}}
-                <div class="info-card" data-aos="fade-up" data-aos-delay="150">
-                    <h3><i class="fa-solid fa-map-location-dot"></i> Itinerario</h3>
-                    <p style="color: var(--slate-500); font-style: italic;">Itinerario disponible próximamente.</p>
-                </div>
+                <details class="tour-accordion" data-aos="fade-up" data-aos-delay="150">
+                    <summary>
+                        <div style="display:flex; align-items:center; gap:0.6rem;">
+                            <i class="fa-solid fa-map-location-dot" style="color:var(--primary);"></i> Itinerario
+                        </div>
+                        <i class="fa-solid fa-chevron-down icon-arrow"></i>
+                    </summary>
+                    <div class="tour-accordion-content">
+                        @if($tour->itinerary)
+                            <p>{!! nl2br(e($tour->itinerary)) !!}</p>
+                        @else
+                            <p style="color: var(--slate-500); font-style: italic;">Itinerario disponible próximamente.</p>
+                        @endif
+                    </div>
+                </details>
 
                 {{-- Card: What's Included --}}
-                <div class="info-card" data-aos="fade-up" data-aos-delay="200" style="background: var(--slate-50); box-shadow: none; border: 1px solid var(--slate-200);">
-                    <h3><i class="fa-solid fa-check-circle"></i> Qué Incluye</h3>
-                    <ul class="feature-grid">
-                        <li><i class="fa-solid fa-bus"></i> Transporte viaje redondo</li>
-                        <li><i class="fa-solid fa-shield-heart"></i> Seguro de viajero a bordo</li>
-                        <li><i class="fa-solid fa-user-tie"></i> Coordinador de grupo</li>
-                        <li><i class="fa-solid fa-camera"></i> Visitas guiadas</li>
-                        <li><i class="fa-solid fa-bottle-water"></i> Hidratación en el autobús</li>
-                    </ul>
-                </div>
+                <details class="tour-accordion" data-aos="fade-up" data-aos-delay="200">
+                    <summary>
+                        <div style="display:flex; align-items:center; gap:0.6rem;">
+                            <i class="fa-solid fa-check-circle" style="color:var(--teal);"></i> Qué Incluye
+                        </div>
+                        <i class="fa-solid fa-chevron-down icon-arrow"></i>
+                    </summary>
+                    <div class="tour-accordion-content" style="background: var(--slate-50);">
+                        <ul class="feature-grid">
+                            <li><i class="fa-solid fa-bus"></i> Transporte viaje redondo</li>
+                            <li><i class="fa-solid fa-shield-heart"></i> Seguro de viajero a bordo</li>
+                            <li><i class="fa-solid fa-user-tie"></i> Coordinador de grupo</li>
+                            <li><i class="fa-solid fa-camera"></i> Visitas guiadas</li>
+                            <li><i class="fa-solid fa-bottle-water"></i> Hidratación en el autobús</li>
+                        </ul>
+                    </div>
+                </details>
 
                 {{-- Card: Not Included --}}
-                <div class="info-card" data-aos="fade-up" data-aos-delay="300" style="background: var(--slate-50); box-shadow: none; border: 1px solid var(--slate-200);">
-                    <h3><i class="fa-solid fa-circle-xmark red"></i> No Incluye</h3>
-                    <ul class="feature-grid not-included">
-                        <li><i class="fa-solid fa-utensils"></i> Alimentos no mencionados</li>
-                        <li><i class="fa-solid fa-ticket"></i> Propinas</li>
-                        <li><i class="fa-solid fa-bag-shopping"></i> Gastos personales</li>
-                    </ul>
-                </div>
+                <details class="tour-accordion" data-aos="fade-up" data-aos-delay="300">
+                    <summary>
+                        <div style="display:flex; align-items:center; gap:0.6rem;">
+                            <i class="fa-solid fa-circle-xmark" style="color:#ef4444;"></i> No Incluye
+                        </div>
+                        <i class="fa-solid fa-chevron-down icon-arrow"></i>
+                    </summary>
+                    <div class="tour-accordion-content" style="background: var(--slate-50);">
+                        <ul class="feature-grid not-included">
+                            <li><i class="fa-solid fa-utensils"></i> Alimentos no mencionados</li>
+                            <li><i class="fa-solid fa-ticket"></i> Propinas</li>
+                            <li><i class="fa-solid fa-bag-shopping"></i> Gastos personales</li>
+                        </ul>
+                    </div>
+                </details>
             </div>
 
             {{-- ============================

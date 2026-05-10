@@ -78,6 +78,11 @@
                     <textarea name="description" rows="4" style="width: 100%; padding: .75rem; border: 1px solid var(--border); border-radius: 6px;">{{ old('description', $tour->description ?? '') }}</textarea>
                 </div>
 
+                <div style="margin-bottom: 2rem;">
+                    <label style="display: block; margin-bottom: .5rem; font-weight: 600; font-size: .85rem;">Itinerario</label>
+                    <textarea name="itinerary" rows="8" style="width: 100%; padding: .75rem; border: 1px solid var(--border); border-radius: 6px;">{{ old('itinerary', $tour->itinerary ?? '') }}</textarea>
+                </div>
+
                 <div style="margin-bottom: 2rem; background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem;">
                     <h3 style="font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 0.5rem;"><i class="fa-solid fa-folder-open"></i> Configuración de Documentos</h3>
                     <label style="display: flex; align-items: center; cursor: pointer;">

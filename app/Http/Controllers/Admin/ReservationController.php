@@ -120,7 +120,7 @@ class ReservationController extends Controller
         }
 
         // Recalcular precios de este pasajero usando la lógica del servicio
-        $pricing = $reservationService->calculatePassengerPricing((float)$passenger->base_price, $passenger->passenger_type);
+        $pricing = $reservationService->calculatePassengerPricing($passenger->reservation->tour, $passenger->passenger_type);
         $passenger->discount_amount = $pricing['discount_amount'];
         $passenger->original_discount_amount = $pricing['discount_amount'];
         $passenger->final_price = $pricing['final_price'];
@@ -214,7 +214,7 @@ class ReservationController extends Controller
             } else {
                 $reservation->status = \App\Enums\ReservationStatus::PARTIAL;
                 \App\Models\ReservationSeat::where('reservation_id', $reservation->id)
-                    ->update(['status' => 'reserved']);
+                    ->update(['status' => 'pending']);
 
                 $notificationData = [
                     'title' => 'Abono Registrado',

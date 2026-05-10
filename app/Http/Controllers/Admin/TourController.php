@@ -38,6 +38,7 @@ class TourController extends Controller
             'expiration_hours' => 'required|integer|min:1',
             'status' => 'required|in:active,inactive,completed',
             'description' => 'nullable|string',
+            'itinerary' => 'nullable|string',
             'image' => 'nullable|image|max:2048'
         ]);
 
@@ -71,6 +72,7 @@ class TourController extends Controller
             'expiration_hours' => 'required|integer|min:1',
             'status' => 'required|in:active,inactive,completed',
             'description' => 'nullable|string',
+            'itinerary' => 'nullable|string',
             'image' => 'nullable|image|max:2048'
         ]);
 
