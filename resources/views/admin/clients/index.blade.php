@@ -33,8 +33,10 @@
                                 }
                             @endphp
                             <tr>
-                                <td style="font-weight: 700; color: var(--navy);">
-                                    {{ $client->name }}<br>
+                                <td style="font-weight: 700;">
+                                    <a href="{{ route('admin.clients.show', $client->id) }}" style="color: var(--navy); text-decoration: none;">
+                                        {{ $client->name }}
+                                    </a><br>
                                     <span style="font-size: 0.75rem; font-weight: 400; color: var(--text-muted);">CURP: {{ $client->curp ?? 'N/A' }}</span>
                                 </td>
                                 <td>

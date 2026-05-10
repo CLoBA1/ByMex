@@ -12,4 +12,15 @@ class ClientController extends Controller
         $clients = Client::withCount('reservations')->get();
         return view('admin.clients.index', compact('clients'));
     }
+
+    public function show($id)
+    {
+        $client = Client::with(['reservations.tour', 'reservations.payments'])->findOrFail($id);
+        
+        $activeTrips = $client->reservations->filter(function ($res) {
+            return $res->status->value !== 'cancelled' && \Carbon\Carbon::parse($res->tour->departure_date)->isFuture();
+        });
+
+        return view('admin.clients.show', compact('client', 'activeTrips'));
+    }
 }
