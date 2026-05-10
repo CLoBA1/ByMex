@@ -20,6 +20,7 @@
                             <th style="text-align: center;">Viajes (Completados)</th>
                             <th style="text-align: center;">Bonificaciones</th>
                             <th style="text-align: right;">Gasto Estimado</th>
+                            <th style="text-align: center;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -73,10 +74,18 @@
                                 <td style="text-align: right; font-weight: 700; color: #166534;">
                                     ${{ number_format($totalGasto, 2) }}
                                 </td>
+                                <td style="text-align: center; white-space: nowrap;">
+                                    <a href="{{ route('admin.clients.show', $client->id) }}" class="btn-action" style="padding: 0.35rem 0.75rem; font-size: 0.85rem; background: var(--slate-100); color: var(--navy); border: 1px solid var(--border); display: inline-block; margin-right: 0.25rem;" title="Ver Detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                    <a href="{{ route('admin.clients.edit', $client->id) }}" class="btn-action" style="padding: 0.35rem 0.75rem; font-size: 0.85rem; background: var(--navy); color: white; border: none; display: inline-block;" title="Editar Cliente">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                                <td colspan="8" style="text-align: center; padding: 3rem; color: var(--text-muted);">
                                     <i class="fa-solid fa-user-xmark" style="font-size: 2rem; color: var(--border); margin-bottom: 1rem; display: block;"></i>
                                     Aún no hay clientes registrados en el sistema.
                                 </td>
