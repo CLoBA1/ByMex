@@ -255,6 +255,16 @@ class ReservationController extends Controller
         return $pdf->download('Comprobante_Pago_' . str_pad($payment->id, 5, '0', STR_PAD_LEFT) . '.pdf');
     }
 
+    public function downloadTicket($id)
+    {
+        $reservation = Reservation::with(['tour', 'client', 'seats', 'passengers'])->findOrFail($id);
+        $paymentSettings = \App\Models\PaymentSetting::first();
+        $activeBanks = \App\Models\BankAccount::where('is_active', true)->orderBy('sort_order')->get();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.ticket', compact('reservation', 'paymentSettings', 'activeBanks'));
+        return $pdf->download('Ticket_ByMex_' . str_pad($reservation->id, 5, '0', STR_PAD_LEFT) . '.pdf');
+    }
+
     public function updateStatus(Request $request, $id)
     {
         $reservation = Reservation::findOrFail($id);

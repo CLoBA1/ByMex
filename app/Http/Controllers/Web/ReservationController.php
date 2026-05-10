@@ -40,7 +40,7 @@ class ReservationController extends Controller
 
     public function success($token)
     {
-        $reservation = Reservation::with(['tour', 'client', 'seats', 'passengers.documents'])
+        $reservation = Reservation::with(['tour', 'client', 'seats', 'passengers.documents', 'payments'])
             ->where('public_token', $token)
             ->firstOrFail();
             
@@ -64,6 +64,21 @@ class ReservationController extends Controller
         $filename = 'Ticket_ByMex_' . str_pad($reservation->id, 5, '0', STR_PAD_LEFT) . '.pdf';
         
         return $pdf->download($filename);
+    }
+
+    public function downloadVoucher($token, $paymentId)
+    {
+        $reservation = Reservation::where('public_token', $token)->firstOrFail();
+
+        $payment = \App\Models\Payment::where('id', $paymentId)
+            ->where('reservation_id', $reservation->id)
+            ->with('reservation.client', 'reservation.tour')
+            ->firstOrFail();
+
+        $paymentSettings = \App\Models\PaymentSetting::first();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.voucher', compact('payment', 'paymentSettings'));
+        return $pdf->download('Comprobante_Pago_' . str_pad($payment->id, 5, '0', STR_PAD_LEFT) . '.pdf');
     }
 
     public function mockPay($token)

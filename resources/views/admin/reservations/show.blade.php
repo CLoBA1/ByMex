@@ -20,6 +20,9 @@
             <a href="{{ route('admin.tours.show', $reservation->tour_id) }}" class="btn-action" style="background: var(--slate-100); color: var(--navy); border: 1px solid var(--border);">
                 <i class="fa-solid fa-arrow-left"></i> Volver al Tour
             </a>
+            <a href="{{ route('admin.reservations.ticket', $reservation->id) }}" class="btn-action" style="background: #d62828; color: #fff; border: none; text-decoration: none;">
+                <i class="fa-solid fa-file-pdf"></i> Descargar Ticket PDF
+            </a>
             @php
                 $amountPaid = $reservation->payments->where('status', 'approved')->sum('amount');
                 $surplus = $amountPaid > $reservation->total_amount ? $amountPaid - $reservation->total_amount : 0;

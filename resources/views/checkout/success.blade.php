@@ -186,6 +186,45 @@
                 @endif
             </div>
 
+            {{-- HISTORIAL DE PAGOS CON VOUCHERS --}}
+            @php
+                $approvedPayments = $reservation->payments->where('status', 'approved')->sortByDesc('created_at');
+            @endphp
+            @if($approvedPayments->count() > 0)
+                <div style="margin-top: 2.5rem; text-align: left;">
+                    <h3 style="color: var(--color-dark); margin-bottom: 0.5rem; font-size: 1.2rem;">
+                        <i class="fa-solid fa-receipt"></i> Historial de Pagos
+                    </h3>
+                    <p style="color: var(--color-dark-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+                        Descarga el comprobante individual de cada pago realizado.
+                    </p>
+
+                    @foreach($approvedPayments as $payment)
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md); margin-bottom: 0.75rem;">
+                            <div>
+                                <div style="font-weight: 600; color: var(--color-dark); font-size: 1rem;">
+                                    ${{ number_format($payment->amount, 2) }} MXN
+                                </div>
+                                <div style="font-size: 0.85rem; color: var(--color-dark-muted);">
+                                    {{ $payment->created_at->format('d/m/Y H:i') }}
+                                    —
+                                    @if($payment->payment_method === 'stripe')
+                                        Pago en línea (Stripe)
+                                    @elseif($payment->payment_method === 'mercadopago')
+                                        Pago en línea (Mercado Pago)
+                                    @else
+                                        Depósito / Transferencia
+                                    @endif
+                                </div>
+                            </div>
+                            <a href="{{ route('reservations.voucher', [$reservation->public_token, $payment->id]) }}" class="btn btn-outline" style="padding: 0.4rem 1rem; font-size: 0.85rem; border-width: 1px; white-space: nowrap;">
+                                <i class="fa-solid fa-file-pdf"></i> Voucher
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
             {{-- DOCUMENTOS POR PASAJERO (PÚBLICO) --}}
             @if($reservation->passengers->count() > 0 && $reservation->tour->requires_passenger_documents)
                 <div style="margin-top: 3rem; text-align: left;">

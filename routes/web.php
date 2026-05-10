@@ -30,6 +30,7 @@ Route::get('/tours/{id}', [WebTourController::class, 'show'])->name('tours.show'
 Route::post('/reservations', [WebReservationController::class, 'store'])->name('reservations.store');
 Route::get('/reservations/{token}/success', [WebReservationController::class, 'success'])->name('reservations.success');
 Route::get('/reservations/{token}/ticket', [WebReservationController::class, 'downloadTicket'])->name('reservations.ticket');
+Route::get('/reservations/{token}/voucher/{paymentId}', [WebReservationController::class, 'downloadVoucher'])->name('reservations.voucher');
 Route::post('/reservations/{token}/passengers/{passengerId}/document', [WebReservationController::class, 'uploadPublicDocument'])->name('reservations.passenger.document');
 Route::get('/reservations/{token}/documents/{documentId}/download', [WebReservationController::class, 'downloadPublicDocument'])->name('reservations.passenger.document.download');
 
@@ -52,6 +53,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/admin/reservations/{id}/status', [AdminReservationController::class, 'updateStatus'])->name('admin.reservations.status');
     Route::post('/admin/reservations/{id}/payment', [AdminReservationController::class, 'storePayment'])->name('admin.reservations.payment');
     Route::get('/admin/payments/{id}/voucher', [AdminReservationController::class, 'downloadVoucher'])->name('admin.payments.voucher');
+    Route::get('/admin/reservations/{id}/ticket', [AdminReservationController::class, 'downloadTicket'])->name('admin.reservations.ticket');
     Route::get('/admin/reservations/surplus', [AdminReservationController::class, 'surplusList'])->name('admin.reservations.surplus');
     Route::get('/admin/reservations/{id}', [AdminReservationController::class, 'show'])->name('admin.reservations.show');
     Route::post('/admin/passengers/{id}/validate', [AdminReservationController::class, 'validatePassenger'])->name('admin.passengers.validate');
