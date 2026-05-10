@@ -81,6 +81,10 @@ class ReservationService
             }
         }
 
+        // Limpieza dinámica "Lazy" justo antes de guardar: si un asiento acaba de expirar, lo liberamos
+        // físicamente para evitar el error 23000 (Integrity Constraint) en la inserción.
+        $this->cancelExpiredReservations($tour->id);
+
         DB::beginTransaction();
         try {
             // 1. Create or Find Client
@@ -186,6 +190,10 @@ class ReservationService
      */
     public function getSeatStatus(int $tourId): array
     {
+        // Limpieza dinámica "Lazy": Aseguramos que las reservaciones vencidas sean canceladas 
+        // y liberen sus asientos antes de consultar la disponibilidad, por si el cron se retrasó.
+        $this->cancelExpiredReservations($tourId);
+
         // Fetch current active seats
         $seats = ReservationSeat::where('tour_id', $tourId)->get();
         $response = [];
