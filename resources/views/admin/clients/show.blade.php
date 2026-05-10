@@ -85,12 +85,29 @@
 
         <div class="card" style="margin-bottom: 0;">
             <div class="card-body" style="display: flex; align-items: center; gap: 1rem;">
-                <div style="background: #fefce8; color: #eab308; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                <div style="background: #fefce8; color: #eab308; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
                     <i class="fa-solid fa-gift"></i>
                 </div>
-                <div>
-                    <div style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">Bonificaciones</div>
-                    <div style="font-size: 1.5rem; font-weight: 800; color: var(--navy);">{{ $client->available_bonuses }}</div>
+                <div style="flex-grow: 1;">
+                    <div style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">Programa Lealtad</div>
+                    <div style="font-size: 1.25rem; font-weight: 800; color: var(--navy);">
+                        {{ $client->available_bonuses }} <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">Bonos Activos</span>
+                    </div>
+                    
+                    @if($client->available_bonuses == 0 || true)
+                        <div style="margin-top: 0.5rem;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">
+                                <span>Avance (Completados)</span>
+                                <strong>{{ $client->next_bonus_progress }} / {{ \App\Models\Client::TRIPS_FOR_BONUS }}</strong>
+                            </div>
+                            <div style="width: 100%; background: #e2e8f0; border-radius: 4px; height: 6px; overflow: hidden;">
+                                @php
+                                    $percentage = ($client->next_bonus_progress / \App\Models\Client::TRIPS_FOR_BONUS) * 100;
+                                @endphp
+                                <div style="background: #eab308; width: {{ $percentage }}%; height: 100%; transition: width 0.5s;"></div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

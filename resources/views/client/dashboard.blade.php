@@ -252,10 +252,31 @@
             </div>
         @endif
 
-        <div class="coming-soon">
-            <i class="fa-solid fa-star" style="font-size: 2rem; color: #cbd5e1; margin-bottom: 1rem;"></i>
-            <h3 style="color: var(--color-dark); margin-bottom: 0.5rem;">Programa de Lealtad</h3>
-            <p>Próximamente podrás ver aquí tus puntos acumulados, recompensas y bonificaciones por viajar con nosotros.</p>
+        <div class="loyalty-card" style="background: white; border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem; margin-top: 2rem; display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; box-shadow: var(--shadow-sm);">
+            <div style="background: #fefce8; color: #eab308; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; flex-shrink: 0;">
+                <i class="fa-solid fa-gift"></i>
+            </div>
+            <div style="flex-grow: 1; min-width: 250px;">
+                <h3 style="color: var(--color-dark); margin: 0 0 0.5rem 0; font-family: 'Montserrat', sans-serif; font-size: 1.5rem;">Programa de Lealtad</h3>
+                <p style="color: var(--color-dark-muted); margin: 0 0 1rem 0;">Acumula {{ \App\Models\Client::TRIPS_FOR_BONUS }} viajes pagados y obtén una bonificación.</p>
+                
+                <div style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="font-weight: 600; color: var(--color-dark);">Progreso de Viajes</span>
+                        <span style="font-weight: 700; color: var(--color-primary);">{{ $client->next_bonus_progress }} / {{ \App\Models\Client::TRIPS_FOR_BONUS }}</span>
+                    </div>
+                    <div style="width: 100%; background: #e2e8f0; border-radius: 6px; height: 10px; overflow: hidden;">
+                        @php
+                            $percentage = ($client->next_bonus_progress / \App\Models\Client::TRIPS_FOR_BONUS) * 100;
+                        @endphp
+                        <div style="background: #eab308; width: {{ $percentage }}%; height: 100%; transition: width 1s ease-in-out;"></div>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; min-width: 150px;">
+                <div style="font-size: 3rem; font-weight: 900; color: var(--color-dark); line-height: 1;">{{ $client->available_bonuses }}</div>
+                <div style="font-size: 0.9rem; color: var(--color-dark-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-top: 0.5rem;">Bonos Disponibles</div>
+            </div>
         </div>
 
     </main>
