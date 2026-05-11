@@ -58,4 +58,58 @@ class BoardingPointController extends Controller
         $bp->delete();
         return back()->with('success', 'Punto de abordaje eliminado.');
     }
+
+    public function storeSubPoint(Request $request, $boardingPointId)
+    {
+        $bp = BoardingPoint::findOrFail($boardingPointId);
+
+        $request->validate([
+            'name' => 'required|string|max:150',
+            'reference' => 'nullable|string|max:255',
+            'sort_order' => 'nullable|integer',
+        ]);
+
+        $bp->subPoints()->create([
+            'name' => $request->name,
+            'reference' => $request->reference,
+            'sort_order' => $request->sort_order ?? 0,
+            'is_active' => true,
+        ]);
+
+        return back()->with('success', 'Punto específico agregado a ' . $bp->name . '.');
+    }
+
+    public function updateSubPoint(Request $request, $id)
+    {
+        $sub = \App\Models\BoardingSubPoint::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:150',
+            'reference' => 'nullable|string|max:255',
+            'is_active' => 'required|boolean',
+            'sort_order' => 'nullable|integer',
+        ]);
+
+        $sub->update([
+            'name' => $request->name,
+            'reference' => $request->reference,
+            'is_active' => $request->is_active,
+            'sort_order' => $request->sort_order ?? 0,
+        ]);
+
+        return back()->with('success', 'Punto específico actualizado.');
+    }
+
+    public function destroySubPoint($id)
+    {
+        $sub = \App\Models\BoardingSubPoint::findOrFail($id);
+
+        if ($sub->passengers()->count() > 0) {
+            $sub->update(['is_active' => false]);
+            return back()->with('success', 'El subpunto ha sido desactivado porque tiene pasajeros vinculados.');
+        }
+
+        $sub->delete();
+        return back()->with('success', 'Punto específico eliminado.');
+    }
 }

@@ -188,6 +188,9 @@
                     if ($passenger->boardingPoint) {
                         $bgColor = $passenger->boardingPoint->color_hex;
                         $bpName = $passenger->boardingPoint->name;
+                        if ($passenger->boardingSubPoint) {
+                            $bpName .= ' (' . $passenger->boardingSubPoint->name . ')';
+                        }
                         $bpCounts[$passenger->boardingPoint->id]++;
                     } else {
                         $bpCounts['legacy']++;

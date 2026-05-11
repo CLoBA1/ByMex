@@ -25,7 +25,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($boardingPoints as $bp)
+                        @forelse(\App\Models\BoardingPoint::with('subPoints')->orderBy('name')->get() as $bp)
                             <tr>
                                 <td>
                                     <span style="display: inline-flex; align-items: center; gap: 0.4rem;">
@@ -33,7 +33,44 @@
                                         {{ $bp->color_label }}
                                     </span>
                                 </td>
-                                <td style="font-weight: 600;">{{ $bp->name }}</td>
+                                <td style="font-weight: 600;">
+                                    {{ $bp->name }}
+                                    
+                                    {{-- Subpuntos Dropdown --}}
+                                    @if($bp->subPoints->count() > 0)
+                                        <div style="margin-top: 0.5rem; border-left: 2px solid var(--border); padding-left: 0.75rem;">
+                                            <details>
+                                                <summary style="cursor: pointer; font-size: 0.8rem; color: var(--primary); font-weight: 600;">
+                                                    <i class="fa-solid fa-list-ul"></i> Ver {{ $bp->subPoints->count() }} Puntos Específicos
+                                                </summary>
+                                                <div style="margin-top: 0.5rem;">
+                                                    @foreach($bp->subPoints as $sub)
+                                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.4rem; background: var(--bg-body); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.25rem;">
+                                                            <div>
+                                                                <span style="font-size: 0.85rem; font-weight: 600; color: {{ $sub->is_active ? 'var(--navy)' : 'var(--text-muted)' }};">{{ $sub->name }}</span>
+                                                                @if($sub->reference)
+                                                                    <span style="font-size: 0.75rem; color: var(--slate-500); display: block;">Ref: {{ $sub->reference }}</span>
+                                                                @endif
+                                                            </div>
+                                                            <div style="display: flex; gap: 0.25rem;">
+                                                                <button type="button" class="btn-action" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; background: var(--slate-100); color: var(--navy); border: 1px solid var(--border);" onclick="editSubBp({{ $sub->id }}, '{{ $sub->name }}', '{{ $sub->reference }}', {{ $sub->is_active ? 'true' : 'false' }}, {{ $sub->sort_order }})" title="Editar Subpunto">
+                                                                    <i class="fa-solid fa-pen"></i>
+                                                                </button>
+                                                                <form action="{{ route('admin.boarding-sub-points.destroy', $sub->id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('¿Eliminar/Desactivar subpunto?');">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit" class="btn-action" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; background: var(--primary);" title="Eliminar Subpunto">
+                                                                        <i class="fa-solid fa-trash"></i>
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </details>
+                                        </div>
+                                    @endif
+                                </td>
                                 <td>
                                     @if($bp->is_active)
                                         <span class="badge badge-green">Activo</span>
@@ -43,6 +80,9 @@
                                 </td>
                                 <td style="text-align: right;">
                                     <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                        <button type="button" class="btn-action" style="background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; padding: 0.4rem;" onclick="addSubBp({{ $bp->id }}, '{{ $bp->name }}')" title="Agregar Punto Específico">
+                                            <i class="fa-solid fa-plus"></i> <i class="fa-solid fa-location-dot"></i>
+                                        </button>
                                         <button type="button" class="btn-action" style="background: var(--slate-100); color: var(--navy); border: 1px solid var(--border); padding: 0.4rem;" onclick="editBp({{ $bp->id }}, '{{ $bp->name }}', '{{ $bp->color_label }}', '{{ $bp->color_hex }}', {{ $bp->is_active ? 'true' : 'false' }}, '{{ $bp->notes }}')" title="Editar">
                                             <i class="fa-solid fa-pen"></i>
                                         </button>
@@ -102,7 +142,7 @@
             </div>
 
             <!-- Editar (oculto por defecto) -->
-            <div class="card" id="editCard" style="display: none;">
+            <div class="card" id="editCard" style="display: none; margin-bottom: 2rem;">
                 <div class="card-header">
                     <h3 class="card-title"><i class="fa-solid fa-pen"></i> Editar Punto</h3>
                 </div>
@@ -146,12 +186,55 @@
                     </form>
                 </div>
             </div>
+
+            <!-- Formulario Subpuntos (oculto por defecto) -->
+            <div class="card" id="subPointCard" style="display: none; margin-bottom: 2rem;">
+                <div class="card-header">
+                    <h3 class="card-title" id="subPointCardTitle"><i class="fa-solid fa-location-dot"></i> Punto Específico</h3>
+                </div>
+                <div class="card-body">
+                    <form id="subPointForm" method="POST">
+                        @csrf
+                        <input type="hidden" name="_method" id="subPointMethod" value="POST">
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem;">Nombre del Lugar</label>
+                            <input type="text" name="name" id="subPointName" required placeholder="Ej. Gasolinera Libramiento" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem;">Referencia Corta (Opcional)</label>
+                            <input type="text" name="reference" id="subPointRef" placeholder="Frente al OXXO" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div>
+                                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem;">Orden de Aparición</label>
+                                <input type="number" name="sort_order" id="subPointOrder" value="0" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
+                            </div>
+                            <div id="subPointActiveContainer" style="display: none;">
+                                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem;">Estado</label>
+                                <select name="is_active" id="subPointActive" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
+                                    <option value="1">Activo</option>
+                                    <option value="0">Inactivo</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button type="submit" class="btn-action" style="flex: 1; justify-content: center; padding: 0.6rem; background: #0284c7;">
+                                <i class="fa-solid fa-save"></i> Guardar
+                            </button>
+                            <button type="button" class="btn-action" style="background: var(--slate-100); color: var(--navy); border: 1px solid var(--border); padding: 0.6rem;" onclick="document.getElementById('subPointCard').style.display='none';">
+                                Cancelar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
 
     </div>
 
     <script>
         function editBp(id, name, colorLabel, colorHex, isActive, notes) {
+            document.getElementById('subPointCard').style.display = 'none';
             document.getElementById('editCard').style.display = 'block';
             document.getElementById('editForm').action = '/admin/boarding-points/' + id;
             document.getElementById('editName').value = name;
@@ -160,6 +243,33 @@
             document.getElementById('editActive').value = isActive ? '1' : '0';
             document.getElementById('editNotes').value = notes || '';
             document.getElementById('editCard').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function addSubBp(bpId, bpName) {
+            document.getElementById('editCard').style.display = 'none';
+            document.getElementById('subPointCard').style.display = 'block';
+            document.getElementById('subPointCardTitle').innerHTML = '<i class="fa-solid fa-plus"></i> Específico para ' + bpName;
+            document.getElementById('subPointForm').action = '/admin/boarding-points/' + bpId + '/sub-points';
+            document.getElementById('subPointMethod').value = 'POST';
+            document.getElementById('subPointName').value = '';
+            document.getElementById('subPointRef').value = '';
+            document.getElementById('subPointOrder').value = '0';
+            document.getElementById('subPointActiveContainer').style.display = 'none';
+            document.getElementById('subPointCard').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function editSubBp(id, name, ref, isActive, order) {
+            document.getElementById('editCard').style.display = 'none';
+            document.getElementById('subPointCard').style.display = 'block';
+            document.getElementById('subPointCardTitle').innerHTML = '<i class="fa-solid fa-pen"></i> Editar Punto Específico';
+            document.getElementById('subPointForm').action = '/admin/boarding-sub-points/' + id;
+            document.getElementById('subPointMethod').value = 'PUT';
+            document.getElementById('subPointName').value = name;
+            document.getElementById('subPointRef').value = ref === 'null' ? '' : ref;
+            document.getElementById('subPointOrder').value = order;
+            document.getElementById('subPointActiveContainer').style.display = 'block';
+            document.getElementById('subPointActive').value = isActive ? '1' : '0';
+            document.getElementById('subPointCard').scrollIntoView({ behavior: 'smooth' });
         }
     </script>
 </x-app-layout>

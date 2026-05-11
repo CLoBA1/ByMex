@@ -316,6 +316,7 @@
     <script>
         window.API_URL_SEATS = "{{ url('api/seats') }}/{{ $tour->id }}";
         window.BOARDING_POINTS = @json($boardingPoints);
+        window.BOARDING_SUB_POINTS_URL = "{{ url('api/boarding-points') }}";
         
         // Lógica de "Ver más / Ver menos"
         document.addEventListener('DOMContentLoaded', function() {

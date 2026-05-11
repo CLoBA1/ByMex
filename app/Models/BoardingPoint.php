@@ -19,4 +19,9 @@ class BoardingPoint extends Model
     {
         return $this->hasMany(ReservationPassenger::class);
     }
+
+    public function subPoints()
+    {
+        return $this->hasMany(BoardingSubPoint::class)->orderBy('sort_order')->orderBy('name');
+    }
 }

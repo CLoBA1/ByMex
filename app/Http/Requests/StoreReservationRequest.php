@@ -36,6 +36,7 @@ class StoreReservationRequest extends FormRequest
             'passengers.*.birthdate' => 'nullable|date',
             'passengers.*.benefit_label' => 'nullable|string',
             'passengers.*.boarding_point_id' => 'nullable|exists:boarding_points,id',
+            'passengers.*.boarding_sub_point_id' => 'nullable|exists:boarding_sub_points,id',
         ];
     }
     
@@ -80,6 +81,32 @@ class StoreReservationRequest extends FormRequest
                     foreach ($passengerSeats as $ps) {
                         if (!in_array($ps, $seatNumbers)) {
                             $validator->errors()->add('passengers', "El asiento asignado ($ps) no está dentro de los asientos seleccionados.");
+                        }
+                    }
+
+                    // 4. Validar subpuntos de abordaje
+                    foreach ($passengers as $index => $p) {
+                        if (!empty($p['boarding_point_id'])) {
+                            // Revisar si el punto principal tiene subpuntos activos
+                            $hasSubPoints = \App\Models\BoardingSubPoint::where('boarding_point_id', $p['boarding_point_id'])
+                                ->where('is_active', true)
+                                ->exists();
+
+                            if ($hasSubPoints) {
+                                if (empty($p['boarding_sub_point_id'])) {
+                                    $validator->errors()->add("passengers.$index.boarding_sub_point_id", "Debe seleccionar un lugar específico de abordaje.");
+                                } else {
+                                    // Validar que el subpunto pertenezca al punto principal
+                                    $validSubPoint = \App\Models\BoardingSubPoint::where('id', $p['boarding_sub_point_id'])
+                                        ->where('boarding_point_id', $p['boarding_point_id'])
+                                        ->where('is_active', true)
+                                        ->exists();
+                                    
+                                    if (!$validSubPoint) {
+                                        $validator->errors()->add("passengers.$index.boarding_sub_point_id", "El lugar específico de abordaje seleccionado no es válido o no está activo.");
+                                    }
+                                }
+                            }
                         }
                     }
                 }

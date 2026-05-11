@@ -52,6 +52,7 @@ class ReservationService
                     'birthdate' => $p['birthdate'] ?? null,
                     'benefit_label' => $p['benefit_label'] ?? null,
                     'boarding_point_id' => $p['boarding_point_id'] ?? null,
+                    'boarding_sub_point_id' => $p['boarding_sub_point_id'] ?? null,
                     'base_price' => $basePrice,
                     'discount_amount' => $discount,
                     'original_discount_amount' => $discount,

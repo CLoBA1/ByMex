@@ -231,6 +231,11 @@
                                                 <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: {{ $passenger->boardingPoint->color_hex }};"></span>
                                                 {{ $passenger->boardingPoint->name }}
                                             </span>
+                                            @if($passenger->boardingSubPoint)
+                                                <div style="font-size: 0.75rem; color: var(--slate-500); margin-left: 1rem; margin-top: 0.1rem;">
+                                                    <i class="fa-solid fa-turn-up fa-rotate-90" style="color: var(--border);"></i> {{ $passenger->boardingSubPoint->name }}
+                                                </div>
+                                            @endif
                                         @else
                                             <span style="color: var(--text-muted); font-size: 0.85rem;">—</span>
                                         @endif

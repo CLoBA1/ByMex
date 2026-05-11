@@ -35,7 +35,16 @@ Route::post('/reservations/{token}/passengers/{passengerId}/document', [WebReser
 Route::get('/reservations/{token}/documents/{documentId}/download', [WebReservationController::class, 'downloadPublicDocument'])->name('reservations.passenger.document.download');
 
 // API Pública
-Route::get('/api/seats/{id}', [ApiSeatController::class, 'getSeats']);
+Route::get('/api/seats/{tourId}', [App\Http\Controllers\Api\TourSeatController::class, 'getSeats']);
+Route::get('/api/boarding-points/{id}/sub-points', function ($id) {
+    return response()->json(
+        \App\Models\BoardingSubPoint::where('boarding_point_id', $id)
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get()
+    );
+});
 
 // Panel de Admin
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -114,6 +123,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/admin/boarding-points', [AdminBoardingPointController::class, 'store'])->name('admin.boarding-points.store');
     Route::put('/admin/boarding-points/{id}', [AdminBoardingPointController::class, 'update'])->name('admin.boarding-points.update');
     Route::delete('/admin/boarding-points/{id}', [AdminBoardingPointController::class, 'destroy'])->name('admin.boarding-points.destroy');
+    
+    // Sub-points CRUD
+    Route::post('/admin/boarding-points/{id}/sub-points', [AdminBoardingPointController::class, 'storeSubPoint'])->name('admin.boarding-sub-points.store');
+    Route::put('/admin/boarding-sub-points/{id}', [AdminBoardingPointController::class, 'updateSubPoint'])->name('admin.boarding-sub-points.update');
+    Route::delete('/admin/boarding-sub-points/{id}', [AdminBoardingPointController::class, 'destroySubPoint'])->name('admin.boarding-sub-points.destroy');
 
     // Notification API
     Route::get('/api/admin/notifications', [ApiNotificationController::class, 'index'])->name('admin.notifications.api');

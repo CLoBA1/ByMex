@@ -14,6 +14,7 @@ class ReservationPassenger extends Model
         'passenger_type',
         'benefit_label',
         'boarding_point_id',
+        'boarding_sub_point_id',
         'base_price',
         'discount_amount',
         'original_discount_amount',
@@ -49,5 +50,10 @@ class ReservationPassenger extends Model
     public function documents()
     {
         return $this->hasMany(PassengerDocument::class);
+    }
+
+    public function boardingSubPoint()
+    {
+        return $this->belongsTo(BoardingSubPoint::class);
     }
 }

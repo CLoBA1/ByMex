@@ -99,7 +99,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const phoneInput = block.querySelector('.p-phone') ? block.querySelector('.p-phone').value : '';
             const typeSelect = block.querySelector('.p-type').value;
             const bpSelect = block.querySelector('.p-bp');
-            existingBlocks[seat] = { name: nameInput, phone: phoneInput, type: typeSelect, bp: bpSelect ? bpSelect.value : '' };
+            const subBpSelect = block.querySelector('.p-sub-bp');
+            existingBlocks[seat] = { 
+                name: nameInput, 
+                phone: phoneInput, 
+                type: typeSelect, 
+                bp: bpSelect ? bpSelect.value : '',
+                subBp: subBpSelect ? subBpSelect.value : ''
+            };
         });
 
         if (selectedSeats.length === 0) {
@@ -147,9 +154,15 @@ document.addEventListener('DOMContentLoaded', () => {
                             </select>
                         </div>
                         <div style="flex: 1; min-width: 120px;">
-                            <label style="font-size: 0.75rem; color: var(--slate-500); margin-bottom: 0.25rem; display: block;">Lugar de abordaje</label>
-                            <select class="form-control p-bp" name="passengers[${index}][boarding_point_id]" style="padding: 0.5rem; font-size: 0.85rem; height: auto;">
+                            <label style="font-size: 0.75rem; color: var(--slate-500); margin-bottom: 0.25rem; display: block;">Punto de abordaje principal</label>
+                            <select class="form-control p-bp" name="passengers[${index}][boarding_point_id]" style="padding: 0.5rem; font-size: 0.85rem; height: auto;" data-index="${index}">
                                 ${bpOptionsWithSel}
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 120px; display: none;" id="subBpContainer_${index}">
+                            <label style="font-size: 0.75rem; color: var(--slate-500); margin-bottom: 0.25rem; display: block;">Lugar específico <span style="color:red;">*</span></label>
+                            <select class="form-control p-sub-bp" name="passengers[${index}][boarding_sub_point_id]" id="subBp_${index}" style="padding: 0.5rem; font-size: 0.85rem; height: auto;" data-prev="${prevData.subBp}">
+                                <option value="">-- Selecciona --</option>
                             </select>
                         </div>
                     </div>
@@ -162,6 +175,66 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.p-type').forEach(select => {
             select.addEventListener('change', calculateTotalWithDiscounts);
         });
+
+        // Lógica de carga de subpuntos
+        document.querySelectorAll('.p-bp').forEach(select => {
+            select.addEventListener('change', function() {
+                const index = this.dataset.index;
+                loadSubPoints(this.value, index);
+            });
+            // Ejecutar carga inicial si ya hay uno seleccionado
+            if (select.value) {
+                loadSubPoints(select.value, select.dataset.index);
+            }
+        });
+    }
+
+    function loadSubPoints(bpId, index) {
+        const container = document.getElementById(`subBpContainer_${index}`);
+        const select = document.getElementById(`subBp_${index}`);
+        const prevValue = select.dataset.prev;
+        
+        if (!bpId) {
+            container.style.display = 'none';
+            select.required = false;
+            select.innerHTML = '<option value="">-- Selecciona --</option>';
+            return;
+        }
+
+        const url = `${window.BOARDING_SUB_POINTS_URL}/${bpId}/sub-points`;
+        
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                if (data.length > 0) {
+                    container.style.display = 'block';
+                    select.required = true;
+                    
+                    let html = '<option value="">-- Selecciona un punto específico --</option>';
+                    data.forEach(sub => {
+                        html += `<option value="${sub.id}">${sub.name}</option>`;
+                    });
+                    select.innerHTML = html;
+                    
+                    // Restaurar previo si existe en las nuevas opciones
+                    if (prevValue && data.find(s => s.id == prevValue)) {
+                        select.value = prevValue;
+                    } 
+                    // Autoseleccionar si solo hay 1 opción
+                    else if (data.length === 1) {
+                        select.value = data[0].id;
+                    }
+                } else {
+                    container.style.display = 'none';
+                    select.required = false;
+                    select.innerHTML = '<option value="">-- Selecciona --</option>';
+                }
+            })
+            .catch(err => {
+                console.error("Error loading sub points:", err);
+                container.style.display = 'none';
+                select.required = false;
+            });
     }
 
     function calculateTotalWithDiscounts() {
