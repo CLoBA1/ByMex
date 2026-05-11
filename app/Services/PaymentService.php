@@ -16,17 +16,11 @@ class PaymentService
 {
     public function __construct()
     {
-        $key = config('services.stripe.key');
+        // Stripe is legacy — initialize only if configured.
         $secret = config('services.stripe.secret');
-
-        Log::info('Stripe Config Debug', [
-            'has_key' => !empty($key),
-            'has_secret' => !empty($secret),
-            'key_prefix' => !empty($key) ? substr($key, 0, 8) . '...' : null,
-            'secret_prefix' => !empty($secret) ? substr($secret, 0, 8) . '...' : null,
-        ]);
-
-        Stripe::setApiKey($secret);
+        if (!empty($secret)) {
+            Stripe::setApiKey($secret);
+        }
     }
 
     /**
@@ -69,50 +63,71 @@ class PaymentService
 
     /**
      * Create a Mercado Pago Preference for a reservation.
+     * Uses balance_due as the amount to respect partial payments.
      */
     public function createMercadoPagoPreference(Reservation $reservation)
     {
         $reservation->loadMissing(['tour', 'client', 'seats']);
 
         $seatCount = $reservation->seats->count();
-        $seatList = $reservation->seats->pluck('seat_number')->sort()->implode(', ');
+        $seatList  = $reservation->seats->pluck('seat_number')->sort()->implode(', ');
 
         $accessToken = config('services.mercadopago.access_token');
-
         if (empty($accessToken)) {
-            throw new \Exception('Mercado Pago no está configurado correctamente (Falta Access Token).');
+            throw new \RuntimeException('Mercado Pago no está configurado (falta MERCADOPAGO_ACCESS_TOKEN).');
         }
+
+        $amountToPay = (float) $reservation->balance_due;
+        if ($amountToPay <= 0) {
+            throw new \RuntimeException('El saldo pendiente de la reserva es cero. No se puede iniciar un pago.');
+        }
+
+        $payload = [
+            'items' => [[
+                'id'          => 'RES-' . $reservation->id,
+                'title'       => $reservation->tour->title,
+                'description' => "Asientos: {$seatList} ({$seatCount} lugar" . ($seatCount > 1 ? 'es' : '') . ")",
+                'quantity'    => 1,
+                'currency_id' => 'MXN',
+                'unit_price'  => $amountToPay,
+            ]],
+            'payer' => [
+                'name'  => $reservation->client->name,
+                'email' => $reservation->client->email ?? 'no-reply@bymex.com',
+            ],
+            'back_urls' => [
+                'success' => route('reservations.success', $reservation->public_token) . '?mp_status=approved',
+                'failure' => route('reservations.success', $reservation->public_token) . '?mp_status=failure',
+                'pending' => route('reservations.success', $reservation->public_token) . '?mp_status=pending',
+            ],
+            'auto_return'        => 'approved',
+            'external_reference' => (string) $reservation->id,
+            'notification_url'   => route('mercadopago.webhook'),
+            // Metadata as backup reference
+            'metadata'           => [
+                'reservation_id' => $reservation->id,
+                'client_email'   => $reservation->client->email,
+            ],
+            'statement_descriptor' => 'ByMex Viajes',
+        ];
 
         $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
-            ->post('https://api.mercadopago.com/checkout/preferences', [
-                'items' => [
-                    [
-                        'id' => 'RES-' . $reservation->id,
-                        'title' => $reservation->tour->title,
-                        'description' => "Asientos: {$seatList} ({$seatCount} lugar" . ($seatCount > 1 ? 'es' : '') . ")",
-                        'quantity' => 1,
-                        'currency_id' => 'MXN',
-                        'unit_price' => (float) $reservation->balance_due,
-                    ]
-                ],
-                'payer' => [
-                    'name' => $reservation->client->name,
-                    'email' => $reservation->client->email ?? 'no-reply@bymex.com',
-                ],
-                'back_urls' => [
-                    'success' => route('reservations.success', $reservation->public_token) . '?mp_status=approved',
-                    'failure' => route('reservations.success', $reservation->public_token) . '?mp_status=failure',
-                    'pending' => route('reservations.success', $reservation->public_token) . '?mp_status=pending',
-                ],
-                'auto_return' => 'approved',
-                'external_reference' => (string) $reservation->id,
-                'notification_url' => route('mercadopago.webhook'),
-            ]);
+            ->post('https://api.mercadopago.com/checkout/preferences', $payload);
 
         if ($response->failed()) {
-            Log::error('Error Mercado Pago: ' . $response->body());
-            throw new \Exception('No se pudo generar la preferencia de pago con Mercado Pago.');
+            Log::error('[MP] Error creando preferencia', [
+                'reservation_id' => $reservation->id,
+                'status'         => $response->status(),
+                'body'           => $response->body(),
+            ]);
+            throw new \RuntimeException('No se pudo generar la preferencia de pago con Mercado Pago.');
         }
+
+        Log::info('[MP] Preferencia creada', [
+            'reservation_id' => $reservation->id,
+            'amount'         => $amountToPay,
+            'preference_id'  => $response->json('id'),
+        ]);
 
         return $response->json();
     }

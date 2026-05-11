@@ -307,7 +307,7 @@
                            class="btn-primary" 
                            style="display: block; width: 100%; padding: 1rem; font-size: 1.1rem; text-decoration: none; margin-bottom: 1rem;"
                            onclick="this.innerHTML = '<i class=\'fa-solid fa-spinner fa-spin\'></i> Redirigiendo a Mercado Pago...';">
-                            <i class="fa-solid fa-credit-card"></i> Pagar en línea — ${{ number_format($reservation->total_amount, 2) }}
+                            <i class="fa-solid fa-credit-card"></i> Pagar en línea — ${{ number_format($reservation->balance_due, 2) }}
                         </a>
                         
                         <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
