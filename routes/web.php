@@ -35,7 +35,7 @@ Route::post('/reservations/{token}/passengers/{passengerId}/document', [WebReser
 Route::get('/reservations/{token}/documents/{documentId}/download', [WebReservationController::class, 'downloadPublicDocument'])->name('reservations.passenger.document.download');
 
 // API Pública
-Route::get('/api/seats/{tourId}', [App\Http\Controllers\Api\TourSeatController::class, 'getSeats']);
+Route::get('/api/seats/{tourId}', [\App\Http\Controllers\Api\SeatController::class, 'getSeats']);
 Route::get('/api/boarding-points/{id}/sub-points', function ($id) {
     return response()->json(
         \App\Models\BoardingSubPoint::where('boarding_point_id', $id)
@@ -136,8 +136,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // Pagos en línea (Mercado Pago)
 Route::get('/reservations/{token}/pay', [\App\Http\Controllers\Web\PaymentController::class, 'checkout'])->name('reservations.pay');
 
+
 // Mercado Pago Webhook (excluido de CSRF)
-Route::post('/mercadopago/webhook', [\App\Http\Controllers\Api\MercadoPagoWebhookController::class, 'handle'])->name('mercadopago.webhook');
+Route::post('/mercadopago/webhook', [\App\Http\Controllers\Api\MercadoPagoWebhookController::class, 'handle'])
+    ->name('mercadopago.webhook')
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
 // Stripe Webhook (Legacy / desactivado)
 Route::post('/stripe/webhook', [\App\Http\Controllers\Api\StripeWebhookController::class, 'handle'])->name('stripe.webhook');
