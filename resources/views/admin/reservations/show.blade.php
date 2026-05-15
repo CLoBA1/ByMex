@@ -24,6 +24,39 @@
                 <i class="fa-solid fa-file-pdf"></i> Descargar Ticket PDF
             </a>
             @php
+                $waPhone = $reservation->client->whatsapp ?? $reservation->client->phone;
+                $cleanPhone = preg_replace('/[^0-9]/', '', $waPhone);
+                if (strlen($cleanPhone) == 10) {
+                    $cleanPhone = '52' . $cleanPhone;
+                } elseif (strlen($cleanPhone) == 12 && str_starts_with($cleanPhone, '52')) {
+                    // Valid
+                } else {
+                    $cleanPhone = null; // Invalid
+                }
+                
+                if ($cleanPhone) {
+                    $waMessage = "Hola {$reservation->client->name}, te compartimos tu ticket de reservación de Viajes By Mex.\n\n"
+                               . "Reservación: RES-" . str_pad($reservation->id, 4, '0', STR_PAD_LEFT) . "\n"
+                               . "Destino: {$reservation->tour->destination}\n"
+                               . "Estado: " . ucfirst($reservation->status->value) . "\n"
+                               . "Total: $" . number_format($reservation->total_amount, 2) . "\n"
+                               . "Saldo pendiente: $" . number_format($reservation->balance_due, 2) . "\n\n"
+                               . "Descarga tu ticket aquí:\n"
+                               . route('reservations.ticket', $reservation->public_token) . "\n\n"
+                               . "Gracias por viajar con Viajes By Mex.";
+                    $waUrl = "https://wa.me/{$cleanPhone}?text=" . urlencode($waMessage);
+                }
+            @endphp
+            @if($cleanPhone)
+                <a href="{{ $waUrl }}" target="_blank" class="btn-action" style="background: #25D366; color: #fff; border: none; text-decoration: none;" title="Enviar por WhatsApp">
+                    <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                </a>
+            @else
+                <button class="btn-action" style="background: #e2e8f0; color: #94a3b8; border: none; cursor: not-allowed;" title="Sin WhatsApp válido">
+                    <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                </button>
+            @endif
+            @php
                 $amountPaid = $reservation->payments->where('status', 'approved')->sum('amount');
                 $surplus = $amountPaid > $reservation->total_amount ? $amountPaid - $reservation->total_amount : 0;
             @endphp
@@ -285,19 +318,9 @@
                                                         <i class="fa-solid fa-user-slash"></i>
                                                     </button>
                                                 </form>
-                                                <form action="{{ route('admin.passengers.status', $passenger->id) }}" method="POST" style="display: inline;" onsubmit="
-                                                    let reason = prompt('Motivo de cancelación para {{ $passenger->name }}:');
-                                                    if(reason === null) return false;
-                                                    this.action_notes.value = reason;
-                                                    return true;
-                                                ">
-                                                    @csrf
-                                                    <input type="hidden" name="status" value="cancelled">
-                                                    <input type="hidden" name="action_notes" value="">
-                                                    <button type="submit" class="btn-action" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: var(--primary);" title="Cancelar Pasajero">
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </button>
-                                                </form>
+                                                <button type="button" class="btn-action" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: var(--primary);" title="Cancelar Pasajero" onclick="openCancelModal({{ $passenger->id }}, '{{ addslashes($passenger->name) }}', '{{ $passenger->seat_number }}', {{ $passenger->final_price }})">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
                                                 <form action="{{ route('admin.passengers.type', $passenger->id) }}" method="POST" style="display: flex; gap: 0.25rem;" onsubmit="return confirm('¿Cambiar tipo de pasajero? Esto recalculará la reserva.');">
                                                     @csrf
                                                     <select name="passenger_type" style="padding: 0.25rem; font-size: 0.75rem; border: 1px solid var(--border); border-radius: 4px;" required>
@@ -311,11 +334,21 @@
                                                 </form>
                                             </div>
                                         @else
-                                            @if($passenger->action_notes)
-                                                <div style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">
-                                                    Motivo: {{ $passenger->action_notes }}
-                                                </div>
-                                            @endif
+                                            <div style="font-size: 0.75rem; color: var(--text-muted);">
+                                                @if($passenger->cancellation_reason)
+                                                    <div style="font-style: italic; margin-bottom: 0.2rem;"><i class="fa-regular fa-comment"></i> {{ $passenger->cancellation_reason }}</div>
+                                                @elseif($passenger->action_notes)
+                                                    <div style="font-style: italic; margin-bottom: 0.2rem;">Motivo: {{ $passenger->action_notes }}</div>
+                                                @endif
+                                                @if($passenger->cancellation_retained_amount > 0)
+                                                    <div style="color: #ea580c; font-weight: 600;">
+                                                        <i class="fa-solid fa-gavel"></i> Retención: ${{ number_format($passenger->cancellation_retained_amount, 2) }}
+                                                    </div>
+                                                @endif
+                                                @if($passenger->cancelled_at)
+                                                    <div style="color: var(--slate-400); font-size: 0.7rem;">{{ $passenger->cancelled_at->format('d/m/Y H:i') }}</div>
+                                                @endif
+                                            </div>
                                         @endif
                                     </td>
                                 </tr>
@@ -569,16 +602,34 @@
                     <h3 class="card-title"><i class="fa-solid fa-file-invoice-dollar"></i> Resumen Financiero</h3>
                 </div>
                 <div class="card-body">
+                    @php
+                        $penaltiesSum = $reservation->adjustments->where('type', 'penalty')->sum('amount');
+                        $refundsSum = $reservation->adjustments->where('type', 'refund')->sum('amount');
+                    @endphp
                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <span style="color: var(--slate-600);">Subtotal:</span>
+                        <span style="color: var(--slate-600);">Subtotal (Pasajeros activos):</span>
                         <span style="font-weight: 600;">${{ number_format($reservation->subtotal, 2) }}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: var(--primary);">
+                    @if($reservation->discount_total > 0)
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: var(--primary);">
                         <span>Descuentos Aplicados:</span>
                         <span style="font-weight: 600;">-${{ number_format($reservation->discount_total, 2) }}</span>
                     </div>
+                    @endif
+                    @if($penaltiesSum > 0)
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: #ea580c;">
+                        <span><i class="fa-solid fa-gavel" style="font-size: 0.8rem;"></i> Retenciones por cancelación:</span>
+                        <span style="font-weight: 600;">+${{ number_format($penaltiesSum, 2) }}</span>
+                    </div>
+                    @endif
+                    @if($refundsSum > 0)
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: #059669;">
+                        <span><i class="fa-solid fa-arrow-rotate-left" style="font-size: 0.8rem;"></i> Devoluciones:</span>
+                        <span style="font-weight: 600;">-${{ number_format($refundsSum, 2) }}</span>
+                    </div>
+                    @endif
                     <div style="display: flex; justify-content: space-between; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 1.25rem; font-weight: 800; color: var(--navy); margin-bottom: 1rem;">
-                        <span>Total:</span>
+                        <span>Total Ajustado:</span>
                         <span style="color: #166534;">${{ number_format($reservation->total_amount, 2) }}</span>
                     </div>
                     
@@ -718,5 +769,98 @@
 
         </div>
     </div>
+
+    {{-- MODAL DE CANCELACIÓN DE PASAJERO --}}
+    <div id="cancelPassengerModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 8px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+            <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 1.1rem; color: var(--navy); font-weight: 700; margin: 0;">
+                    <i class="fa-solid fa-user-xmark" style="color: var(--primary);"></i> Cancelar Pasajero
+                </h3>
+                <button type="button" onclick="closeCancelModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+            </div>
+            <form id="cancelPassengerForm" method="POST">
+                @csrf
+                <div style="padding: 1.5rem;">
+                    <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 1rem; margin-bottom: 1.5rem; color: #991b1b; font-size: 0.85rem;">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <strong>Atención:</strong> El pasajero será marcado como cancelado y su asiento se liberará. Los pagos existentes no se eliminarán. Indica cuánto se retendrá por política de cancelación.
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <div style="font-size: 0.85rem; color: var(--slate-500); margin-bottom: 0.25rem;">Pasajero:</div>
+                        <div style="font-weight: 700; color: var(--navy); font-size: 1rem;" id="cancelModalName">—</div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div>
+                            <div style="font-size: 0.85rem; color: var(--slate-500); margin-bottom: 0.25rem;">Asiento:</div>
+                            <div style="font-weight: 600;" id="cancelModalSeat">—</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85rem; color: var(--slate-500); margin-bottom: 0.25rem;">Costo neto:</div>
+                            <div style="font-weight: 600; color: #166534;" id="cancelModalPrice">—</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; font-weight: 600; color: var(--text-main); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                            Motivo de cancelación <span style="color: red;">*</span>
+                        </label>
+                        <textarea name="cancellation_reason" required rows="3" placeholder="Ej: Cliente solicita cancelación por motivos personales..." style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.9rem; resize: vertical;"></textarea>
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; font-weight: 600; color: var(--text-main); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                            Monto retenido / penalización <span style="color: red;">*</span>
+                        </label>
+                        <div style="position: relative;">
+                            <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 600;">$</span>
+                            <input type="number" name="retained_amount" id="cancelModalRetainedInput" required step="0.01" min="0" placeholder="0.00" style="width: 100%; padding: 0.75rem 0.75rem 0.75rem 1.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem;">
+                        </div>
+                        <small style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-top: 0.25rem;">
+                            Monto que se retiene por política de cancelación. Máximo = costo neto del pasajero. Poner 0 si no aplica penalización.
+                        </small>
+                    </div>
+                </div>
+
+                <div style="padding: 1.5rem; border-top: 1px solid var(--border); background: #f8fafc; display: flex; justify-content: flex-end; gap: 1rem; border-radius: 0 0 8px 8px;">
+                    <button type="button" onclick="closeCancelModal()" style="padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: #f1f5f9; color: var(--text-main);">Cerrar</button>
+                    <button type="submit" style="padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; background: var(--primary); color: white;">
+                        <i class="fa-solid fa-user-xmark"></i> Cancelar Pasajero
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @section('extra-js')
+    <script>
+        function openCancelModal(passengerId, name, seat, finalPrice) {
+            const modal = document.getElementById('cancelPassengerModal');
+            const form = document.getElementById('cancelPassengerForm');
+            const retainedInput = document.getElementById('cancelModalRetainedInput');
+
+            form.action = '/admin/passengers/' + passengerId + '/cancel';
+            document.getElementById('cancelModalName').textContent = name;
+            document.getElementById('cancelModalSeat').textContent = seat;
+            document.getElementById('cancelModalPrice').textContent = '$' + parseFloat(finalPrice).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            retainedInput.max = finalPrice;
+            retainedInput.value = '';
+            form.querySelector('textarea[name="cancellation_reason"]').value = '';
+
+            modal.style.display = 'flex';
+        }
+
+        function closeCancelModal() {
+            document.getElementById('cancelPassengerModal').style.display = 'none';
+        }
+
+        // Close if clicked outside
+        document.getElementById('cancelPassengerModal').addEventListener('click', function(e) {
+            if (e.target === this) closeCancelModal();
+        });
+    </script>
+    @endsection
 
 </x-app-layout>

@@ -23,6 +23,9 @@ class ReservationPassenger extends Model
         'validation_notes',
         'status',
         'action_notes',
+        'cancelled_at',
+        'cancellation_reason',
+        'cancellation_retained_amount',
     ];
 
     protected function casts(): array
@@ -33,6 +36,8 @@ class ReservationPassenger extends Model
             'discount_amount' => 'decimal:2',
             'original_discount_amount' => 'decimal:2',
             'final_price' => 'decimal:2',
+            'cancellation_retained_amount' => 'decimal:2',
+            'cancelled_at' => 'datetime',
             'status' => \App\Enums\PassengerStatus::class,
         ];
     }

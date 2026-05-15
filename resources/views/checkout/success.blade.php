@@ -231,8 +231,8 @@
                     <h3 style="color: var(--color-dark); margin-bottom: 0.5rem; font-size: 1.2rem;">
                         <i class="fa-solid fa-folder-open"></i> Documentos por Pasajero
                     </h3>
-                    <p style="color: var(--color-dark-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
-                        Sube los documentos de identificación de cada pasajero (INE, credencial, pasaporte, etc.). Formatos aceptados: PDF, JPG, PNG. Máximo 5 MB.
+                    <p style="font-size: 0.9rem; color: var(--slate-600); margin-bottom: 1rem;">
+                        Sube INE o INAPAM, si cuentas con alguno. Formatos aceptados: PDF, JPG, PNG. Máximo 5 MB.
                     </p>
 
                     @foreach($reservation->passengers as $passenger)

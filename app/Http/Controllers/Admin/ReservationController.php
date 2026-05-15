@@ -46,18 +46,7 @@ class ReservationController extends Controller
 
         // --- RECÁLCULO DE TOTALES DE LA RESERVA PADRE ---
         $reservation = $passenger->reservation;
-        $allPassengers = $reservation->passengers()->where('status', '!=', 'cancelled')->get();
-
-        $newDiscountTotal = $allPassengers->sum('discount_amount');
-        $newTotalAmount = $allPassengers->sum('final_price');
-
-        $amountAlreadyPaid = $reservation->total_amount - $reservation->balance_due;
-        $newBalanceDue = max(0, $newTotalAmount - $amountAlreadyPaid);
-
-        $reservation->discount_total = $newDiscountTotal;
-        $reservation->total_amount = $newTotalAmount;
-        $reservation->balance_due = $newBalanceDue;
-        $reservation->save();
+        $this->recalculateReservation($reservation);
 
         $label = $newStatus === 'validated' ? 'Validado' : 'Rechazado';
         return back()->with('success', "Pasajero {$passenger->name} marcado como {$label}. Totales de la reserva actualizados.");
@@ -68,9 +57,14 @@ class ReservationController extends Controller
         $passenger = ReservationPassenger::findOrFail($id);
         
         $request->validate([
-            'status' => 'required|in:active,cancelled,no_show,boarded',
+            'status' => 'required|in:active,no_show,boarded',
             'action_notes' => 'nullable|string|max:255',
         ]);
+
+        // Block status change on already cancelled passengers
+        if ($passenger->status->value === 'cancelled') {
+            return back()->with('error', 'No se puede cambiar el estado de un pasajero cancelado.');
+        }
 
         $passenger->status = $request->status;
         if ($request->action_notes) {
@@ -78,25 +72,85 @@ class ReservationController extends Controller
         }
         $passenger->save();
 
-        if ($request->status === 'cancelled') {
+        return back()->with('success', "Estado del pasajero actualizado a {$request->status}.");
+    }
+
+    /**
+     * Cancel a passenger with financial traceability.
+     * Requires cancellation reason and retained amount via modal.
+     */
+    public function cancelPassenger(Request $request, $id)
+    {
+        $passenger = ReservationPassenger::findOrFail($id);
+
+        // Block double cancellation
+        if ($passenger->status->value === 'cancelled') {
+            return back()->with('error', 'Este pasajero ya está cancelado.');
+        }
+
+        $request->validate([
+            'cancellation_reason' => 'required|string|max:1000',
+            'retained_amount' => 'required|numeric|min:0|max:' . $passenger->final_price,
+        ], [
+            'cancellation_reason.required' => 'El motivo de cancelación es obligatorio.',
+            'retained_amount.required' => 'El monto retenido es obligatorio.',
+            'retained_amount.max' => 'El monto retenido no puede ser mayor al costo neto del pasajero ($' . number_format($passenger->final_price, 2) . ').',
+        ]);
+
+        $reservation = $passenger->reservation;
+
+        DB::transaction(function () use ($passenger, $reservation, $request) {
+            // 1. Mark passenger as cancelled
+            $passenger->status = 'cancelled';
+            $passenger->cancelled_at = now();
+            $passenger->cancellation_reason = $request->cancellation_reason;
+            $passenger->cancellation_retained_amount = $request->retained_amount;
+            $passenger->action_notes = $request->cancellation_reason;
+            $passenger->save();
+
+            // 2. Release seat from map
             \App\Models\ReservationSeat::where('reservation_id', $passenger->reservation_id)
                 ->where('seat_number', $passenger->seat_number)
                 ->delete();
 
-            $this->recalculateReservation($passenger->reservation);
+            // 3. Create penalty adjustment if retained_amount > 0
+            if ($request->retained_amount > 0) {
+                \App\Models\ReservationAdjustment::create([
+                    'reservation_id' => $reservation->id,
+                    'type' => 'penalty',
+                    'amount' => $request->retained_amount,
+                    'notes' => "Penalización por cancelación de pasajero {$passenger->name} (Asiento {$passenger->seat_number}). Motivo: {$request->cancellation_reason}",
+                    'user_id' => auth()->id(),
+                ]);
+            }
 
+            // 4. Recalculate reservation totals
+            $this->recalculateReservation($reservation);
+        });
+
+        // Notify admin
+        try {
             $admin = \App\Models\AdminOwner::first();
             if ($admin) {
+                $retainedLabel = $request->retained_amount > 0
+                    ? "Retención: \$" . number_format($request->retained_amount, 2)
+                    : 'Sin retención';
                 $admin->notify(new \App\Notifications\SystemAlert(
                     'Pasajero Cancelado',
-                    "El pasajero {$passenger->name} fue cancelado en la reserva #{$passenger->reservation->id}.",
-                    route('admin.reservations.show', $passenger->reservation_id),
+                    "El pasajero {$passenger->name} fue cancelado en la reserva #{$reservation->id}. {$retainedLabel}.",
+                    route('admin.reservations.show', $reservation->id),
                     'fa-solid fa-user-xmark'
                 ));
             }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Notificación de cancelación falló: ' . $e->getMessage());
         }
 
-        return back()->with('success', "Estado del pasajero actualizado a {$request->status}.");
+        $msg = $request->retained_amount > 0
+            ? "Pasajero cancelado correctamente. El asiento fue liberado y se registró la retención por cancelación de \$" . number_format($request->retained_amount, 2) . "."
+            : 'Pasajero cancelado correctamente. El asiento fue liberado sin retención aplicada.';
+
+        return back()->with('success', $msg);
     }
 
     public function updatePassengerType(Request $request, $id, \App\Services\ReservationService $reservationService)
@@ -140,9 +194,15 @@ class ReservationController extends Controller
 
     private function recalculateReservation(Reservation $reservation)
     {
+        $reservation->refresh();
         $allActivePassengers = $reservation->passengers()->where('status', '!=', 'cancelled')->get();
 
-        if ($allActivePassengers->isEmpty()) {
+        // Sum of cancellation penalties from adjustments
+        $penaltiesTotal = $reservation->adjustments()->where('type', 'penalty')->sum('amount');
+        // Sum of refunds from adjustments
+        $refundsTotal = $reservation->adjustments()->where('type', 'refund')->sum('amount');
+
+        if ($allActivePassengers->isEmpty() && $penaltiesTotal == 0) {
             $reservation->status = \App\Enums\ReservationStatus::CANCELLED;
             $reservation->subtotal = 0;
             $reservation->discount_total = 0;
@@ -154,21 +214,29 @@ class ReservationController extends Controller
 
         $newSubtotal = $allActivePassengers->sum('base_price');
         $newDiscountTotal = $allActivePassengers->sum('discount_amount');
-        $newTotalAmount = $allActivePassengers->sum('final_price');
+        $activePassengersTotal = $allActivePassengers->sum('final_price');
 
-        $amountAlreadyPaid = $reservation->total_amount - $reservation->balance_due;
+        // Total = active passengers + penalties - refunds
+        $newTotalAmount = $activePassengersTotal + $penaltiesTotal - $refundsTotal;
+        $newTotalAmount = max(0, $newTotalAmount);
+
+        $amountAlreadyPaid = $reservation->payments()->where('status', 'approved')->sum('amount');
         $newBalanceDue = max(0, $newTotalAmount - $amountAlreadyPaid);
 
         if ($amountAlreadyPaid > $newTotalAmount) {
-            $admin = \App\Models\AdminOwner::first();
-            if ($admin) {
-                $surplus = number_format($amountAlreadyPaid - $newTotalAmount, 2);
-                $admin->notify(new \App\Notifications\SystemAlert(
-                    'Saldo a Favor Generado',
-                    "La reserva #{$reservation->id} ahora tiene un saldo a favor de \${$surplus} por recálculo.",
-                    route('admin.reservations.show', $reservation->id),
-                    'fa-solid fa-hand-holding-dollar'
-                ));
+            try {
+                $admin = \App\Models\AdminOwner::first();
+                if ($admin) {
+                    $surplus = number_format($amountAlreadyPaid - $newTotalAmount, 2);
+                    $admin->notify(new \App\Notifications\SystemAlert(
+                        'Saldo a Favor Generado',
+                        "La reserva #{$reservation->id} ahora tiene un saldo a favor de \${$surplus} por recálculo.",
+                        route('admin.reservations.show', $reservation->id),
+                        'fa-solid fa-hand-holding-dollar'
+                    ));
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Notificación de saldo a favor falló: ' . $e->getMessage());
             }
         }
 

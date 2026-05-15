@@ -67,6 +67,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/reservations/{id}', [AdminReservationController::class, 'show'])->name('admin.reservations.show');
     Route::post('/admin/passengers/{id}/validate', [AdminReservationController::class, 'validatePassenger'])->name('admin.passengers.validate');
     Route::post('/admin/passengers/{id}/status', [AdminReservationController::class, 'updatePassengerStatus'])->name('admin.passengers.status');
+    Route::post('/admin/passengers/{id}/cancel', [AdminReservationController::class, 'cancelPassenger'])->name('admin.passengers.cancel');
     Route::post('/admin/passengers/{id}/type', [AdminReservationController::class, 'updatePassengerType'])->name('admin.passengers.type');
     // Autobuses (Flota)
     Route::resource('admin/buses', \App\Http\Controllers\Admin\BusController::class)->names([
