@@ -21,7 +21,7 @@ class CleanTestData extends Command
      *
      * @var string
      */
-    protected $description = 'Limpia datos transaccionales (reservaciones, clientes, pagos, etc.) para dejar la BD lista para producción.';
+    protected $description = 'Limpia datos transaccionales (reservaciones, clientes, pagos, tours, etc.) para dejar la BD lista para producción.';
 
     /**
      * Execute the console command.
@@ -50,6 +50,7 @@ class CleanTestData extends Command
         }
 
         // Definir las tablas transaccionales a limpiar, EN ORDEN DE DEPENDENCIAS (Hijos primero, Padres después)
+        // tours va AL FINAL porque reservations/reservation_seats tienen FK hacia tours
         $tablesToClean = [
             'passenger_documents',
             'reservation_adjustments',
@@ -61,6 +62,7 @@ class CleanTestData extends Command
             'clients',
             'admin_notifications',
             'notifications',
+            'tours',           // ← se limpia al final, después de todos sus hijos
         ];
 
         // Obtener conteos iniciales
@@ -80,6 +82,15 @@ class CleanTestData extends Command
             return;
         }
 
+        // Recopilar rutas de imágenes de tours ANTES de truncar
+        $tourImages = [];
+        if (Schema::hasTable('tours')) {
+            $tourImages = DB::table('tours')
+                ->whereNotNull('image')
+                ->pluck('image')
+                ->toArray();
+        }
+
         // Ejecutar borrado
         $this->info("\nIniciando limpieza...");
         try {
@@ -97,10 +108,35 @@ class CleanTestData extends Command
             Schema::enableForeignKeyConstraints();
             $this->info("\n¡Limpieza ejecutada con éxito!");
             
-            // Advertencia de archivos
-            $this->warn("\nNOTA SOBRE ARCHIVOS:");
-            $this->line("Los registros de 'passenger_documents' y comprobantes en 'payments' fueron eliminados de la BD.");
-            $this->line("Se recomienda revisar la carpeta storage/app/public/documents y storage/app/public/payments/proofs y vaciarlas manualmente si contienen archivos de prueba.");
+            // Eliminar imágenes de tours del disco
+            if (!empty($tourImages)) {
+                $this->warn("\nEliminando imágenes de tours del storage...");
+                $deleted = 0;
+                foreach ($tourImages as $imagePath) {
+                    $fullPath = storage_path('app/public/' . ltrim($imagePath, 'public/'));
+                    // También intentar la ruta tal cual (en caso de que ya venga con 'tours/...')
+                    $altPath  = storage_path('app/' . ltrim($imagePath, '/'));
+                    if (file_exists($fullPath)) {
+                        unlink($fullPath);
+                        $deleted++;
+                    } elseif (file_exists($altPath)) {
+                        unlink($altPath);
+                        $deleted++;
+                    }
+                }
+                $this->info("Imágenes de tours eliminadas del disco: $deleted de " . count($tourImages));
+                if ($deleted < count($tourImages)) {
+                    $this->warn("Algunas imágenes no se encontraron en disco (posiblemente ya estaban eliminadas).");
+                }
+            } else {
+                $this->line("No había imágenes de tours registradas en BD.");
+            }
+
+            // Advertencia de archivos restantes
+            $this->warn("\nNOTA SOBRE ARCHIVOS ADICIONALES:");
+            $this->line("- storage/app/public/documents      → Documentos de pasajeros (revisar manualmente).");
+            $this->line("- storage/app/public/payments/proofs → Comprobantes de pago (revisar manualmente).");
+            $this->line("NO se borran logos, banners ni imágenes del sitio.");
 
         } catch (\Exception $e) {
             Schema::enableForeignKeyConstraints();
