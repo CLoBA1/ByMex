@@ -104,9 +104,9 @@
             <form action="{{ route('client.login.submit') }}" method="POST">
                 @csrf
                 <div class="form-group">
-                    <label for="email"><i class="fa-solid fa-envelope" style="color: #94a3b8;"></i> Correo Electrónico</label>
-                    <input type="email" name="email" id="email" value="{{ old('email') }}" required autofocus placeholder="tu@correo.com">
-                    @error('email')
+                    <label for="login_input"><i class="fa-solid fa-user" style="color: #94a3b8;"></i> Correo o WhatsApp</label>
+                    <input type="text" name="login_input" id="login_input" value="{{ old('login_input') }}" required autofocus placeholder="Tu correo o número de WhatsApp">
+                    @error('login_input')
                         <div class="form-error">{{ $message }}</div>
                     @enderror
                 </div>
