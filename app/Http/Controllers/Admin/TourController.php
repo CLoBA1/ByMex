@@ -40,6 +40,8 @@ class TourController extends Controller
             'status' => 'required|in:active,inactive,completed',
             'description' => 'nullable|string',
             'itinerary' => 'nullable|string',
+            'what_includes' => 'nullable|string',
+            'what_not_includes' => 'nullable|string',
             'image' => 'nullable|image|max:2048'
         ]);
 
@@ -75,6 +77,8 @@ class TourController extends Controller
             'status' => 'required|in:active,inactive,completed',
             'description' => 'nullable|string',
             'itinerary' => 'nullable|string',
+            'what_includes' => 'nullable|string',
+            'what_not_includes' => 'nullable|string',
             'image' => 'nullable|image|max:2048'
         ]);
 

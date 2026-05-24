@@ -87,6 +87,18 @@
                     <textarea name="itinerary" rows="8" style="width: 100%; padding: .75rem; border: 1px solid var(--border); border-radius: 6px;">{{ old('itinerary', $tour->itinerary ?? '') }}</textarea>
                 </div>
 
+                <div style="margin-bottom: 2rem;">
+                    <label style="display: block; margin-bottom: .5rem; font-weight: 600; font-size: .85rem;">Qué Incluye</label>
+                    <textarea name="what_includes" rows="5" style="width: 100%; padding: .75rem; border: 1px solid var(--border); border-radius: 6px;" placeholder="Lista de elementos separados por saltos de línea (un elemento por línea)">{{ old('what_includes', $tour->what_includes ?? '') }}</textarea>
+                    <small style="color: var(--text-muted); display: block; margin-top: .25rem;">Escribe un elemento por línea. No necesitas usar viñetas, se agregarán automáticamente.</small>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <label style="display: block; margin-bottom: .5rem; font-weight: 600; font-size: .85rem;">No Incluye</label>
+                    <textarea name="what_not_includes" rows="5" style="width: 100%; padding: .75rem; border: 1px solid var(--border); border-radius: 6px;" placeholder="Lista de elementos separados por saltos de línea (un elemento por línea)">{{ old('what_not_includes', $tour->what_not_includes ?? '') }}</textarea>
+                    <small style="color: var(--text-muted); display: block; margin-top: .25rem;">Escribe un elemento por línea. No necesitas usar viñetas, se agregarán automáticamente.</small>
+                </div>
+
                 <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.5rem;">
                     <input type="checkbox" name="requires_passenger_documents" value="1" {{ old('requires_passenger_documents', $tour->requires_passenger_documents ?? false) ? 'checked' : '' }} style="width: 1.25rem; height: 1.25rem; margin-top: 0.25rem;">
                     <div>

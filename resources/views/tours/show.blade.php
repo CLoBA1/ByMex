@@ -123,6 +123,7 @@
                 </details>
 
                 {{-- Card: What's Included --}}
+                @if(!empty(trim($tour->what_includes)))
                 <details class="tour-accordion" data-aos="fade-up" data-aos-delay="200">
                     <summary>
                         <div style="display:flex; align-items:center; gap:0.6rem;">
@@ -132,16 +133,18 @@
                     </summary>
                     <div class="tour-accordion-content" style="background: var(--slate-50);">
                         <ul class="feature-grid">
-                            <li><i class="fa-solid fa-bus"></i> Transporte viaje redondo</li>
-                            <li><i class="fa-solid fa-shield-heart"></i> Seguro de viajero a bordo</li>
-                            <li><i class="fa-solid fa-user-tie"></i> Coordinador de grupo</li>
-                            <li><i class="fa-solid fa-camera"></i> Visitas guiadas</li>
-                            <li><i class="fa-solid fa-bottle-water"></i> Hidratación en el autobús</li>
+                            @foreach(explode("\n", trim($tour->what_includes)) as $item)
+                                @if(trim($item) !== '')
+                                <li><i class="fa-solid fa-check" style="color:var(--teal);"></i> {{ trim($item) }}</li>
+                                @endif
+                            @endforeach
                         </ul>
                     </div>
                 </details>
+                @endif
 
                 {{-- Card: Not Included --}}
+                @if(!empty(trim($tour->what_not_includes)))
                 <details class="tour-accordion" data-aos="fade-up" data-aos-delay="300">
                     <summary>
                         <div style="display:flex; align-items:center; gap:0.6rem;">
@@ -151,12 +154,15 @@
                     </summary>
                     <div class="tour-accordion-content" style="background: var(--slate-50);">
                         <ul class="feature-grid not-included">
-                            <li><i class="fa-solid fa-utensils"></i> Alimentos no mencionados</li>
-                            <li><i class="fa-solid fa-ticket"></i> Propinas</li>
-                            <li><i class="fa-solid fa-bag-shopping"></i> Gastos personales</li>
+                            @foreach(explode("\n", trim($tour->what_not_includes)) as $item)
+                                @if(trim($item) !== '')
+                                <li><i class="fa-solid fa-xmark" style="color:#ef4444;"></i> {{ trim($item) }}</li>
+                                @endif
+                            @endforeach
                         </ul>
                     </div>
                 </details>
+                @endif
             </div>
 
             {{-- ============================
