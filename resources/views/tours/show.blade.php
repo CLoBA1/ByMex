@@ -292,15 +292,9 @@
                     <label>Nombre Completo</label>
                     <input type="text" class="form-control" name="name" required placeholder="Ej. Juan Pérez">
                 </div>
-                <div class="form-row-2">
-                    <div class="form-group">
-                        <label>Teléfono Celular</label>
-                        <input type="tel" class="form-control" name="phone" required placeholder="10 dígitos">
-                    </div>
-                    <div class="form-group">
-                        <label>WhatsApp (Opcional)</label>
-                        <input type="tel" class="form-control" name="whatsapp" placeholder="Si es diferente">
-                    </div>
+                <div class="form-group">
+                    <label>WhatsApp</label>
+                    <input type="tel" class="form-control" name="whatsapp" required placeholder="10 dígitos">
                 </div>
 
                 <!-- Contenedor dinámico de pasajeros -->

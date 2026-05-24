@@ -45,19 +45,20 @@ class ReservationService
                 $totalAmount += $finalPrice;
 
                 $passengersData[] = [
-                    'seat_number' => $p['seat_number'],
-                    'name' => $p['name'],
-                    'phone' => $p['phone'] ?? null,
-                    'passenger_type' => $p['passenger_type'],
-                    'birthdate' => $p['birthdate'] ?? null,
-                    'benefit_label' => $p['benefit_label'] ?? null,
-                    'boarding_point_id' => $p['boarding_point_id'] ?? null,
+                    'seat_number'           => $p['seat_number'],
+                    'name'                  => $p['name'],
+                    'phone'                 => $p['phone'] ?? null,
+                    'whatsapp'              => $p['whatsapp'] ?? null,
+                    'passenger_type'        => $p['passenger_type'],
+                    'birthdate'             => $p['birthdate'] ?? null,
+                    'benefit_label'         => $p['benefit_label'] ?? null,
+                    'boarding_point_id'     => $p['boarding_point_id'] ?? null,
                     'boarding_sub_point_id' => $p['boarding_sub_point_id'] ?? null,
-                    'base_price' => $basePrice,
-                    'discount_amount' => $discount,
+                    'base_price'            => $basePrice,
+                    'discount_amount'       => $discount,
                     'original_discount_amount' => $discount,
-                    'final_price' => $finalPrice,
-                    'validation_status' => 'pending',
+                    'final_price'           => $finalPrice,
+                    'validation_status'     => 'pending',
                 ];
             }
         } else {
@@ -89,23 +90,24 @@ class ReservationService
         DB::beginTransaction();
         try {
             // 1. Create or Find Client
-            // Since email is no longer required, we find by phone instead of email
+            // whatsapp is now the primary contact; phone is optional
+            $whatsappForLookup = $dto->whatsapp;
             if (!empty($dto->email)) {
                 $client = Client::firstOrCreate(
                     ['email' => $dto->email],
                     [
-                        'name' => $dto->name,
-                        'phone' => $dto->phone,
-                        'whatsapp' => $dto->whatsapp ?? $dto->phone,
+                        'name'     => $dto->name,
+                        'phone'    => $dto->phone ?? $dto->whatsapp,
+                        'whatsapp' => $dto->whatsapp,
                     ]
                 );
             } else {
                 $client = Client::firstOrCreate(
-                    ['phone' => $dto->phone],
+                    ['phone' => $dto->phone ?? $dto->whatsapp],
                     [
-                        'name' => $dto->name,
-                        'whatsapp' => $dto->whatsapp ?? $dto->phone,
-                        'email' => null,
+                        'name'     => $dto->name,
+                        'whatsapp' => $dto->whatsapp,
+                        'email'    => null,
                     ]
                 );
             }

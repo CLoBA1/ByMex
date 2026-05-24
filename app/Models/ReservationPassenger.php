@@ -10,6 +10,8 @@ class ReservationPassenger extends Model
         'reservation_id',
         'seat_number',
         'name',
+        'phone',
+        'whatsapp',
         'birthdate',
         'passenger_type',
         'benefit_label',

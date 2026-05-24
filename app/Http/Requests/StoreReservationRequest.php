@@ -20,34 +20,35 @@ class StoreReservationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tour_id' => 'required|exists:tours,id',
-            'seats' => 'required|string',
-            'name' => 'required|string|max:150',
-            'phone' => 'required|string|max:20',
-            'whatsapp' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:100',
-            
-            // Nuevo modo con pasajeros (opcional por ahora para compatibilidad)
-            'passengers' => 'nullable|array',
-            'passengers.*.seat_number' => 'required_with:passengers|string',
-            'passengers.*.name' => 'required_with:passengers|string|max:150',
-            'passengers.*.phone' => 'required_with:passengers|string|max:20',
-            'passengers.*.passenger_type' => 'required_with:passengers|string',
-            'passengers.*.birthdate' => 'nullable|date',
-            'passengers.*.benefit_label' => 'nullable|string',
-            'passengers.*.boarding_point_id' => 'nullable|exists:boarding_points,id',
-            'passengers.*.boarding_sub_point_id' => 'nullable|exists:boarding_sub_points,id',
+            'tour_id'                            => 'required|exists:tours,id',
+            'seats'                              => 'required|string',
+            'name'                               => 'required|string|max:150',
+            'phone'                              => 'nullable|string|max:20',
+            'whatsapp'                           => 'required|string|max:20',
+            'email'                              => 'nullable|email|max:100',
+
+            // Pasajeros detallados
+            'passengers'                              => 'nullable|array',
+            'passengers.*.seat_number'                => 'required_with:passengers|string',
+            'passengers.*.name'                       => 'required_with:passengers|string|max:150',
+            'passengers.*.phone'                      => 'nullable|string|max:20',
+            'passengers.*.whatsapp'                   => 'required_with:passengers|string|max:20',
+            'passengers.*.passenger_type'             => 'required_with:passengers|string',
+            'passengers.*.birthdate'                  => 'nullable|date',
+            'passengers.*.benefit_label'              => 'nullable|string',
+            'passengers.*.boarding_point_id'          => 'nullable|exists:boarding_points,id',
+            'passengers.*.boarding_sub_point_id'      => 'nullable|exists:boarding_sub_points,id',
         ];
     }
     
     public function messages(): array
     {
         return [
-            'tour_id.required' => 'El viaje es requerido.',
-            'seats.required' => 'Debes seleccionar al menos un asiento.',
-            'name.required' => 'Tu nombre es obligatorio.',
-            'phone.required' => 'Tu teléfono celular es obligatorio.',
-            'email.required' => 'Un correo electrónico válido es obligatorio.',
+            'tour_id.required'     => 'El viaje es requerido.',
+            'seats.required'       => 'Debes seleccionar al menos un asiento.',
+            'name.required'        => 'Tu nombre es obligatorio.',
+            'whatsapp.required'    => 'Tu número de WhatsApp es obligatorio.',
+            'email.email'          => 'Un correo electrónico válido es obligatorio.',
         ];
     }
 

@@ -96,13 +96,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.passenger-block').forEach(block => {
             const seat = block.dataset.seat;
             const nameInput = block.querySelector('.p-name').value;
-            const phoneInput = block.querySelector('.p-phone') ? block.querySelector('.p-phone').value : '';
+            const whatsappInput = block.querySelector('.p-whatsapp') ? block.querySelector('.p-whatsapp').value : '';
             const typeSelect = block.querySelector('.p-type').value;
             const bpSelect = block.querySelector('.p-bp');
             const subBpSelect = block.querySelector('.p-sub-bp');
             existingBlocks[seat] = { 
                 name: nameInput, 
-                phone: phoneInput, 
+                whatsapp: whatsappInput, 
                 type: typeSelect, 
                 bp: bpSelect ? bpSelect.value : '',
                 subBp: subBpSelect ? subBpSelect.value : ''
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
         passengersContainer.innerHTML = '<h3 style="margin-top: 1rem; margin-bottom: 0.5rem; font-size: 1.05rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--navy);"><i class="fa-solid fa-users"></i> Detalle de Pasajeros</h3>';
 
         selectedSeats.forEach((seat, index) => {
-            const prevData = existingBlocks[seat] || { name: '', phone: '', type: 'Adulto', bp: '' };
+            const prevData = existingBlocks[seat] || { name: '', whatsapp: '', type: 'Adulto', bp: '' };
             const seatLabel = seat.toString().padStart(2, '0');
 
             // Re-seleccionar la opción de boarding point guardada
@@ -140,8 +140,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             <input type="text" class="form-control p-name" name="passengers[${index}][name]" value="${prevData.name}" required placeholder="Nombre del pasajero" style="padding: 0.5rem; font-size: 0.85rem; height: auto;">
                         </div>
                         <div style="flex: 1; min-width: 120px;">
-                            <label style="font-size: 0.75rem; color: var(--slate-500); margin-bottom: 0.25rem; display: block;">Teléfono</label>
-                            <input type="tel" class="form-control p-phone" name="passengers[${index}][phone]" value="${prevData.phone || ''}" required placeholder="10 dígitos" style="padding: 0.5rem; font-size: 0.85rem; height: auto;">
+                            <label style="font-size: 0.75rem; color: var(--slate-500); margin-bottom: 0.25rem; display: block;">WhatsApp</label>
+                            <input type="tel" class="form-control p-whatsapp" name="passengers[${index}][whatsapp]" value="${prevData.whatsapp || ''}" required placeholder="10 dígitos" style="padding: 0.5rem; font-size: 0.85rem; height: auto;">
                         </div>
                     </div>
                     <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
