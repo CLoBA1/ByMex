@@ -1,14 +1,13 @@
-@extends('layouts.admin')
-@section('header-title', 'Pasajeros del Viaje')
-@section('content')
+<x-app-layout>
+    @section('header-title', 'Pasajeros del Viaje')
+
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <div>
             <h2 style="font-family: 'Montserrat', sans-serif; font-size: 1.8rem; color: var(--navy); font-weight: 800; margin-bottom: 0.25rem;">
                 <i class="fa-solid fa-users-line"></i> Pasajeros: {{ $tour->title }}
             </h2>
             <p style="color: var(--text-muted); margin: 0;">
-                {{ \Carbon\Carbon::parse($tour->start_date)->format('d/m/Y') }}
-                al {{ \Carbon\Carbon::parse($tour->end_date)->format('d/m/Y') }}
+                {{ \Carbon\Carbon::parse($tour->departure_date)->format('d/m/Y') }}
             </p>
         </div>
         <a href="{{ route('admin.tour-passengers.index') }}" class="btn-action"
@@ -55,7 +54,6 @@
                     <tbody>
                         @forelse($allPassengers as $passenger)
                             @php
-                                // Status badge
                                 $statusBg = '#f1f5f9'; $statusColor = '#64748b'; $statusLabel = ucfirst($passenger->status);
                                 if (in_array($passenger->status, ['paid', 'confirmed', 'active'])) {
                                     $statusBg = '#dcfce7'; $statusColor = '#166534'; $statusLabel = 'Confirmado';
@@ -115,17 +113,14 @@
                                 {{-- Acciones --}}
                                 <td style="text-align: center;">
                                     @if($passenger->is_titular)
-                                        {{-- Titulares siempre son clientes --}}
                                         <span style="display: inline-flex; align-items: center; gap: 0.3rem; background: #dcfce7; color: #166534; padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">
                                             <i class="fa-solid fa-check"></i> Ya es Cliente
                                         </span>
                                     @elseif($passenger->client_id)
-                                        {{-- Pasajero ya convertido a cliente --}}
                                         <span style="display: inline-flex; align-items: center; gap: 0.3rem; background: #dcfce7; color: #166534; padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">
                                             <i class="fa-solid fa-check"></i> Ya es Cliente
                                         </span>
                                     @else
-                                        {{-- Botón para agregar como cliente --}}
                                         <form action="{{ route('admin.tour-passengers.add-client', $passenger->id) }}" method="POST"
                                               onsubmit="return confirm('¿Registrar a {{ addslashes($passenger->name) }} como cliente del portal?');">
                                             @csrf
@@ -150,4 +145,4 @@
             </div>
         </div>
     </div>
-@endsection
+</x-app-layout>

@@ -1,6 +1,6 @@
-@extends('layouts.app')
-@section('header-title', 'Pasajeros por Viaje')
-@section('content')
+<x-app-layout>
+    @section('header-title', 'Pasajeros por Viaje')
+
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h2 style="font-family: 'Montserrat', sans-serif; font-size: 1.8rem; color: var(--navy); font-weight: 800; margin-bottom: 0;">
             <i class="fa-solid fa-users-line"></i> Lista de Pasajeros por Viaje
@@ -35,7 +35,7 @@
                                     <strong>{{ $tour->title }}</strong>
                                 </td>
                                 <td>
-                                    {{ \Carbon\Carbon::parse($tour->start_date)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($tour->end_date)->format('d/m/Y') }}
+                                    {{ \Carbon\Carbon::parse($tour->departure_date)->format('d/m/Y') }}
                                 </td>
                                 <td style="text-align: center; font-weight: 600;">
                                     {{ $totalAdditionalPassengers }}
@@ -63,4 +63,4 @@
             </div>
         </div>
     </div>
-@endsection
+</x-app-layout>
