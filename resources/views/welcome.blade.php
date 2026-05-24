@@ -30,7 +30,7 @@
                                     <a href="{{ $banner->link }}" class="btn btn-primary" style="font-size:1.1rem; padding:1rem 2rem;" data-aos="zoom-in" data-aos-delay="400">
                                         {{ $banner->button_text }} <i class="fa-solid fa-arrow-right"></i>
                                     </a>
-                                    <a href="{{ route('services') }}" class="btn" style="font-size:1.1rem; padding:1rem 2rem; margin-left: 0.5rem; background-color: white; color: var(--navy); border-radius: 8px; font-weight: 600;" data-aos="zoom-in" data-aos-delay="500">Servicios</a>
+                                    <a href="{{ route('services') }}" class="btn btn-outline" style="font-size:1.1rem; padding:1rem 2rem; margin-left: 0.5rem; color: white; border: 2px solid white;" data-aos="zoom-in" data-aos-delay="500">Servicios</a>
                                 @endif
                             </div>
                         </div>
@@ -47,7 +47,7 @@
                             </h1>
                             <p data-aos="fade-up" data-aos-delay="300" style="color:#e2e8f0; font-size:1.2rem; max-width:600px; margin-bottom:2rem;">Autobuses de lujo, hospedaje 4 estrellas y atención personalizada.</p>
                             <a href="{{ route('tours.index') }}" class="btn btn-primary" style="font-size:1.1rem; padding:1rem 2rem;" data-aos="zoom-in" data-aos-delay="400">Ver Catálogo <i class="fa-solid fa-arrow-right"></i></a>
-                            <a href="{{ route('services') }}" class="btn" style="font-size:1.1rem; padding:1rem 2rem; margin-left: 0.5rem; background-color: white; color: var(--navy); border-radius: 8px; font-weight: 600;" data-aos="zoom-in" data-aos-delay="500">Servicios</a>
+                            <a href="{{ route('services') }}" class="btn btn-outline" style="font-size:1.1rem; padding:1rem 2rem; margin-left: 0.5rem; color: white; border: 2px solid white;" data-aos="zoom-in" data-aos-delay="500">Servicios</a>
                         </div>
                     </div>
                 @endif
