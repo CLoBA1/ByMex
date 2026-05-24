@@ -51,7 +51,7 @@
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
                     <div>
                         <label style="display: block; margin-bottom: .5rem; font-weight: 600; font-size: .85rem;">Estatus</label>
                         <select name="status" required style="width: 100%; padding: .75rem; border: 1px solid var(--border); border-radius: 6px;">
@@ -63,6 +63,10 @@
                     <div>
                         <label style="display: block; margin-bottom: .5rem; font-weight: 600; font-size: .85rem;">Horas previas para expiración</label>
                         <input type="number" name="expiration_hours" value="{{ old('expiration_hours', $tour->expiration_hours ?? 24) }}" required style="width: 100%; padding: .75rem; border: 1px solid var(--border); border-radius: 6px;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: .5rem; font-weight: 600; font-size: .85rem;">Duración del viaje (días)</label>
+                        <input type="number" name="duration_days" value="{{ old('duration_days', $tour->duration_days ?? '') }}" style="width: 100%; padding: .75rem; border: 1px solid var(--border); border-radius: 6px;" placeholder="Ej. 3">
                     </div>
                 </div>
 

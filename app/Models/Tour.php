@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Tour extends Model
 {
-    protected $fillable = ['title', 'destination', 'departure_date', 'boarding_point', 'price', 'minimum_deposit', 'total_seats', 'expiration_hours', 'description', 'itinerary', 'status', 'image', 'requires_passenger_documents', 'what_includes', 'what_not_includes'];
+    protected $fillable = ['title', 'destination', 'departure_date', 'boarding_point', 'price', 'minimum_deposit', 'total_seats', 'expiration_hours', 'description', 'itinerary', 'status', 'image', 'requires_passenger_documents', 'what_includes', 'what_not_includes', 'duration_days'];
 
     protected function casts(): array
     {

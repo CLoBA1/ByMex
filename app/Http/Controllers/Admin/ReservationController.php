@@ -273,6 +273,17 @@ class ReservationController extends Controller
                 \App\Models\ReservationSeat::where('reservation_id', $reservation->id)
                     ->update(['status' => 'paid']);
 
+                // Otorgar puntos de bonificación si aplica
+                if ($reservation->tour && $reservation->tour->duration_days > 0) {
+                    \App\Models\BonusRequest::create([
+                        'client_id' => $reservation->client_id,
+                        'request_type' => 'Viaje: ' . $reservation->tour->title,
+                        'requested_bonus_count' => $reservation->tour->duration_days,
+                        'status' => 'approved',
+                        'admin_notes' => 'Otorgado automáticamente por liquidación de reserva #' . $reservation->id
+                    ]);
+                }
+
                 $notificationData = [
                     'title' => 'Reserva Liquidada',
                     'message' => "La reserva #{$reservation->id} de {$reservation->client->name} ha sido pagada en su totalidad.",

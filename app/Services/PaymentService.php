@@ -173,6 +173,17 @@ class PaymentService
         if ($newBalance == 0) {
             ReservationSeat::where('reservation_id', $reservation->id)
                 ->update(['status' => SeatStatus::PAID]);
+
+            // Otorgar puntos de bonificación si aplica
+            if ($reservation->tour && $reservation->tour->duration_days > 0) {
+                \App\Models\BonusRequest::create([
+                    'client_id' => $reservation->client_id,
+                    'request_type' => 'Viaje: ' . $reservation->tour->title,
+                    'requested_bonus_count' => $reservation->tour->duration_days,
+                    'status' => 'approved',
+                    'admin_notes' => 'Otorgado automáticamente por liquidación de reserva #' . $reservation->id
+                ]);
+            }
         }
 
         Log::info("Reservation #{$reservation->id} processed payment of {$amountPaid} via Stripe webhook.");
