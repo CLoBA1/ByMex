@@ -97,6 +97,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'destroy' => 'admin.banners.destroy',
     ]);
 
+    // Servicios
+    Route::resource('admin/service-categories', \App\Http\Controllers\Admin\ServiceCategoryController::class)->names([
+        'index' => 'admin.service-categories.index',
+        'create' => 'admin.service-categories.create',
+        'store' => 'admin.service-categories.store',
+        'edit' => 'admin.service-categories.edit',
+        'update' => 'admin.service-categories.update',
+        'destroy' => 'admin.service-categories.destroy',
+    ]);
+    Route::resource('admin/service-options', \App\Http\Controllers\Admin\ServiceOptionController::class)->names([
+        'index' => 'admin.service-options.index',
+        'create' => 'admin.service-options.create',
+        'store' => 'admin.service-options.store',
+        'edit' => 'admin.service-options.edit',
+        'update' => 'admin.service-options.update',
+        'destroy' => 'admin.service-options.destroy',
+    ]);
+
     // --- Solicitudes de Bonos ---
     Route::prefix('admin/solicitudes-bonos')->name('admin.bonus-requests.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\BonusRequestController::class, 'index'])->name('index');

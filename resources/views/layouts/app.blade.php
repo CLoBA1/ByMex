@@ -183,6 +183,12 @@
             <a href="{{ route('admin.tours.index') }}" class="nav-item {{ request()->routeIs('admin.tours.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-bus"></i> Catálogo de Viajes
             </a>
+            <a href="{{ route('admin.service-categories.index') }}" class="nav-item {{ request()->routeIs('admin.service-categories.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-layer-group"></i> Servicios: Categorías
+            </a>
+            <a href="{{ route('admin.service-options.index') }}" class="nav-item {{ request()->routeIs('admin.service-options.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-list-check"></i> Servicios: Opciones
+            </a>
             <a href="{{ route('admin.clients.index') }}" class="nav-item {{ request()->routeIs('admin.clients.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-users"></i> Clientes
             </a>
