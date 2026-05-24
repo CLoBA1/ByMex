@@ -170,8 +170,8 @@
                         <div class="label">Precio por persona</div>
                         <div class="price">${{ number_format($tour->price, 0) }} MXN</div>
                         @if($tour->minimum_deposit > 0)
-                        <div style="font-size: 0.85rem; color: var(--slate-500); margin-top: 0.25rem;">
-                            Reserva con: <strong>${{ number_format($tour->minimum_deposit, 2) }} MXN</strong>
+                        <div style="font-family: var(--font-h); font-size: 0.95rem; font-weight: 700; color: var(--gold); margin-top: 0.25rem;">
+                            Reserva desde: ${{ number_format($tour->minimum_deposit, 0) }} MXN
                         </div>
                         @endif
                     </div>

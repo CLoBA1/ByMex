@@ -40,6 +40,9 @@
                                     <div class="price-box">
                                         <span>Desde</span>
                                         <h4>${{ number_format($tour->price, 0) }}</h4>
+                                        @if($tour->minimum_deposit > 0)
+                                        <div style="font-family: var(--font-h); font-size: 0.85rem; font-weight: 700; color: var(--gold); margin-top: 0.25rem;">Reserva desde: ${{ number_format($tour->minimum_deposit, 0) }} MXN</div>
+                                        @endif
                                     </div>
                                     <div class="btn-book">Reservar <i class="fa-solid fa-arrow-right"></i></div>
                                 </div>
