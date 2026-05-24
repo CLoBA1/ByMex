@@ -53,7 +53,6 @@
                 @endauth
 
                 <a href="{{ route('tours.index') }}" class="btn btn-primary btn-cta-nav">Explorar <i class="fa-solid fa-arrow-right"></i></a>
-                <a href="{{ route('services') }}" class="btn btn-outline" style="border: 1px solid var(--primary); color: var(--primary); margin-left: 0.5rem; font-weight: 600; padding: 0.6rem 1.25rem;">Servicios</a>
                 <button class="mobile-menu-btn" onclick="document.getElementById('mobile-nav-links').classList.toggle('mobile-active')">
                     <i class="fa-solid fa-bars"></i>
                 </button>
