@@ -96,7 +96,7 @@ class TourPassengersController extends Controller
         $client = Client::create([
             'name'     => $passengerName,
             'whatsapp' => $whatsapp ?: null,
-            'phone'    => $whatsapp ?: null,
+            'phone'    => $whatsapp ?: 'sin teléfono',
             'email'    => null,
             'password' => Hash::make($passwordBase),
         ]);
