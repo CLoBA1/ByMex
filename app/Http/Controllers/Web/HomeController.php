@@ -30,6 +30,16 @@ class HomeController extends Controller
 
     public function services()
     {
-        return view('services');
+        $categories = \App\Models\ServiceCategory::with(['options' => function ($query) {
+            $query->where('status', 'active')->orderBy('order');
+        }])->where('status', 'active')->orderBy('order')->get();
+
+        $paymentSetting = \App\Models\PaymentSetting::first();
+        $waNumber = $paymentSetting ? $paymentSetting->whatsapp_number : '527331362024';
+        
+        // Ensure WA number format is clean (digits only)
+        $waNumber = preg_replace('/[^0-9]/', '', $waNumber);
+
+        return view('services', compact('categories', 'waNumber'));
     }
 }
