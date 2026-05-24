@@ -30,7 +30,7 @@ class TourPassengersController extends Controller
     {
         $tour->load(['reservations' => function($query) {
             $query->whereIn('status', ['paid', 'partial', 'pending'])
-                  ->with(['passengers.client', 'client', 'boardingPoint']);
+                  ->with(['passengers.client', 'client']);
         }]);
 
         $allPassengers = collect();
@@ -42,7 +42,7 @@ class TourPassengersController extends Controller
                 'name'                => $reservation->client->name,
                 'type'                => 'Titular',
                 'whatsapp'            => $reservation->client->whatsapp ?? $reservation->client->phone,
-                'boarding_point_name' => collect([$reservation->boardingPoint->name ?? '', $reservation->boardingSubPoint->name ?? ''])->filter()->implode(' - '),
+                'boarding_point_name' => '',
                 'status'              => $reservation->status->value,
                 'is_titular'          => true,
                 'reservation_id'      => $reservation->id,
@@ -56,7 +56,7 @@ class TourPassengersController extends Controller
                     'name'                => trim($passenger->name . ' ' . ($passenger->last_name ?? '')),
                     'type'                => ucfirst($passenger->passenger_type->value ?? 'Adulto'),
                     'whatsapp'            => $passenger->whatsapp,
-                    'boarding_point_name' => collect([$reservation->boardingPoint->name ?? '', $reservation->boardingSubPoint->name ?? ''])->filter()->implode(' - '),
+                    'boarding_point_name' => '',
                     'status'              => $passenger->status->value ?? $reservation->status->value,
                     'is_titular'          => false,
                     'reservation_id'      => $reservation->id,
