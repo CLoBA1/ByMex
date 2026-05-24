@@ -27,10 +27,12 @@
                                     <p data-aos="fade-up" data-aos-delay="300" style="color:#e2e8f0; font-size:1.2rem; max-width:600px; margin-bottom:2rem;">{{ $banner->subtitle }}</p>
                                 @endif
                                 @if($banner->link && $banner->button_text)
-                                    <a href="{{ $banner->link }}" class="btn btn-primary" style="font-size:1.1rem; padding:1rem 2rem;" data-aos="zoom-in" data-aos-delay="400">
-                                        {{ $banner->button_text }} <i class="fa-solid fa-arrow-right"></i>
-                                    </a>
-                                    <a href="{{ route('services') }}" class="btn btn-outline" style="font-size:1.1rem; padding:1rem 2rem; margin-left: 0.5rem; color: white; border: 2px solid white;" data-aos="zoom-in" data-aos-delay="500">Servicios</a>
+                                    <div style="display:flex; flex-direction:row; align-items:center; justify-content:center; gap:16px;">
+                                        <a href="{{ $banner->link }}" class="btn btn-primary" style="font-size:1.1rem; padding:1rem 2rem;" data-aos="zoom-in" data-aos-delay="400">
+                                            {{ $banner->button_text }} <i class="fa-solid fa-arrow-right"></i>
+                                        </a>
+                                        <a href="{{ route('services') }}" class="btn btn-outline" style="font-size:1.1rem; padding:1rem 2rem; color: white; border: 2px solid white;" data-aos="zoom-in" data-aos-delay="500">Servicios</a>
+                                    </div>
                                 @endif
                             </div>
                         </div>
@@ -46,8 +48,10 @@
                                 Descubre México<br><span style="color:var(--gold);">A Otro Nivel</span>
                             </h1>
                             <p data-aos="fade-up" data-aos-delay="300" style="color:#e2e8f0; font-size:1.2rem; max-width:600px; margin-bottom:2rem;">Autobuses de lujo, hospedaje 4 estrellas y atención personalizada.</p>
-                            <a href="{{ route('tours.index') }}" class="btn btn-primary" style="font-size:1.1rem; padding:1rem 2rem;" data-aos="zoom-in" data-aos-delay="400">Ver Catálogo <i class="fa-solid fa-arrow-right"></i></a>
-                            <a href="{{ route('services') }}" class="btn btn-outline" style="font-size:1.1rem; padding:1rem 2rem; margin-left: 0.5rem; color: white; border: 2px solid white;" data-aos="zoom-in" data-aos-delay="500">Servicios</a>
+                            <div style="display:flex; flex-direction:row; align-items:center; justify-content:center; gap:16px;">
+                                <a href="{{ route('tours.index') }}" class="btn btn-primary" style="font-size:1.1rem; padding:1rem 2rem;" data-aos="zoom-in" data-aos-delay="400">Ver Catálogo <i class="fa-solid fa-arrow-right"></i></a>
+                                <a href="{{ route('services') }}" class="btn btn-outline" style="font-size:1.1rem; padding:1rem 2rem; color: white; border: 2px solid white;" data-aos="zoom-in" data-aos-delay="500">Servicios</a>
+                            </div>
                         </div>
                     </div>
                 @endif
