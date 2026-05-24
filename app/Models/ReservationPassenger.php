@@ -28,6 +28,7 @@ class ReservationPassenger extends Model
         'cancelled_at',
         'cancellation_reason',
         'cancellation_retained_amount',
+        'client_id',
     ];
 
     protected function casts(): array
@@ -47,6 +48,11 @@ class ReservationPassenger extends Model
     public function reservation()
     {
         return $this->belongsTo(Reservation::class);
+    }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
     }
 
     public function boardingPoint()

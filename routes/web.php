@@ -62,6 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Lista de Pasajeros por Tour
     Route::get('/admin/tour-passengers', [\App\Http\Controllers\Admin\TourPassengersController::class, 'index'])->name('admin.tour-passengers.index');
     Route::get('/admin/tour-passengers/{tour}', [\App\Http\Controllers\Admin\TourPassengersController::class, 'show'])->name('admin.tour-passengers.show');
+    Route::post('/admin/tour-passengers/{passenger}/add-client', [\App\Http\Controllers\Admin\TourPassengersController::class, 'addClient'])->name('admin.tour-passengers.add-client');
 
     Route::post('/admin/reservations/{id}/status', [AdminReservationController::class, 'updateStatus'])->name('admin.reservations.status');
     Route::post('/admin/reservations/{id}/payment', [AdminReservationController::class, 'storePayment'])->name('admin.reservations.payment');
