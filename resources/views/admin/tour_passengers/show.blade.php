@@ -1,6 +1,6 @@
-<x-app-layout>
-    @section('header-title', 'Pasajeros del Viaje')
-
+@extends('layouts.app')
+@section('header-title', 'Pasajeros del Viaje')
+@section('content')
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <div>
             <h2 style="font-family: 'Montserrat', sans-serif; font-size: 1.8rem; color: var(--navy); font-weight: 800; margin-bottom: 0.25rem;">
@@ -150,4 +150,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+@endsection

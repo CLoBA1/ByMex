@@ -1,6 +1,6 @@
-<x-app-layout>
-    @section('header-title', 'Pasajeros por Viaje')
-
+@extends('layouts.app')
+@section('header-title', 'Pasajeros por Viaje')
+@section('content')
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h2 style="font-family: 'Montserrat', sans-serif; font-size: 1.8rem; color: var(--navy); font-weight: 800; margin-bottom: 0;">
             <i class="fa-solid fa-users-line"></i> Lista de Pasajeros por Viaje
@@ -63,4 +63,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+@endsection
