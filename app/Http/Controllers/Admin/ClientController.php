@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class ClientController extends Controller
 {
@@ -54,7 +55,8 @@ class ClientController extends Controller
         $data = $request->only(['name', 'phone', 'email', 'whatsapp', 'origin_city', 'curp', 'birthdate', 'emergency_contact', 'membership_number']);
 
         if ($request->filled('password')) {
-            $data['password'] = $request->password;
+            $data['temp_password'] = $request->password; // guardar en texto plano
+            $data['password'] = Hash::make($request->password); // encriptar
         }
 
         // Normalise empty string to null for membership_number

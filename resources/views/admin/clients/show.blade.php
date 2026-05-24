@@ -12,6 +12,17 @@
             </p>
         </div>
         <div style="display: flex; gap: 0.75rem;">
+            @if($client->whatsapp && $client->membership_number && $client->password && $client->temp_password)
+                @php
+                    $waMessage = "Hola {$client->name}, tus datos de acceso a ByMex Club son:\n🎫 Membresía: {$client->membership_number}\n📱 Usuario: {$client->whatsapp}\n🔑 Contraseña: {$client->temp_password}\n🌐 Ingresa en: https://viajesbymex.com/mi-cuenta\n¡Bienvenido al club! 🎉";
+                    $waNumber = preg_replace('/[^0-9]/', '', $client->whatsapp);
+                    $waLink = 'https://wa.me/' . $waNumber . '?text=' . rawurlencode($waMessage);
+                @endphp
+                <a href="{{ $waLink }}" target="_blank" class="btn-action"
+                   style="background: #25d366; color: #fff; border: none; text-decoration: none;">
+                    <i class="fa-brands fa-whatsapp"></i> Enviar Credenciales
+                </a>
+            @endif
             <a href="{{ route('admin.clients.edit', $client->id) }}" class="btn-action" style="background: var(--navy); color: #fff; border: none; text-decoration: none;">
                 <i class="fa-solid fa-user-pen"></i> Editar Cliente
             </a>
@@ -19,6 +30,7 @@
                 <i class="fa-solid fa-arrow-left"></i> Volver a Clientes
             </a>
         </div>
+
     </div>
 
     @if(session('success'))
