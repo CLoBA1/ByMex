@@ -183,6 +183,9 @@
             <a href="{{ route('admin.tours.index') }}" class="nav-item {{ request()->routeIs('admin.tours.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-bus"></i> Catálogo de Viajes
             </a>
+            <a href="{{ route('admin.tour-passengers.index') }}" class="nav-item {{ request()->routeIs('admin.tour-passengers.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-users-line"></i> Pasajeros por Viaje
+            </a>
             <a href="{{ route('admin.service-categories.index') }}" class="nav-item {{ request()->routeIs('admin.service-categories.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-layer-group"></i> Servicios: Categorías
             </a>
