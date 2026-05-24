@@ -20,7 +20,7 @@ class TourPassengersController extends Controller
             $query->whereIn('status', ['paid', 'partial', 'pending'])
                   ->with('passengers', 'client');
         }])
-        ->orderBy('start_date', 'desc')
+        ->orderBy('departure_date', 'desc')
         ->get();
 
         return view('admin.tour_passengers.index', compact('tours'));
