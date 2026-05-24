@@ -15,7 +15,7 @@
     <section class="section-pad" id="servicios" style="background: var(--navy);">
         <div class="container" style="max-width: 1200px;">
             @php
-                $waNumber = '527441295026';
+                $waNumber = '527331362024';
                 $servicios = [
                     [
                         'icon' => 'fa-solid fa-map-location-dot',

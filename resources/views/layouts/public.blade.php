@@ -100,7 +100,7 @@
     </footer>
 
     <!-- WhatsApp Float -->
-    <a href="https://wa.me/527441295026?text=Hola%2C%20quiero%20información%20sobre%20los%20próximos%20viajes" target="_blank" class="whatsapp-float" aria-label="WhatsApp">
+    <a href="https://wa.me/527331362024?text=Hola%2C%20quiero%20información%20sobre%20los%20próximos%20viajes" target="_blank" class="whatsapp-float" aria-label="WhatsApp">
         <i class="fa-brands fa-whatsapp"></i>
     </a>
 
