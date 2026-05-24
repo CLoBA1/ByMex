@@ -5,13 +5,33 @@
         <div>
             <h2 style="font-family: 'Montserrat', sans-serif; font-size: 1.8rem; color: var(--navy); font-weight: 800; margin-bottom: 0.25rem;">
                 <i class="fa-solid fa-user-circle"></i> {{ $client->name }}
+                @if($client->status === 'active')
+                    <span style="font-size: 0.8rem; background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 6px; vertical-align: middle; margin-left: 0.5rem;">● Activo</span>
+                @else
+                    <span style="font-size: 0.8rem; background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 6px; vertical-align: middle; margin-left: 0.5rem;">● Inactivo</span>
+                @endif
             </h2>
             <p style="color: var(--text-muted); font-size: 0.9rem;">
                 Miembro desde: {{ $client->created_at->translatedFormat('F Y') }}
                 @if($client->membership_number) | Membresía: <span style="font-weight: 600; color: var(--primary);">{{ $client->membership_number }}</span> @endif
             </p>
         </div>
-        <div style="display: flex; gap: 0.75rem;">
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            @if($client->status === 'active')
+                <form action="{{ route('admin.clients.toggle', $client->id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('¿Seguro que deseas desactivar este cliente? No podrá iniciar sesión.');">
+                    @csrf
+                    <button type="submit" class="btn-action" style="background: #ef4444; color: #fff; border: none; cursor: pointer; padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 6px;">
+                        <i class="fa-solid fa-user-slash"></i> Desactivar Cliente
+                    </button>
+                </form>
+            @else
+                <form action="{{ route('admin.clients.toggle', $client->id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('¿Seguro que deseas reactivar este cliente?');">
+                    @csrf
+                    <button type="submit" class="btn-action" style="background: #10b981; color: #fff; border: none; cursor: pointer; padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 6px;">
+                        <i class="fa-solid fa-user-check"></i> Reactivar Cliente
+                    </button>
+                </form>
+            @endif
             @if($client->whatsapp && $client->membership_number && $client->password && $client->temp_password)
                 @php
                     $waMessage = "Hola {$client->name}, tus datos de acceso a ByMex Club son:\n🎫 Membresía: {$client->membership_number}\n📱 Usuario: {$client->whatsapp}\n🔑 Contraseña: {$client->temp_password}\n🌐 Ingresa en: https://viajesbymex.com/mi-cuenta\n¡Bienvenido al club! 🎉";

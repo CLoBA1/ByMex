@@ -69,4 +69,19 @@ class ClientController extends Controller
         return redirect()->route('admin.clients.show', $client->id)
             ->with('success', 'Datos del cliente actualizados correctamente.');
     }
+
+    public function toggle($id)
+    {
+        $client = Client::findOrFail($id);
+        
+        if ($client->status === 'active') {
+            $client->update(['status' => 'inactive']);
+            $msg = 'Cliente desactivado correctamente.';
+        } else {
+            $client->update(['status' => 'active']);
+            $msg = 'Cliente reactivado correctamente.';
+        }
+
+        return redirect()->back()->with('success', $msg);
+    }
 }

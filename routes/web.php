@@ -131,6 +131,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/clients/{id}', [AdminClientController::class, 'show'])->name('admin.clients.show');
     Route::get('/admin/clients/{id}/edit', [AdminClientController::class, 'edit'])->name('admin.clients.edit');
     Route::put('/admin/clients/{id}', [AdminClientController::class, 'update'])->name('admin.clients.update');
+    Route::post('/admin/clients/{id}/toggle', [AdminClientController::class, 'toggle'])->name('admin.clients.toggle');
 
     // Configuración
     Route::get('/admin/settings', [AdminSettingController::class, 'index'])->name('admin.settings');

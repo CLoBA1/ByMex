@@ -33,11 +33,17 @@
                                     }
                                 }
                             @endphp
-                            <tr>
+                            <tr style="{{ $client->status === 'inactive' ? 'opacity: 0.5;' : '' }}">
                                 <td style="font-weight: 700;">
                                     <a href="{{ route('admin.clients.show', $client->id) }}" style="color: var(--navy); text-decoration: none;">
                                         {{ $client->name }}
-                                    </a><br>
+                                    </a>
+                                    @if($client->status === 'active')
+                                        <span style="font-size: 0.7rem; background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; vertical-align: middle; margin-left: 0.25rem;">● Activo</span>
+                                    @else
+                                        <span style="font-size: 0.7rem; background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; vertical-align: middle; margin-left: 0.25rem;">● Inactivo</span>
+                                    @endif
+                                    <br>
                                     <span style="font-size: 0.75rem; font-weight: 400; color: var(--text-muted);">CURP: {{ $client->curp ?? 'N/A' }}</span>
                                 </td>
                                 <td>

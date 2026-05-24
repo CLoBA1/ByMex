@@ -40,6 +40,12 @@ class AuthController extends Controller
 
         // 3. Verificar contraseña si se encontró el cliente
         if ($client && Hash::check($request->password, $client->password)) {
+            if ($client->status === 'inactive') {
+                return back()->withErrors([
+                    'login_input' => 'Tu cuenta ha sido desactivada. Contacta a la oficina.',
+                ])->onlyInput('login_input');
+            }
+
             Auth::guard('client')->login($client, $request->boolean('remember'));
             $request->session()->regenerate();
             return redirect()->intended(route('client.dashboard'));
