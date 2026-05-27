@@ -19,6 +19,8 @@ class StoreReservationRequest extends FormRequest
      */
     public function rules(): array
     {
+        \Illuminate\Support\Facades\Log::info('VALIDACION_DATOS', ['input' => request()->all()]);
+
         return [
             'tour_id'                            => 'required|exists:tours,id',
             'seats'                              => 'required|string',

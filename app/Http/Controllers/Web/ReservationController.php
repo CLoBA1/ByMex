@@ -19,6 +19,10 @@ class ReservationController extends Controller
 
     public function store(StoreReservationRequest $request)
     {
+        \Illuminate\Support\Facades\Log::info('RESERVACION_INTENTO', [
+            'data' => $request->all()
+        ]);
+
         try {
             $reservation = $this->reservationService->processNewReservation($request->toDTO());
             
@@ -34,6 +38,7 @@ class ReservationController extends Controller
 
             return redirect()->route('reservations.success', $reservation->public_token);
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('RESERVACION_ERROR', ['error' => $e->getMessage()]);
             return back()->with('error', $e->getMessage());
         }
     }
