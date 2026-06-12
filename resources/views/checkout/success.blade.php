@@ -303,11 +303,16 @@
                             Paga de forma rápida y segura con tarjeta de crédito, débito o dinero en cuenta a través de Mercado Pago.
                         </p>
 
+                        @php
+                            $mpAmount = ($reservation->tour && $reservation->tour->minimum_deposit > 0) 
+                                ? $reservation->tour->minimum_deposit 
+                                : $reservation->balance_due;
+                        @endphp
                         <a href="{{ route('reservations.pay', $reservation->public_token) }}" 
                            class="btn-primary" 
                            style="display: block; width: 100%; padding: 1rem; font-size: 1.1rem; text-decoration: none; margin-bottom: 1rem;"
                            onclick="this.innerHTML = '<i class=\'fa-solid fa-spinner fa-spin\'></i> Redirigiendo a Mercado Pago...';">
-                            <i class="fa-solid fa-credit-card"></i> Pagar en línea — ${{ number_format($reservation->balance_due, 2) }}
+                            <i class="fa-solid fa-credit-card"></i> Pagar en línea — ${{ number_format($mpAmount, 2) }}
                         </a>
                         
                         <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">

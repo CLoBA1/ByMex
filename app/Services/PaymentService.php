@@ -77,9 +77,11 @@ class PaymentService
             throw new \RuntimeException('Mercado Pago no está configurado (falta MERCADOPAGO_ACCESS_TOKEN).');
         }
 
-        $amountToPay = (float) $reservation->balance_due;
+        $minDeposit = $reservation->tour ? (float) $reservation->tour->minimum_deposit : 0;
+        $amountToPay = $minDeposit > 0 ? $minDeposit : (float) $reservation->balance_due;
+
         if ($amountToPay <= 0) {
-            throw new \RuntimeException('El saldo pendiente de la reserva es cero. No se puede iniciar un pago.');
+            throw new \RuntimeException('El saldo pendiente o depósito de la reserva es cero. No se puede iniciar un pago.');
         }
 
         $payload = [

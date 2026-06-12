@@ -751,12 +751,17 @@
 
                             <!-- Mercado Pago Checkout (link independiente, NO es form submit) -->
                             @if(config('services.mercadopago.access_token') && $reservation->status->value != 'paid')
+                                @php
+                                    $mpAmount = ($reservation->tour && $reservation->tour->minimum_deposit > 0) 
+                                        ? $reservation->tour->minimum_deposit 
+                                        : $reservation->balance_due;
+                                @endphp
                                 <a href="{{ route('reservations.pay', $reservation->public_token) }}" 
                                    target="_blank"
                                    class="btn-action" 
                                    style="background: #009ee3; width: 100%; justify-content: center; margin-top: 0.5rem; text-decoration: none;"
                                    onclick="this.innerHTML = '<i class=\'fa-solid fa-spinner fa-spin\'></i> Redirigiendo a Mercado Pago...'; return true;">
-                                    <i class="fa-solid fa-handshake"></i> Cobrar vía Mercado Pago — ${{ number_format($reservation->balance_due, 2) }}
+                                    <i class="fa-solid fa-handshake"></i> Cobrar vía Mercado Pago — ${{ number_format($mpAmount, 2) }}
                                 </a>
                                 <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.35rem; text-align: center;">Abre Mercado Pago para cobrar con tarjeta/efectivo.</p>
                             @endif
