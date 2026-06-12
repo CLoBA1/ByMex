@@ -4,8 +4,8 @@
 --}}
 @php
 $busMap = [
-    ['operator', '_', 'bus_title', 'stairs', '_'],
-    ['empty', 'empty', 'aisle', '_', '_'],
+    ['bus_title_full'],
+    ['operator', '_', 'empty', 'stairs', '_'],
     [1, 2, 'aisle', 3, 4],
     [5, 6, 'aisle', 7, 8],
     [9, 10, 'aisle', 11, 12],
@@ -91,15 +91,15 @@ $isAdmin = ($mode ?? 'public') === 'admin';
     border: 1px dashed rgba(148,163,184,0.3);
     color: #94a3b8;
 }
-.rbus-title {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.55rem;
+.rbus-title-full {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 0.7rem;
     font-weight: 800;
-    color: var(--primary, #d62828);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
+    color: var(--primary, #d62828);
+    padding: 4px 0 8px 0;
 }
 
 /* Admin overrides */
@@ -115,7 +115,7 @@ $isAdmin = ($mode ?? 'public') === 'admin';
 .admin-bus-map .rbus-door {
     background: #f1f5f9; border-color: #94a3b8; color: #475569;
 }
-.admin-bus-map .rbus-title {
+.admin-bus-map .rbus-title-full {
     color: var(--navy, #0d1b2a);
 }
 </style>
@@ -153,8 +153,8 @@ $isAdmin = ($mode ?? 'public') === 'admin';
             <div class="rbus-aisle"></div>
         @elseif($cell === 'operator')
             <div class="rbus-special rbus-operator"><i class="fa-solid fa-ban"></i><span>OPERADOR</span></div>
-        @elseif($cell === 'bus_title')
-            <div class="rbus-title">{{ $tour->title ?? 'TOUR' }}</div>
+        @elseif($cell === 'bus_title_full')
+            <div class="rbus-title-full">{{ $tour->title ?? 'TOUR' }}</div>
         @elseif($cell === 'stairs')
             <div class="rbus-special rbus-stairs"><i class="fa-solid fa-stairs"></i><span>ESCALERAS</span></div>
         @elseif($cell === 'wc')
