@@ -24,4 +24,13 @@ class BoardingPoint extends Model
     {
         return $this->hasMany(BoardingSubPoint::class)->orderBy('sort_order')->orderBy('name');
     }
+
+    public function tours()
+    {
+        return $this->belongsToMany(
+            Tour::class,
+            'tour_boarding_points'
+        )
+        ->withPivot('departure_time', 'sort_order');
+    }
 }

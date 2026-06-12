@@ -26,4 +26,14 @@ class Tour extends Model
     {
         return $this->hasMany(ReservationSeat::class);
     }
+
+    public function boardingPoints()
+    {
+        return $this->belongsToMany(
+            BoardingPoint::class,
+            'tour_boarding_points'
+        )
+        ->withPivot('departure_time', 'sort_order')
+        ->orderBy('tour_boarding_points.sort_order');
+    }
 }

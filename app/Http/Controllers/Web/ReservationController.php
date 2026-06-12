@@ -57,7 +57,7 @@ class ReservationController extends Controller
 
     public function downloadTicket($token)
     {
-        $reservation = Reservation::with(['tour', 'client', 'seats', 'passengers'])
+        $reservation = Reservation::with(['tour.boardingPoints', 'client', 'seats', 'passengers'])
             ->where('public_token', $token)
             ->firstOrFail();
             

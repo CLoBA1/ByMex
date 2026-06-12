@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Enums\TourStatus;
+use App\Models\BoardingPoint;
+use App\Models\Tour;
 use App\Repositories\Contracts\TourRepositoryInterface;
 use Illuminate\Http\Request;
 
@@ -24,7 +26,8 @@ class TourController extends Controller
 
     public function create()
     {
-        return view('admin.tours.form');
+        $allBoardingPoints = BoardingPoint::where('is_active', true)->orderBy('name')->get();
+        return view('admin.tours.form', compact('allBoardingPoints'));
     }
 
     public function store(Request $request)
@@ -48,7 +51,19 @@ class TourController extends Controller
 
         $validated['requires_passenger_documents'] = $request->has('requires_passenger_documents');
 
-        $this->repository->createTour($validated);
+        $tour = $this->repository->createTour($validated);
+
+        // Sincronizar puntos de abordaje
+        $boardingPointsData = [];
+        foreach ($request->input('boarding_points', []) as $bpId => $data) {
+            if (!empty($data['active'])) {
+                $boardingPointsData[$bpId] = [
+                    'departure_time' => $data['departure_time'] ?? null,
+                    'sort_order'     => $data['sort_order'] ?? 0,
+                ];
+            }
+        }
+        $tour->boardingPoints()->sync($boardingPointsData);
 
         return redirect()->route('admin.tours.index')->with('success', 'Tour creado exitosamente.');
     }
@@ -62,7 +77,9 @@ class TourController extends Controller
     public function edit($id)
     {
         $tour = $this->repository->findTourWithReservations($id);
-        return view('admin.tours.form', compact('tour'));
+        $allBoardingPoints = BoardingPoint::where('is_active', true)->orderBy('name')->get();
+        $tourBoardingPoints = $tour->boardingPoints->keyBy('id');
+        return view('admin.tours.form', compact('tour', 'allBoardingPoints', 'tourBoardingPoints'));
     }
 
     public function update(Request $request, $id)
@@ -90,7 +107,19 @@ class TourController extends Controller
             $validated['image'] = $request->file('image');
         }
 
-        $this->repository->updateTour($id, $validated);
+        $tour = $this->repository->updateTour($id, $validated);
+
+        // Sincronizar puntos de abordaje
+        $boardingPointsData = [];
+        foreach ($request->input('boarding_points', []) as $bpId => $data) {
+            if (!empty($data['active'])) {
+                $boardingPointsData[$bpId] = [
+                    'departure_time' => $data['departure_time'] ?? null,
+                    'sort_order'     => $data['sort_order'] ?? 0,
+                ];
+            }
+        }
+        $tour->boardingPoints()->sync($boardingPointsData);
 
         return redirect()->route('admin.tours.index')->with('success', 'Tour actualizado exitosamente.');
     }

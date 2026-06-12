@@ -114,8 +114,70 @@
                     </div>
                 </div>
 
+                @if(isset($allBoardingPoints) && $allBoardingPoints->count() > 0)
+                <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <h3 style="font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
+                        <i class="fa-solid fa-bus"></i> Puntos de Abordaje y Horarios
+                    </h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+                        Activa los puntos de abordaje disponibles para este tour y define la hora de salida desde cada uno.
+                    </p>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        @foreach($allBoardingPoints as $bp)
+                            @php
+                                $assigned = isset($tourBoardingPoints) ? $tourBoardingPoints->get($bp->id) : null;
+                                $isActive = $assigned !== null;
+                                $depTime  = $assigned ? optional($assigned->pivot)->departure_time : null;
+                                $sortOrd  = $assigned ? optional($assigned->pivot)->sort_order : 0;
+                            @endphp
+                            <div style="background: white; border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                                {{-- Checkbox de activación --}}
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; color: var(--navy); min-width: 200px; cursor: pointer;">
+                                    <input type="checkbox"
+                                           name="boarding_points[{{ $bp->id }}][active]"
+                                           value="1"
+                                           id="bp_active_{{ $bp->id }}"
+                                           {{ $isActive ? 'checked' : '' }}
+                                           onchange="toggleBoardingFields({{ $bp->id }}, this.checked)"
+                                           style="width: 1.1rem; height: 1.1rem;">
+                                    <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: {{ $bp->color_hex }}; margin-right: 4px;"></span>
+                                    {{ $bp->name }}
+                                </label>
+                                {{-- Hora de salida --}}
+                                <div id="bp_fields_{{ $bp->id }}" style="{{ $isActive ? '' : 'display:none;' }} display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                                    <div>
+                                        <label style="font-size: 0.75rem; color: var(--slate-500); display: block; margin-bottom: 0.2rem;">Hora de salida</label>
+                                        <input type="time"
+                                               name="boarding_points[{{ $bp->id }}][departure_time]"
+                                               value="{{ $depTime ? \Carbon\Carbon::parse($depTime)->format('H:i') : '' }}"
+                                               style="padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem;">
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 0.75rem; color: var(--slate-500); display: block; margin-bottom: 0.2rem;">Orden</label>
+                                        <input type="number"
+                                               name="boarding_points[{{ $bp->id }}][sort_order]"
+                                               value="{{ $sortOrd }}"
+                                               min="0" max="99"
+                                               style="padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; width: 70px;">
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
                 <button type="submit" class="btn-action" style="width: 100%; justify-content: center; padding: 1rem; font-size: 1rem;"><i class="fa-solid fa-save"></i> Guardar Tour</button>
             </form>
         </div>
     </div>
 </x-app-layout>
+
+<script>
+function toggleBoardingFields(bpId, checked) {
+    const fields = document.getElementById('bp_fields_' + bpId);
+    if (fields) {
+        fields.style.display = checked ? 'flex' : 'none';
+    }
+}
+</script>

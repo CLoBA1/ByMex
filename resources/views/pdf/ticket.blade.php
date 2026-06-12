@@ -210,11 +210,16 @@
                     <th>Asiento</th>
                     <th>Nombre</th>
                     <th>Categoría</th>
+                    <th>Abordaje</th>
                     <th style="text-align: right;">Tarifa Final</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($reservation->passengers as $p)
+                @php
+                    $bpHorario = $reservation->tour->boardingPoints
+                        ->firstWhere('id', $p->boarding_point_id);
+                @endphp
                 <tr>
                     <td style="text-align: center; font-weight: bold;">{{ str_pad($p->seat_number, 2, '0', STR_PAD_LEFT) }}</td>
                     <td>{{ $p->name }}</td>
@@ -222,6 +227,16 @@
                         {{ $p->passenger_type }}
                         @if($p->benefit_label)
                             <br><small style="color: #666;">({{ $p->benefit_label }})</small>
+                        @endif
+                    </td>
+                    <td>
+                        @if($p->boarding_point_name)
+                            <strong>{{ $p->boarding_point_name }}</strong>
+                            @if($bpHorario && $bpHorario->pivot->departure_time)
+                                <br><small style="color: #555;">🕐 {{ \Carbon\Carbon::parse($bpHorario->pivot->departure_time)->format('h:i A') }}</small>
+                            @endif
+                        @else
+                            —
                         @endif
                     </td>
                     <td style="text-align: right;">
@@ -234,7 +249,7 @@
                 @empty
                 <!-- Fallback para reservaciones muy antiguas sin pasajeros en BD -->
                 <tr>
-                    <td colspan="4" style="text-align: center; font-style: italic; color: #888;">
+                    <td colspan="5" style="text-align: center; font-style: italic; color: #888;">
                         Asientos: 
                         @foreach($reservation->seats as $seat)
                             {{ str_pad($seat->seat_number, 2, '0', STR_PAD_LEFT) }}{{ !$loop->last ? ' - ' : '' }}
