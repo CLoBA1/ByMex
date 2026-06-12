@@ -291,6 +291,21 @@
             
             <form action="{{ route('reservations.store') }}" method="POST">
                 @csrf
+                
+                @if($errors->any())
+                    <div style="background: #fee2e2; border: 1px solid #fca5a5; 
+                                border-radius: 6px; padding: 0.75rem 1rem; 
+                                margin-bottom: 1rem; font-size: 0.85rem; 
+                                color: #991b1b;">
+                        <strong><i class="fa-solid fa-triangle-exclamation"></i> 
+                        Error en la reservación:</strong>
+                        <ul style="margin: 0.5rem 0 0 1rem; padding: 0;">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
                 <input type="hidden" name="tour_id" value="{{ $tour->id }}">
                 <input type="hidden" name="seats" id="selectedSeatsInput" value="">
                 
@@ -383,4 +398,13 @@
         }
     </script>
     <script src="{{ asset('js/tour.js') }}?v={{ filemtime(public_path('js/tour.js')) }}"></script>
+    
+    @if($errors->any())
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('checkoutModal');
+            if (modal) modal.style.display = 'flex';
+        });
+    </script>
+    @endif
 @endsection
