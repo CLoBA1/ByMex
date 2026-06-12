@@ -5,7 +5,7 @@
 @php
 $busMap = [
     ['operator', '_', 'bus_title', 'stairs', '_'],
-    ['empty', 'empty', 'aisle', 'extra_label', '_'],
+    ['empty', 'empty', 'aisle', '_', '_'],
     [1, 2, 'aisle', 3, 4],
     [5, 6, 'aisle', 7, 8],
     [9, 10, 'aisle', 11, 12],
@@ -91,12 +91,6 @@ $isAdmin = ($mode ?? 'public') === 'admin';
     border: 1px dashed rgba(148,163,184,0.3);
     color: #94a3b8;
 }
-.rbus-extra-label {
-    font-size: 0.5rem;
-    color: rgba(250,204,21,0.7);
-    border: 1px dashed rgba(250,204,21,0.3);
-    background: rgba(250,204,21,0.05);
-}
 .rbus-title {
     display: flex;
     align-items: center;
@@ -120,9 +114,6 @@ $isAdmin = ($mode ?? 'public') === 'admin';
 }
 .admin-bus-map .rbus-door {
     background: #f1f5f9; border-color: #94a3b8; color: #475569;
-}
-.admin-bus-map .rbus-extra-label {
-    color: #854d0e; border-color: #eab308; background: #fef9c3;
 }
 .admin-bus-map .rbus-title {
     color: var(--navy, #0d1b2a);
@@ -166,8 +157,6 @@ $isAdmin = ($mode ?? 'public') === 'admin';
             <div class="rbus-title">{{ $tour->title ?? 'TOUR' }}</div>
         @elseif($cell === 'stairs')
             <div class="rbus-special rbus-stairs"><i class="fa-solid fa-stairs"></i><span>ESCALERAS</span></div>
-        @elseif($cell === 'extra_label')
-            <div class="rbus-special rbus-extra-label"><small>Asiento Adicional</small></div>
         @elseif($cell === 'wc')
             <div class="rbus-special rbus-wc"><i class="fa-solid fa-restroom"></i><span>WC</span></div>
         @elseif($cell === 'door')
