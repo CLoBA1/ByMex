@@ -37,9 +37,27 @@ class Client extends Authenticatable
         return $this->reservations()->where('status', \App\Enums\ReservationStatus::PAID)->count();
     }
 
+    public function bonusRequests()
+    {
+        return $this->hasMany(BonusRequest::class);
+    }
+
     public function getBonusesEarnedAttribute()
     {
-        return (int) floor($this->completed_trips_count / self::TRIPS_FOR_BONUS);
+        // Bonos ganados por viajes completados
+        $tripBonuses = (int) floor($this->completed_trips_count / self::TRIPS_FOR_BONUS);
+        
+        // Ajustes manuales aprobados: sumar adds, restar subtracts
+        $manualAdjustments = $this->bonusRequests()
+            ->where('status', 'approved')
+            ->get()
+            ->sum(function ($br) {
+                return $br->adjustment_type === 'subtract' 
+                    ? -$br->requested_bonus_count 
+                    :  $br->requested_bonus_count;
+            });
+        
+        return max(0, $tripBonuses + $manualAdjustments);
     }
 
     public function getAvailableBonusesAttribute()

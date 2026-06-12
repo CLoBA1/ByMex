@@ -155,6 +155,97 @@
         </div>
     @endif
 
+    <!-- Gestión de Bonificaciones -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fa-solid fa-gift"></i> Gestión de Bonificaciones</h3>
+        </div>
+        <div class="card-body" style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+            <!-- Formulario de Ajuste Manual -->
+            <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem;">
+                <h4 style="font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem;">Ajuste Manual de Bonos</h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Bonos disponibles: <strong>{{ $client->available_bonuses }}</strong></p>
+
+                <form action="{{ route('admin.clients.bonus', $client->id) }}" method="POST">
+                    @csrf
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--navy);">Tipo de ajuste</label>
+                        <select name="adjustment_type" required style="width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px;">
+                            <option value="add">➕ Agregar bonos</option>
+                            <option value="subtract">➖ Quitar bonos</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--navy);">Cantidad</label>
+                        <input type="number" name="requested_bonus_count" min="1" max="100" required value="1" style="width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px;">
+                    </div>
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--navy);">Motivo / Nota (Opcional)</label>
+                        <input type="text" name="admin_notes" placeholder="Ej: Premio especial, Corrección, etc." style="width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px;">
+                    </div>
+                    <button type="submit" class="btn-action" style="width: 100%; justify-content: center;"><i class="fa-solid fa-save"></i> Aplicar Ajuste</button>
+                </form>
+            </div>
+
+            <!-- Historial de Movimientos -->
+            <div>
+                <h4 style="font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem;">Historial de Movimientos</h4>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th style="text-align: center;">Cantidad</th>
+                                <th>Motivo / Notas Admin</th>
+                                <th style="text-align: center;">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($client->bonusRequests()->orderByDesc('created_at')->get() as $br)
+                                <tr>
+                                    <td style="font-size: 0.85rem; color: var(--text-muted);">{{ $br->created_at->format('d/m/Y H:i') }}</td>
+                                    <td>
+                                        @if($br->adjustment_type === 'add')
+                                            <span style="color: #16a34a; font-weight: 600;"><i class="fa-solid fa-plus"></i> Agregado</span>
+                                        @elseif($br->adjustment_type === 'subtract')
+                                            <span style="color: #ef4444; font-weight: 600;"><i class="fa-solid fa-minus"></i> Descontado</span>
+                                        @else
+                                            <span style="color: #3b82f6; font-weight: 600;"><i class="fa-solid fa-trophy"></i> Por viaje / Canje</span>
+                                        @endif
+                                    </td>
+                                    <td style="text-align: center; font-weight: 700;">
+                                        @if($br->adjustment_type === 'subtract')
+                                            <span style="color: #ef4444;">-{{ $br->requested_bonus_count }}</span>
+                                        @else
+                                            <span style="color: #16a34a;">+{{ $br->requested_bonus_count }}</span>
+                                        @endif
+                                    </td>
+                                    <td style="font-size: 0.85rem;">{{ $br->admin_notes ?: ($br->client_notes ?: '—') }}</td>
+                                    <td style="text-align: center;">
+                                        @php
+                                            $bBg = '#f1f5f9'; $bCol = '#64748b'; $bTxt = ucfirst($br->status);
+                                            if($br->status === 'approved') { $bBg = '#dcfce7'; $bCol = '#166534'; }
+                                            elseif($br->status === 'pending') { $bBg = '#fef08a'; $bCol = '#854d0e'; }
+                                            elseif($br->status === 'rejected') { $bBg = '#fee2e2'; $bCol = '#991b1b'; }
+                                        @endphp
+                                        <span style="background: {{ $bBg }}; color: {{ $bCol }}; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">{{ $bTxt }}</span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted); font-style: italic;">
+                                        Sin movimientos de bonificaciones aún.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div style="display: grid; grid-template-columns: 1fr; gap: 2rem;">
         <!-- Contact Info -->
         <div class="card" style="margin-bottom: 0;">

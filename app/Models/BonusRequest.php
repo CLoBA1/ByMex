@@ -10,6 +10,7 @@ class BonusRequest extends Model
         'client_id',
         'request_type',
         'requested_bonus_count',
+        'adjustment_type',
         'status',
         'client_notes',
         'admin_notes',

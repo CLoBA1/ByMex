@@ -111,4 +111,36 @@ class ClientController extends Controller
 
         return redirect()->back()->with('success', $msg);
     }
+    public function storeBonus(\Illuminate\Http\Request $request, $id)
+    {
+        $client = Client::findOrFail($id);
+        
+        $request->validate([
+            'adjustment_type'      => 'required|in:add,subtract',
+            'requested_bonus_count'=> 'required|integer|min:1|max:100',
+            'admin_notes'          => 'nullable|string|max:500',
+        ]);
+
+        // Verificar que no quede en negativo al restar
+        if ($request->adjustment_type === 'subtract') {
+            if ($request->requested_bonus_count > $client->available_bonuses) {
+                return back()->with('error', 
+                    'No se pueden quitar más bonos de los disponibles. 
+                    El cliente tiene ' . $client->available_bonuses . ' bono(s).');
+            }
+        }
+
+        \App\Models\BonusRequest::create([
+            'client_id'             => $client->id,
+            'request_type'          => 'Ajuste manual',
+            'adjustment_type'       => $request->adjustment_type,
+            'requested_bonus_count' => $request->requested_bonus_count,
+            'status'                => 'approved',
+            'admin_notes'           => $request->admin_notes ?? null,
+        ]);
+
+        $accion = $request->adjustment_type === 'add' ? 'agregados' : 'quitados';
+        return back()->with('success', 
+            $request->requested_bonus_count . ' bono(s) ' . $accion . ' correctamente.');
+    }
 }
