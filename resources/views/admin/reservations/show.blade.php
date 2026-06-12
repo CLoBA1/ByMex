@@ -35,12 +35,27 @@
                 }
                 
                 if ($cleanPhone) {
+                    $statusLabels = [
+                        'pending'   => 'Pendiente',
+                        'partial'   => 'Anticipo',
+                        'paid'      => 'Pagado',
+                        'cancelled' => 'Cancelado',
+                    ];
+                    $statusLabel = $statusLabels[$reservation->status->value] ?? ucfirst($reservation->status->value);
+
+                    $lastNote = $reservation->payments()
+                        ->whereNotNull('notes')
+                        ->where('notes', '!=', '')
+                        ->latest()
+                        ->value('notes');
+
                     $waMessage = "Hola {$reservation->client->name}, te compartimos tu ticket de reservación de Viajes By Mex.\n\n"
                                . "Reservación: RES-" . str_pad($reservation->id, 4, '0', STR_PAD_LEFT) . "\n"
                                . "Destino: {$reservation->tour->destination}\n"
-                               . "Estado: " . ucfirst($reservation->status->value) . "\n"
+                               . "Estado: {$statusLabel}\n"
                                . "Total: $" . number_format($reservation->total_amount, 2) . "\n"
-                               . "Saldo pendiente: $" . number_format($reservation->balance_due, 2) . "\n\n"
+                               . "Saldo pendiente: $" . number_format($reservation->balance_due, 2) . "\n"
+                               . ($lastNote ? "Concepto último abono: {$lastNote}\n\n" : "\n")
                                . "Descarga tu ticket aquí:\n"
                                . route('reservations.ticket', $reservation->public_token) . "\n\n"
                                . "Gracias por viajar con Viajes By Mex.";
