@@ -3,7 +3,12 @@
 
     <div class="card">
         <div class="card-header">
-            <h2 class="card-title"><i class="fa-solid fa-users"></i> Historial de Clientes</h2>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <h2 class="card-title" style="margin: 0;"><i class="fa-solid fa-users"></i> Historial de Clientes</h2>
+                <a href="{{ route('admin.clients.create') }}" class="btn-action" style="background: var(--navy); color: white; border: none; text-decoration: none; padding: 0.4rem 1rem; font-size: 0.9rem;">
+                    <i class="fa-solid fa-plus"></i> Nuevo Cliente
+                </a>
+            </div>
             <div class="search-box">
                 <input type="text" placeholder="Buscar cliente..." style="padding: .5rem 1rem; border: 1px solid var(--border); border-radius: 6px; width: 250px;">
             </div>

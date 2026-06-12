@@ -15,6 +15,33 @@ class ClientController extends Controller
         return view('admin.clients.index', compact('clients'));
     }
 
+    public function create()
+    {
+        return view('admin.clients.create');
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name'              => 'required|string|max:150',
+            'phone'             => 'required|string|max:20|unique:clients,phone',
+            'whatsapp'          => 'nullable|string|max:20',
+            'email'             => 'nullable|email|max:100',
+            'birthdate'         => 'nullable|date',
+            'curp'              => 'nullable|string|max:18',
+            'origin_city'       => 'nullable|string|max:100',
+            'emergency_contact' => 'nullable|string|max:150',
+        ]);
+
+        Client::create($request->only([
+            'name', 'phone', 'whatsapp', 'email',
+            'birthdate', 'curp', 'origin_city', 'emergency_contact'
+        ]));
+
+        return redirect()->route('admin.clients.index')
+            ->with('success', 'Cliente registrado correctamente.');
+    }
+
     public function show($id)
     {
         $client = Client::with(['reservations.tour', 'reservations.payments'])->findOrFail($id);
