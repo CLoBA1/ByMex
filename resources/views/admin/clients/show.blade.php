@@ -126,20 +126,7 @@
                         {{ $client->available_bonuses }} <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">Bonos Activos</span>
                     </div>
                     
-                    @if($client->available_bonuses == 0 || true)
-                        <div style="margin-top: 0.5rem;">
-                            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">
-                                <span>Avance (Completados)</span>
-                                <strong>{{ $client->next_bonus_progress }} / {{ \App\Models\Client::TRIPS_FOR_BONUS }}</strong>
-                            </div>
-                            <div style="width: 100%; background: #e2e8f0; border-radius: 4px; height: 6px; overflow: hidden;">
-                                @php
-                                    $percentage = ($client->next_bonus_progress / \App\Models\Client::TRIPS_FOR_BONUS) * 100;
-                                @endphp
-                                <div style="background: #eab308; width: {{ $percentage }}%; height: 100%; transition: width 0.5s;"></div>
-                            </div>
-                        </div>
-                    @endif
+                    <!-- Barra de progreso eliminada -->
                 </div>
             </div>
         </div>

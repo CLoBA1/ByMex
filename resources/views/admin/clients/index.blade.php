@@ -71,15 +71,9 @@
                                             <i class="fa-solid fa-gift"></i> {{ $client->available_bonuses }} Disponible(s)
                                         </span>
                                     @else
-                                        <div style="font-size: 0.8rem; color: var(--slate-500); font-weight: 600;">
-                                            {{ $client->next_bonus_progress }} / {{ \App\Models\Client::TRIPS_FOR_BONUS }} viajes
-                                        </div>
-                                        <div style="width: 100%; background-color: #e2e8f0; border-radius: 4px; height: 6px; margin-top: 4px;">
-                                            @php
-                                                $percentage = ($client->next_bonus_progress / \App\Models\Client::TRIPS_FOR_BONUS) * 100;
-                                            @endphp
-                                            <div style="background-color: var(--primary); height: 6px; border-radius: 4px; width: {{ $percentage }}%;"></div>
-                                        </div>
+                                        <span style="font-size: 0.8rem; color: var(--slate-500); font-style: italic;">
+                                            0 Disponibles
+                                        </span>
                                     @endif
                                 </td>
                                 <td style="text-align: right; font-weight: 700; color: #166534;">
