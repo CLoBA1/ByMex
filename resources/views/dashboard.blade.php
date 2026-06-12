@@ -91,6 +91,7 @@
             </div>
         </div>
 
+        {{--
         <div class="card" style="margin-bottom: 0;">
             <div class="card-body" style="padding: 1.25rem;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -104,6 +105,7 @@
                 </div>
             </div>
         </div>
+        --}}
 
         <div class="card" style="margin-bottom: 0;">
             <div class="card-body" style="padding: 1.25rem;">
