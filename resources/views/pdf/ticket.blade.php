@@ -230,8 +230,8 @@
                         @endif
                     </td>
                     <td>
-                        @if($p->boarding_point_name)
-                            <strong>{{ $p->boarding_point_name }}</strong>
+                        @if($p->boardingPoint)
+                            <strong>{{ $p->boardingPoint->name }}</strong>
                             @if($bpHorario && $bpHorario->pivot->departure_time)
                                 <br><small style="color: #555;">🕐 {{ \Carbon\Carbon::parse($bpHorario->pivot->departure_time)->format('h:i A') }}</small>
                             @endif
