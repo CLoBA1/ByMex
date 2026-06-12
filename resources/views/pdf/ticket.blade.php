@@ -11,6 +11,7 @@
             margin: 0;
             padding: 0;
             background: #fff;
+            font-size: 13px;
         }
         .ticket-wrapper {
             width: 100%;
@@ -120,7 +121,7 @@
         }
         table.passengers-table th, table.passengers-table td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 6px 4px;
             text-align: left;
             font-size: 13px;
         }
@@ -128,6 +129,7 @@
             background-color: #f8f9fa;
             color: #555;
             text-transform: uppercase;
+            font-size: 11px;
         }
         .note-alert {
             background-color: #fff3cd;
@@ -194,9 +196,9 @@
         <div class="grid">
             <div class="col-left" style="width: 100%;">
                 <div class="section-title">Detalles del Viaje</div>
-                <div class="info-block" style="font-size: 12px; line-height: 1.8;">
+                <div class="info-block" style="font-size: 13px; line-height: 2;">
                     <div style="padding: 4px 0;">
-                        <strong style="font-size: 11px; font-weight: bold;">Destino:</strong> 
+                        <strong style="font-size: 12px; font-weight: bold;">Destino:</strong> 
                         <span style="font-size: 16px; font-weight: bold; color: #333;">{{ $reservation->tour->title }}</span>
                     </div>
                     
@@ -218,11 +220,11 @@
 
                     @if($puntosHastaCliente->isNotEmpty())
                         <div style="padding: 4px 0;">
-                            <strong style="font-size: 11px; font-weight: bold;">Fecha:</strong> 
+                            <strong style="font-size: 12px; font-weight: bold;">Fecha:</strong> 
                             {{ \Carbon\Carbon::parse($reservation->tour->departure_date)->locale('es')->isoFormat('D [de] MMMM YYYY') }}
                         </div>
                         <div style="padding: 4px 0;">
-                            <strong style="font-size: 11px; font-weight: bold;">Salida:</strong> 
+                            <strong style="font-size: 12px; font-weight: bold;">Salida:</strong> 
                             @foreach($puntosHastaCliente as $bp)
                                 {{ $bp->name }}
                                 @if($bp->pivot->departure_time)
@@ -233,13 +235,13 @@
                         </div>
                     @else
                         <div style="padding: 4px 0;">
-                            <strong style="font-size: 11px; font-weight: bold;">Salida:</strong> 
+                            <strong style="font-size: 12px; font-weight: bold;">Salida:</strong> 
                             {{ \Carbon\Carbon::parse($reservation->tour->departure_date)->locale('es')->isoFormat('D [de] MMMM YYYY - H:i') }} hrs
                         </div>
                     @endif
                     
                     <div style="padding: 4px 0;">
-                        <strong style="font-size: 11px; font-weight: bold;">Vencimiento:</strong> 
+                        <strong style="font-size: 12px; font-weight: bold;">Vencimiento:</strong> 
                         Tienes hasta el {{ \Carbon\Carbon::parse($reservation->expires_at)->format('d/m/Y H:i') }} para realizar tu anticipo.
                     </div>
                 </div>
@@ -312,7 +314,7 @@
         @endif
 
         <div style="width: 100%; text-align: right; margin-bottom: 20px;">
-            <table style="width: 300px; float: right; font-size: 14px; border-collapse: collapse;">
+            <table style="width: 300px; float: right; font-size: 15px; border-collapse: collapse;">
                 <tr>
                     <td style="padding: 5px; color: #555;">Subtotal:</td>
                     <td style="padding: 5px; text-align: right;">${{ number_format($reservation->subtotal ?? $reservation->total_amount, 2) }}</td>
@@ -328,12 +330,12 @@
                     <td style="padding: 10px; text-align: right; border-radius: 0 5px 5px 0;">${{ number_format($reservation->total_amount, 2) }} MXN</td>
                 </tr>
                 <tr>
-                    <td style="padding: 5px; color: #555; font-size: 13px;">Anticipo / Pagado:</td>
-                    <td style="padding: 5px; text-align: right; font-size: 13px;">${{ number_format($reservation->total_amount - $reservation->balance_due, 2) }}</td>
+                    <td style="padding: 5px; color: #555; font-size: 14px;">Anticipo / Pagado:</td>
+                    <td style="padding: 5px; text-align: right; font-size: 14px;">${{ number_format($reservation->total_amount - $reservation->balance_due, 2) }}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 5px; color: #555; font-size: 13px; font-weight: bold;">Saldo Pendiente:</td>
-                    <td style="padding: 5px; text-align: right; font-size: 13px; font-weight: bold;">${{ number_format($reservation->balance_due, 2) }}</td>
+                    <td style="padding: 5px; color: #555; font-size: 14px; font-weight: bold;">Saldo Pendiente:</td>
+                    <td style="padding: 5px; text-align: right; font-size: 14px; font-weight: bold;">${{ number_format($reservation->balance_due, 2) }}</td>
                 </tr>
             </table>
         <div class="clear"></div>
