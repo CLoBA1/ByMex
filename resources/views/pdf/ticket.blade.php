@@ -194,9 +194,11 @@
         <div class="grid">
             <div class="col-left" style="width: 100%;">
                 <div class="section-title">Detalles del Viaje</div>
-                <div class="info-block">
-                    <strong>Destino:</strong> <span style="font-size: 16px; font-weight: bold;">{{ $reservation->tour->title }}</span><br>
-                    <strong>Salida:</strong> {{ \Carbon\Carbon::parse($reservation->tour->departure_date)->format('d/m/Y H:i') }} hrs<br>
+                <div class="info-block" style="font-size: 12px; line-height: 1.8;">
+                    <div style="padding: 4px 0;">
+                        <strong style="font-size: 11px; font-weight: bold;">Destino:</strong> 
+                        <span style="font-size: 16px; font-weight: bold; color: #333;">{{ $reservation->tour->title }}</span>
+                    </div>
                     
                     @php
                         $boardingPointsOrdenados = $reservation->tour->boardingPoints->sortBy('pivot.sort_order');
@@ -215,17 +217,31 @@
                     @endphp
 
                     @if($puntosHastaCliente->isNotEmpty())
-                        <strong>Salidas:</strong> 
-                        @foreach($puntosHastaCliente as $bp)
-                            {{ $bp->name }}
-                            @if($bp->pivot->departure_time)
-                                {{ \Carbon\Carbon::parse($bp->pivot->departure_time)->format('H:i') }} hrs
-                            @endif
-                            @if(!$loop->last) → @endif
-                        @endforeach
-                        <br>
+                        <div style="padding: 4px 0;">
+                            <strong style="font-size: 11px; font-weight: bold;">Fecha:</strong> 
+                            {{ \Carbon\Carbon::parse($reservation->tour->departure_date)->locale('es')->isoFormat('D [de] MMMM YYYY') }}
+                        </div>
+                        <div style="padding: 4px 0;">
+                            <strong style="font-size: 11px; font-weight: bold;">Salida:</strong> 
+                            @foreach($puntosHastaCliente as $bp)
+                                {{ $bp->name }}
+                                @if($bp->pivot->departure_time)
+                                    {{ \Carbon\Carbon::parse($bp->pivot->departure_time)->format('H:i') }} hrs
+                                @endif
+                                @if(!$loop->last) &gt; @endif
+                            @endforeach
+                        </div>
+                    @else
+                        <div style="padding: 4px 0;">
+                            <strong style="font-size: 11px; font-weight: bold;">Salida:</strong> 
+                            {{ \Carbon\Carbon::parse($reservation->tour->departure_date)->locale('es')->isoFormat('D [de] MMMM YYYY - H:i') }} hrs
+                        </div>
                     @endif
-                    <strong>Vencimiento:</strong> Tienes hasta el {{ \Carbon\Carbon::parse($reservation->expires_at)->format('d/m/Y H:i') }} para realizar tu anticipo.
+                    
+                    <div style="padding: 4px 0;">
+                        <strong style="font-size: 11px; font-weight: bold;">Vencimiento:</strong> 
+                        Tienes hasta el {{ \Carbon\Carbon::parse($reservation->expires_at)->format('d/m/Y H:i') }} para realizar tu anticipo.
+                    </div>
                 </div>
             </div>
             <div class="clear"></div>
