@@ -197,6 +197,34 @@
                 <div class="info-block">
                     <strong>Destino:</strong> <span style="font-size: 16px; font-weight: bold;">{{ $reservation->tour->title }}</span><br>
                     <strong>Salida:</strong> {{ \Carbon\Carbon::parse($reservation->tour->departure_date)->format('d/m/Y H:i') }} hrs<br>
+                    
+                    @php
+                        $boardingPointsOrdenados = $reservation->tour->boardingPoints->sortBy('pivot.sort_order');
+                        
+                        $maxSortOrder = $reservation->passengers
+                            ->map(fn($p) => 
+                                $reservation->tour->boardingPoints
+                                    ->firstWhere('id', $p->boarding_point_id)
+                                    ?->pivot->sort_order ?? 0
+                            )->max();
+
+                        $puntosHastaCliente = $boardingPointsOrdenados
+                            ->filter(fn($bp) => 
+                                $bp->pivot->sort_order <= $maxSortOrder
+                            );
+                    @endphp
+
+                    @if($puntosHastaCliente->isNotEmpty())
+                        <strong>Salidas:</strong> 
+                        @foreach($puntosHastaCliente as $bp)
+                            {{ $bp->name }}
+                            @if($bp->pivot->departure_time)
+                                {{ \Carbon\Carbon::parse($bp->pivot->departure_time)->format('H:i') }} hrs
+                            @endif
+                            @if(!$loop->last) → @endif
+                        @endforeach
+                        <br>
+                    @endif
                     <strong>Vencimiento:</strong> Tienes hasta el {{ \Carbon\Carbon::parse($reservation->expires_at)->format('d/m/Y H:i') }} para realizar tu anticipo.
                 </div>
             </div>
@@ -232,8 +260,8 @@
                     <td>
                         @if($p->boardingPoint)
                             <strong>{{ $p->boardingPoint->name }}</strong>
-                            @if($bpHorario && $bpHorario->pivot->departure_time)
-                                <br><small style="color: #555;">🕐 {{ \Carbon\Carbon::parse($bpHorario->pivot->departure_time)->format('h:i A') }}</small>
+                            @if($p->boardingSubPoint)
+                                <br><small>↳ {{ $p->boardingSubPoint->name }}</small>
                             @endif
                         @else
                             —
