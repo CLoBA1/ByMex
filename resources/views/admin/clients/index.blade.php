@@ -10,7 +10,7 @@
                 </a>
             </div>
             <div class="search-box">
-                <input type="text" placeholder="Buscar cliente..." style="padding: .5rem 1rem; border: 1px solid var(--border); border-radius: 6px; width: 250px;">
+                <input type="text" id="clientSearch" placeholder="Buscar cliente..." style="padding: .5rem 1rem; border: 1px solid var(--border); border-radius: 6px; width: 250px;">
             </div>
         </div>
         <div class="card-body" style="padding: 0;">
@@ -107,4 +107,49 @@
             </div>
         </div>
     </div>
+
+<script>
+document.getElementById('clientSearch')
+    .addEventListener('input', function () {
+        const query = this.value.toLowerCase().trim();
+        const rows = document.querySelectorAll('.data-table tbody tr');
+
+        rows.forEach(function (row) {
+            // Ignorar la fila de "no hay clientes"
+            if (row.querySelector('td[colspan]')) {
+                row.style.display = '';
+                return;
+            }
+            // Buscar en: nombre, teléfono, email, 
+            // membresía y ciudad de origen
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(query) ? '' : 'none';
+        });
+
+        // Si no hay resultados visibles, mostrar mensaje
+        const visibleRows = [...rows].filter(r => 
+            !r.querySelector('td[colspan]') && 
+            r.style.display !== 'none'
+        );
+        const tbody = document.querySelector('.data-table tbody');
+        const noResults = document.getElementById('no-search-results');
+        
+        if (visibleRows.length === 0 && query !== '') {
+            if (!noResults) {
+                const tr = document.createElement('tr');
+                tr.id = 'no-search-results';
+                tr.innerHTML = `<td colspan="8" style="text-align:center; 
+                    padding: 2rem; color: var(--text-muted);">
+                    <i class="fa-solid fa-magnifying-glass" 
+                       style="font-size:1.5rem; display:block; 
+                              margin-bottom:0.5rem;"></i>
+                    Sin resultados para "<strong>${this.value}</strong>"
+                </td>`;
+                tbody.appendChild(tr);
+            }
+        } else {
+            if (noResults) noResults.remove();
+        }
+    });
+</script>
 </x-app-layout>
