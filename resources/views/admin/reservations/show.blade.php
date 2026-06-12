@@ -459,6 +459,7 @@
                                 'status' => $pay->status,
                                 'notes'  => !empty($noteParts) ? implode(' | ', $noteParts) : 'Pago manual',
                                 'user'   => $pay->approvedBy ? $pay->approvedBy->name : 'Sistema (Webhook)',
+                                'db_notes' => $pay->notes,
                             ]);
                         }
 
@@ -559,6 +560,11 @@
                                                 {{ $amountPrefix }}${{ number_format($mov['amount'], 2) }}
                                             @else
                                                 <span style="color: var(--text-muted);">—</span>
+                                            @endif
+                                            @if($mov['kind'] === 'payment' && !empty($mov['db_notes']))
+                                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; font-weight: normal;">
+                                                    📝 {{ $mov['db_notes'] }}
+                                                </div>
                                             @endif
                                         </td>
                                         <td>
@@ -729,13 +735,14 @@
                             <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem;">Registrar Abono Manual</h4>
                             
                             <!-- Formulario de Abono Parcial/Total -->
-                            <form action="{{ route('admin.reservations.payment', $reservation->id) }}" method="POST" style="display: flex; gap: 0.5rem; align-items: stretch; margin-bottom: 1rem;">
+                            <form action="{{ route('admin.reservations.payment', $reservation->id) }}" method="POST" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
                                 @csrf
-                                <div style="position: relative; flex: 1;">
+                                <div style="position: relative; width: 100%;">
                                     <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted);">$</span>
                                     <input type="number" name="amount" step="0.01" min="1" max="{{ $reservation->balance_due }}" required placeholder="Monto a abonar" style="width: 100%; padding: 0.5rem 0.5rem 0.5rem 1.5rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem;">
                                 </div>
-                                <button type="submit" class="btn-action" style="background: var(--navy); border: none;" onclick="return confirm('¿Registrar este abono manual?')">
+                                <input type="text" name="notes" placeholder="Ej: Promoción, Vale, Descuento..." style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem;">
+                                <button type="submit" class="btn-action" style="background: var(--navy); border: none; justify-content: center;" onclick="return confirm('¿Registrar este abono manual?')">
                                     <i class="fa-solid fa-plus"></i> Abonar
                                 </button>
                             </form>

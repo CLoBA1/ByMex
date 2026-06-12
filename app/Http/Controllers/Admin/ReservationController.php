@@ -253,6 +253,7 @@ class ReservationController extends Controller
 
         $request->validate([
             'amount' => 'required|numeric|min:0.01',
+            'notes' => 'nullable|string|max:500',
         ]);
 
         $notificationData = null;
@@ -261,6 +262,7 @@ class ReservationController extends Controller
             \App\Models\Payment::create([
                 'reservation_id' => $reservation->id,
                 'amount' => $request->amount,
+                'notes' => $request->notes ?? null,
                 'status' => 'approved',
                 'approved_by' => auth()->id(),
             ]);
