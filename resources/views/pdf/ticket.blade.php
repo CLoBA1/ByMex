@@ -333,6 +333,21 @@
                     <td style="padding: 5px; color: #555; font-size: 14px;">Anticipo / Pagado:</td>
                     <td style="padding: 5px; text-align: right; font-size: 14px;">${{ number_format($reservation->total_amount - $reservation->balance_due, 2) }}</td>
                 </tr>
+                @php
+                    $pagosConNota = $reservation->payments
+                        ->where('status', 'approved')
+                        ->whereNotNull('notes')
+                        ->where('notes', '!=', '');
+                @endphp
+                @if($pagosConNota->isNotEmpty())
+                    @foreach($pagosConNota as $pago)
+                    <tr>
+                        <td colspan="2" style="padding: 3px 5px; font-size: 11px; color: #666; font-style: italic; text-align: right;">
+                            📝 {{ \Carbon\Carbon::parse($pago->uploaded_at ?? $pago->created_at)->format('d/m/Y') }} — {{ $pago->notes }}
+                        </td>
+                    </tr>
+                    @endforeach
+                @endif
                 <tr>
                     <td style="padding: 5px; color: #555; font-size: 14px; font-weight: bold;">Saldo Pendiente:</td>
                     <td style="padding: 5px; text-align: right; font-size: 14px; font-weight: bold;">${{ number_format($reservation->balance_due, 2) }}</td>

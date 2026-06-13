@@ -338,7 +338,7 @@ class ReservationController extends Controller
 
     public function downloadTicket($id)
     {
-        $reservation = Reservation::with(['tour', 'client', 'seats', 'passengers'])->findOrFail($id);
+        $reservation = Reservation::with(['tour.boardingPoints', 'client', 'seats', 'passengers', 'payments'])->findOrFail($id);
         $paymentSettings = \App\Models\PaymentSetting::first();
         $activeBanks = \App\Models\BankAccount::where('is_active', true)->orderBy('sort_order')->get();
 
