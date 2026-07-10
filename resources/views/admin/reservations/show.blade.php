@@ -258,7 +258,20 @@
                         <tbody>
                             @forelse($reservation->passengers as $passenger)
                                 <tr style="{{ $passenger->status->value == 'cancelled' ? 'opacity: 0.6; background-color: #f8fafc;' : '' }}">
-                                    <td style="font-weight: 700; color: var(--navy); {{ $passenger->status->value == 'cancelled' ? 'text-decoration: line-through;' : '' }}">{{ $passenger->seat_number }}</td>
+                                    <td style="font-weight: 700; color: var(--navy); {{ $passenger->status->value == 'cancelled' ? 'text-decoration: line-through;' : '' }}">
+                                        {{ $passenger->seat_number }}
+                                        @if($passenger->status->value !== 'cancelled')
+                                            <div style="margin-top: 0.5rem; font-weight: normal;">
+                                                <form action="{{ route('admin.passengers.seat', $passenger->id) }}" method="POST" style="display: flex; gap: 4px; align-items: center;">
+                                                    @csrf
+                                                    <input type="number" name="seat_number" value="{{ $passenger->seat_number }}" min="1" required style="width: 50px; padding: 2px 4px; font-size: 0.8rem; border: 1px solid var(--border); border-radius: 4px;">
+                                                    <button type="submit" class="btn-action" style="padding: 2px 4px; font-size: 0.75rem; background: var(--slate-100); color: var(--navy); border: 1px solid var(--border);" title="Cambiar asiento">
+                                                        <i class="fa-solid fa-save"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        @endif
+                                    </td>
                                     <td>{{ $passenger->name }}</td>
                                     <td>
                                         <div>{{ ucfirst($passenger->passenger_type) }}</div>

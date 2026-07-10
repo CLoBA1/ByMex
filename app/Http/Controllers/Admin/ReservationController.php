@@ -531,4 +531,52 @@ class ReservationController extends Controller
 
         return Storage::disk('public')->download($doc->file_path, $doc->original_name);
     }
+    public function updateSeat(\Illuminate\Http\Request $request, $id)
+    {
+        $request->validate([
+            'seat_number' => 'required|integer|min:1',
+        ]);
+
+        $passenger = \App\Models\ReservationPassenger::findOrFail($id);
+        
+        if ($passenger->status->value === 'cancelled') {
+            return back()->with('error', 'No se puede cambiar el asiento de un pasajero cancelado.');
+        }
+
+        $nuevoAsiento = $request->seat_number;
+        
+        if ($nuevoAsiento == $passenger->seat_number) {
+            return back()->with('info', 'El asiento es el mismo, no hubo cambios.');
+        }
+
+        // Verificar si está ocupado en el mismo tour (ignorando la reserva actual)
+        $isOccupied = \App\Models\ReservationSeat::where('tour_id', $passenger->reservation->tour_id)
+            ->where('seat_number', $nuevoAsiento)
+            ->where('reservation_id', '!=', $passenger->reservation_id)
+            ->exists();
+
+        if ($isOccupied) {
+            return back()->with('error', "El asiento $nuevoAsiento ya está ocupado por otra reservación.");
+        }
+
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($passenger, $nuevoAsiento) {
+                // Actualizar la tabla pivot de ReservationSeat
+                \App\Models\ReservationSeat::where('reservation_id', $passenger->reservation_id)
+                    ->where('seat_number', $passenger->seat_number)
+                    ->update(['seat_number' => $nuevoAsiento]);
+
+                // Actualizar el pasajero
+                $passenger->seat_number = $nuevoAsiento;
+                $passenger->save();
+            });
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->errorInfo[1] == 1062 || $e->getCode() == 23000) {
+                return back()->with('error', "Error de concurrencia: el asiento $nuevoAsiento fue ocupado en este instante.");
+            }
+            throw $e;
+        }
+
+        return back()->with('success', "Asiento actualizado a $nuevoAsiento correctamente.");
+    }
 }
