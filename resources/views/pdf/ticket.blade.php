@@ -261,7 +261,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($reservation->passengers as $p)
+                @forelse($reservation->passengers->where('status', '!=', 'cancelled') as $p)
                 @php
                     $bpHorario = $reservation->tour->boardingPoints
                         ->firstWhere('id', $p->boarding_point_id);
@@ -343,7 +343,7 @@
                     @foreach($pagosConNota as $pago)
                     <tr>
                         <td colspan="2" style="padding: 3px 5px; font-size: 11px; color: #666; font-style: italic; text-align: right;">
-                            📝 {{ \Carbon\Carbon::parse($pago->uploaded_at ?? $pago->created_at)->format('d/m/Y') }} — {{ $pago->notes }}
+                            * {{ \Carbon\Carbon::parse($pago->uploaded_at ?? $pago->created_at)->format('d/m/Y') }} — {{ $pago->notes }}
                         </td>
                     </tr>
                     @endforeach

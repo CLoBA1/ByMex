@@ -50,7 +50,7 @@ class TourPassengersController extends Controller
             ]);
 
             // 2. Pasajeros adicionales
-            foreach ($reservation->passengers as $passenger) {
+            foreach ($reservation->passengers->where('status', '!=', 'cancelled') as $passenger) {
                 $allPassengers->push((object)[
                     'id'                  => $passenger->id,
                     'name'                => trim($passenger->name . ' ' . ($passenger->last_name ?? '')),
