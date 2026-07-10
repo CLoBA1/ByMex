@@ -34,7 +34,7 @@
             @endif
             @if($client->whatsapp && $client->membership_number && $client->password && $client->temp_password)
                 @php
-                    $waMessage = "Hola {$client->name}, tus datos de acceso a ByMex Club son:\n🎫 Membresía: {$client->membership_number}\n📱 Usuario: {$client->whatsapp}\n🔑 Contraseña: {$client->temp_password}\n🌐 Ingresa en: https://viajesbymex.com/mi-cuenta\n¡Bienvenido al club! 🎉";
+                    $waMessage = "Hola {$client->name}, tus datos de acceso a ByMex Club son:\n🎫 Membresía: {$client->membership_number}\n📱 Usuario: {$client->whatsapp}\n🔑 Contraseña: {$client->temp_password}\n🌐 Ingresa en: " . route('client.login') . "\n¡Bienvenido al club! 🎉";
                     $waNumber = preg_replace('/[^0-9]/', '', $client->whatsapp);
                     $waLink = 'https://wa.me/' . $waNumber . '?text=' . rawurlencode($waMessage);
                 @endphp

@@ -11,6 +11,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->redirectGuestsTo(function (\Illuminate\Http\Request $request) {
+            if ($request->is('mi-cuenta') || $request->is('mi-cuenta/*')) {
+                return route('client.login');
+            }
+            return route('login');
+        });
+
         $middleware->validateCsrfTokens(except: [
             'stripe/webhook',
             'mercadopago/webhook',
