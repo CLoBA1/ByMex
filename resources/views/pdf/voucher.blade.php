@@ -129,7 +129,7 @@
                     <br><strong>Ref:</strong> {{ substr($payment->stripe_session_id, -12) }}
                 @endif
                 @if(!empty($payment->notes))
-                    <br><strong>Concepto:</strong> <span style="font-style: italic;">📝 {{ $payment->notes }}</span>
+                    <br><strong>Concepto:</strong> <span style="font-style: italic;">* {{ $payment->notes }}</span>
                 @endif
             </div>
         </div>
